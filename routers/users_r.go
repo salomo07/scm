@@ -12,8 +12,10 @@ import (
 
 func UsersRouters(router *fasthttprouter.Router) {
 	router.POST("/company/create/:idcompany", func(ctx *fasthttp.RequestCtx) {
-		if controllers.CheckSession(ctx) {
-			controllers.CreateCompany(ctx)
+		if controllers.CheckSession(ctx) != "" {
+			// controllers.RegisterCompany(ctx) //
+			// controllers.RegisterCompany(ctx)
+			controllers.CreateCompanyDB(ctx)
 		} else {
 			ctx.SetStatusCode(fasthttp.StatusUnauthorized)
 		}
@@ -23,10 +25,4 @@ func UsersRouters(router *fasthttprouter.Router) {
 		fmt.Fprintf(ctx, services.StructToJson(models.DefaultResponse{Status: fasthttp.StatusBadRequest, Messege: "idcompany is needed"}))
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
-
-	// router.POST("/users/create", SendToNextServer)
-	// router.POST("/lb/:appid/*path", SendToNextServer)
-
-	// router.GET("/servers/:appid", GetServerPool)    //Menampilkan pool server berdasarkan appid
-	// router.POST("/servers/:appid", AddServerHandle) //Menyimpan pool server berdasarkan appid
 }

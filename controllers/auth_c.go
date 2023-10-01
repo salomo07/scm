@@ -2,8 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"log"
-	"os"
 	"scm/config"
 	"scm/models"
 	"scm/services"
@@ -29,44 +27,42 @@ func GenerateJWT(json []byte, expiredtime int64, ctx *fasthttp.RequestCtx) strin
 	print(ss)
 	return ss
 }
-func CheckSession(ctx *fasthttp.RequestCtx) bool {
+func CheckSession(ctx *fasthttp.RequestCtx) string {
 	expTime := time.Now().Local().Add(time.Hour * 8).Unix()
-	go GenerateJWT([]byte(services.StructToJson(models.SessionData{IdCompany: "Company-Xerwerwer", AppId: "wms", IdUser: "iduser-234234235", UserCDB: "admin", PassCDB: "123"})), expTime, ctx)
+	go GenerateJWT([]byte(services.StructToJson(models.SessionData{IdCompany: "Company-Xerwerwer", AppId: "wms", IdUser: "iduser-234234235", UserCDB: "WVdSdGFXND0=", PassCDB: "TVRJeg=="})), expTime, ctx)
 	authHeader := ctx.Request.Header.Peek("Authorization")
 	tokenString, err := extractBearerToken(authHeader)
-	ctx.Response.SetStatusCode(fasthttp.StatusUnauthorized)
+	// ctx.Response.SetStatusCode(fasthttp.StatusUnauthorized)
 	if err != nil {
-		print(err.Error())
-		fmt.Fprintf(ctx, services.StructToJson(models.DefaultResponse{Status: fasthttp.StatusBadRequest, Messege: err.Error()}))
-		return false
+		print("\n" + err.Error() + "\n")
+		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, err.Error())
+		return ""
 	} else {
 		token, errToken := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return []byte(config.TOKEN_SALT), nil
 		})
 		if errToken != nil {
 			print("\n" + errToken.Error() + "\n")
-			fmt.Fprintf(ctx, services.StructToJson(models.DefaultResponse{Status: fasthttp.StatusUnauthorized, Messege: errToken.Error()}))
-			return false
+			services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, errToken.Error())
+			return ""
 		} else {
 			if token.Valid {
 				ctx.Response.SetStatusCode(fasthttp.StatusOK)
-				ctx.Response.Header.Set("Content-Type", "application/json")
 				claim := claimJWT(token)
 
-				print(claim.IdUser)
+				// print(claim.IdUser)
 
 				sessionData := services.GetValueRedis(claim.IdUser)
 				if sessionData == "" {
-					fmt.Fprintf(ctx, services.StructToJson(models.DefaultResponse{Status: fasthttp.StatusUnauthorized, Messege: "Session not found"}))
-					return false
+					services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Session not found")
+					return ""
 				} else {
-					return true
+					return sessionData
 				}
-				// fmt.Fprintf(ctx, StructToJson(claim))
 			} else {
-				print("\n" + "Tidak valis coyyy" + "\n")
-				fmt.Fprintf(ctx, services.StructToJson(models.DefaultResponse{Status: fasthttp.StatusUnauthorized, Messege: "Token is valid"}))
-				return false
+				print("\n" + "Token is valid" + "\n")
+				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Token is valid")
+				return ""
 			}
 		}
 	}
@@ -88,18 +84,4 @@ func claimJWT(token *jwt.Token) (session models.SessionData) {
 	data := claims["data"].(string)
 	services.JsonToStruct(string(data), &session)
 	return session
-}
-func generateJWT(json []byte, expiredtime int64) string {
-	mySigningKey := []byte(os.Getenv("TOKEN_SALT"))
-	type Claims struct {
-		Json string `json:"data"`
-		jwt.StandardClaims
-	}
-	claims := Claims{string(json), jwt.StandardClaims{ExpiresAt: expiredtime}}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	ss, err := token.SignedString(mySigningKey)
-	if err != nil {
-		log.Println("generateJWT error : ", err)
-	}
-	return ss
 }

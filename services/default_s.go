@@ -8,27 +8,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-func SendToNextServer(ctx *fasthttp.RequestCtx) {
-	client := &fasthttp.Client{}
-	print(string(ctx.URI().FullURI()))
-	forwardedRequest := fasthttp.AcquireRequest()
-	forwardedRequest.SetRequestURI(string(ctx.URI().FullURI()))
-	forwardedRequest.SetBody(ctx.Request.Body())
-	forwardedRequest.Header.SetMethod(string(ctx.Method()))
-
-	forwardedResponse := fasthttp.AcquireResponse()
-	err := client.Do(forwardedRequest, forwardedResponse)
-	if err != nil {
-		ctx.SetStatusCode(fasthttp.StatusBadGateway)
-		fmt.Fprintf(ctx, StructToJson(models.DefaultResponse{Status: fasthttp.StatusBadRequest, Messege: "idcompany is needed"}))
-	}
-
-	ctx.Response.Header.Set("Content-Type", "application/json")
-	ctx.Response.SetStatusCode(forwardedResponse.StatusCode())
-	ctx.Response.SetBody(forwardedResponse.Body())
-	fasthttp.ReleaseRequest(forwardedRequest)
-	fasthttp.ReleaseResponse(forwardedResponse)
-}
+// Generally functional ---->
 func JsonToStruct(jsonStr string, dynamic any) interface{} {
 	json.Unmarshal([]byte(jsonStr), &dynamic)
 	return dynamic
@@ -39,4 +19,29 @@ func StructToJson(v any) string {
 		println("Fail to convert to JSON")
 	}
 	return string(res)
+}
+func ShowResponseDefault(ctx *fasthttp.RequestCtx, statuscode int, msg string) {
+	fmt.Fprintf(ctx, StructToJson(models.DefaultResponse{Status: statuscode, Messege: msg}))
+}
+
+//<----
+
+func SendToNextServer(url string, method string, body []byte) {
+	client := &fasthttp.Client{}
+	forwardedRequest := fasthttp.AcquireRequest()
+	forwardedRequest.SetRequestURI(url)
+	forwardedRequest.SetBody(body)
+	forwardedRequest.Header.SetMethod(string(method))
+
+	forwardedResponse := fasthttp.AcquireResponse()
+	err := client.Do(forwardedRequest, forwardedResponse)
+	if err != nil {
+		print(err.Error())
+	}
+
+	// ctx.Response.Header.Set("Content-Type", "application/json")
+	// ctx.Response.SetStatusCode(forwardedResponse.StatusCode())
+	// ctx.Response.SetBody(forwardedResponse.Body())
+	fasthttp.ReleaseRequest(forwardedRequest)
+	fasthttp.ReleaseResponse(forwardedResponse)
 }

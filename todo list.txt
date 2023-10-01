@@ -1,0 +1,2 @@
+1. Register Company di DB scm_core
+    {"table":"company","idcompany":"","level":"","email":""}

@@ -8,7 +8,8 @@ import (
 
 var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
 
-var CDB_HOST_ADMIN = "10.180.8.74"
+// var CDB_HOST_ADMIN = "10.180.8.74"
+var CDB_HOST_ADMIN = "localhost"
 var CDB_USER_ADMIN = "admin"
 var CDB_PASS_ADMIN = "123"
 var CDB_PORT_ADMIN = "5984"
@@ -48,7 +49,7 @@ func DecodedCredtial(encoded string) (string, string) {
 
 func GetCredCDB(userdb string, passdb string) string {
 	protocol := ""
-	if isLocal {
+	if !isLocal {
 		protocol = "https://"
 	} else {
 		protocol = "http://"
@@ -58,6 +59,7 @@ func GetCredCDB(userdb string, passdb string) string {
 }
 
 func GetCredRedis() string {
+	// REDIS_CRED = "redis://localhost:5984" //Local
 	if REDIS_CRED != "" {
 		return REDIS_CRED
 	}

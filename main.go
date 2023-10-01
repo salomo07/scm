@@ -16,7 +16,7 @@ var port = "1234"
 func main() {
 	router := fasthttprouter.New()
 	routers.UsersRouters(router)
-
+	routers.CouchDBRouters(router)
 	// print("\nUser: " + config.HashingBcrypt("admin") + "\n")
 	// print("\nPass: " + config.HashingBcrypt("123") + "\n")
 	// print("\nHost: " + config.HashingBcrypt("10.180.8.74") + "\n")
