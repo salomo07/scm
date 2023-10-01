@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"scm/controllers"
 	"scm/models"
+	"scm/services"
 
 	"github.com/buaazp/fasthttprouter"
 	"github.com/valyala/fasthttp"
@@ -19,7 +20,7 @@ func UsersRouters(router *fasthttprouter.Router) {
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 	router.POST("/company/create/", func(ctx *fasthttp.RequestCtx) {
-		fmt.Fprintf(ctx, controllers.StructToJson(models.DefaultResponse{Status: fasthttp.StatusBadRequest, Messege: "idcompany is needed"}))
+		fmt.Fprintf(ctx, services.StructToJson(models.DefaultResponse{Status: fasthttp.StatusBadRequest, Messege: "idcompany is needed"}))
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 

@@ -6,6 +6,6 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-func CreateCompany(ctx *fasthttp.RequestCtx) {
+func CreateCompany(_ *fasthttp.RequestCtx) {
 	services.CreateDB("admin", "123", "_users")
 }
