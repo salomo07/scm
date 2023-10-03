@@ -4,8 +4,13 @@ import (
 	"scm/config"
 )
 
-func CreateDB(userdb string, passdb string, dbname string) {
-	url := config.GetCredCDB(userdb, passdb) + dbname
+func CreateDB(dbname string) (resBody string, errStr string) {
+	url := config.GetCredCDB("", "") + dbname
+	print("xxxx" + url)
 	var xxx []byte
-	SendToNextServer(url, "PUT", xxx)
+	return SendToNextServer(url, "PUT", xxx)
+}
+func RegisterCompany(body []byte) (resBody string, errStr string) {
+	url := config.GetCredCDB("", "") + "/scm_core"
+	return SendToNextServer(url, "POST", body)
 }

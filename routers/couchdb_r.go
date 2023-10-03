@@ -9,6 +9,8 @@ import (
 
 func CouchDBRouters(router *fasthttprouter.Router) {
 	router.POST("/createdb/:name", func(ctx *fasthttp.RequestCtx) {
-		controllers.CreateCompanyDB(ctx)
+		// controllers.CreateCompanyDB(ctx)
+		controllers.RegisterCompany(ctx)
 	})
+
 }

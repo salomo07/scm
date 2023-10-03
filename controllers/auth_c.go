@@ -24,11 +24,11 @@ func GenerateJWT(json []byte, expiredtime int64, ctx *fasthttp.RequestCtx) strin
 	if err != nil {
 		fmt.Fprintf(ctx, services.StructToJson(models.DefaultResponse{Status: fasthttp.StatusBadRequest, Messege: "GenerateJWT : " + err.Error()}))
 	}
-	print(ss)
+	// print(ss)
 	return ss
 }
 func CheckSession(ctx *fasthttp.RequestCtx) string {
-	expTime := time.Now().Local().Add(time.Hour * 8).Unix()
+	expTime := time.Now().Local().Add(time.Hour*8).UnixNano() / 1000
 	go GenerateJWT([]byte(services.StructToJson(models.SessionData{IdCompany: "Company-Xerwerwer", AppId: "wms", IdUser: "iduser-234234235", UserCDB: "WVdSdGFXND0=", PassCDB: "TVRJeg=="})), expTime, ctx)
 	authHeader := ctx.Request.Header.Peek("Authorization")
 	tokenString, err := extractBearerToken(authHeader)
@@ -57,6 +57,7 @@ func CheckSession(ctx *fasthttp.RequestCtx) string {
 					services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Session not found")
 					return ""
 				} else {
+					// print(sessionData)
 					return sessionData
 				}
 			} else {

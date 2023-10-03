@@ -9,12 +9,16 @@ import (
 var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
 
 // var CDB_HOST_ADMIN = "10.180.8.74"
-var CDB_HOST_ADMIN = "localhost"
-var CDB_USER_ADMIN = "admin"
-var CDB_PASS_ADMIN = "123"
-var CDB_PORT_ADMIN = "5984"
+// var CDB_HOST_ADMIN = "localhost"
+// var CDB_USER_ADMIN = "admin"
+// var CDB_PASS_ADMIN = "123"
+// var CDB_PORT_ADMIN = "5984"
+// var CDB_CRED_ADMIN = ""
+var CDB_HOST_ADMIN = "Wm1ZeVlUa3lORE10T1RBelpTMDBaRFZrTFRoaVl6QXRNVE14WlRrME9EZGlaVEF4TFdKc2RXVnRhWGd1WTJ4dmRXUmhiblJ1YjNOeGJHUmlMbUZ3Y0dSdmJXRnBiaTVqYkc5MVpBPT0="
+var CDB_USER_ADMIN = "WVhCcGEyVjVMWFl5TFRNeWQyNDBOelpwZFRRelp6aHNkbXRuYlhBM2QzZGpjM016YTJkM2RERTRPREkxWlRRMGJYWTFjelYy"
+var CDB_PASS_ADMIN = "TjJKbU9UazJObVJsWXpZMVlqVmlOMkUxTVRJM1pUQTJOVFUxWkdRNU5UUT0="
 var CDB_CRED_ADMIN = ""
-var isLocal = true
+var isLocal = false
 
 var REDIS_CRED = ""
 var REDIS_USER = "WkdWbVlYVnNkQT09"
@@ -51,10 +55,11 @@ func GetCredCDB(userdb string, passdb string) string {
 	protocol := ""
 	if !isLocal {
 		protocol = "https://"
+		return GetCredCDBFromIBM()
 	} else {
 		protocol = "http://"
 	}
-	CDB_CRED_ADMIN = protocol + userdb + ":" + passdb + "@" + CDB_HOST_ADMIN + ":" + CDB_PORT_ADMIN + "/"
+	CDB_CRED_ADMIN = protocol + userdb + ":" + passdb + "@" + CDB_HOST_ADMIN + "/"
 	return CDB_CRED_ADMIN
 }
 
@@ -94,4 +99,37 @@ func GetCredRedis() string {
 	}
 	REDIS_CRED = "redis://" + REDIS_USER + ":" + REDIS_PASS + "@" + REDIS_HOST + ":" + REDIS_PORT
 	return REDIS_CRED
+}
+
+func GetCredCDBFromIBM() string {
+	print(CDB_CRED_ADMIN)
+	if CDB_CRED_ADMIN != "" {
+		return CDB_CRED_ADMIN
+	}
+	for x := 0; x < 2; x++ {
+		res, err := DecodedCredtial(CDB_USER_ADMIN)
+		if err != "" {
+			print(err)
+		}
+		CDB_USER_ADMIN = res
+	}
+
+	for x := 0; x < 2; x++ {
+
+		res, err := DecodedCredtial(CDB_PASS_ADMIN)
+		if err != "" {
+			print(err)
+		}
+		CDB_PASS_ADMIN = res
+	}
+	for x := 0; x < 2; x++ {
+		res, err := DecodedCredtial(CDB_HOST_ADMIN)
+		if err != "" {
+			print(err)
+		}
+		CDB_HOST_ADMIN = res
+	}
+	CDB_CRED_ADMIN = "https://" + CDB_USER_ADMIN + ":" + CDB_PASS_ADMIN + "@" + CDB_HOST_ADMIN + "/"
+
+	return CDB_CRED_ADMIN
 }

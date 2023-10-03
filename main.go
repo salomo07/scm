@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"scm/controllers"
 	"scm/models"
 	"scm/routers"
 
@@ -26,12 +25,12 @@ func main() {
 	router.MethodNotAllowed = func(ctx *fasthttp.RequestCtx) {
 		ctx.SetStatusCode(fasthttp.StatusMethodNotAllowed)
 		ctx.Response.Header.Set("Content-Type", "application/json")
-		fmt.Fprintf(ctx, controllers.StructToJson(models.DefaultResponse{Messege: "Your method is not allowed", Status: fasthttp.StatusMethodNotAllowed}))
+		fmt.Fprintf(ctx, models.StructToJson(models.DefaultResponse{Messege: "Your method is not allowed", Status: fasthttp.StatusMethodNotAllowed}))
 	}
 	router.NotFound = func(ctx *fasthttp.RequestCtx) {
 		ctx.SetStatusCode(fasthttp.StatusNotFound)
 		ctx.Response.Header.Set("Content-Type", "application/json")
-		fmt.Fprintf(ctx, controllers.StructToJson(models.DefaultResponse{Messege: "API is not found", Status: fasthttp.StatusNotFound}))
+		fmt.Fprintf(ctx, models.StructToJson(models.DefaultResponse{Messege: "API is not found", Status: fasthttp.StatusNotFound}))
 	}
 
 	server := &fasthttp.Server{Handler: router.Handler}
