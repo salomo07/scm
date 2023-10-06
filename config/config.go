@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/base64"
+	"os"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -103,6 +104,10 @@ func GetCredRedis() string {
 
 func GetCredCDBFromIBM() string {
 	print(CDB_CRED_ADMIN)
+	CDB := os.Getenv("CDB_USER_ADMIN")
+	if CDB != "" {
+		return CDB
+	}
 	if CDB_CRED_ADMIN != "" {
 		return CDB_CRED_ADMIN
 	}
@@ -130,6 +135,6 @@ func GetCredCDBFromIBM() string {
 		CDB_HOST_ADMIN = res
 	}
 	CDB_CRED_ADMIN = "https://" + CDB_USER_ADMIN + ":" + CDB_PASS_ADMIN + "@" + CDB_HOST_ADMIN + "/"
-
+	print(CDB_CRED_ADMIN)
 	return CDB_CRED_ADMIN
 }
