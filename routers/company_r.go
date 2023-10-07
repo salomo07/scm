@@ -10,7 +10,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-func UsersRouters(router *fasthttprouter.Router) {
+func CompanyRouters(router *fasthttprouter.Router) {
 	router.POST("/company/create/:idcompany", func(ctx *fasthttp.RequestCtx) {
 		// controllers.CreateCompanyDB(ctx)
 		controllers.RegisterCompany(ctx)
