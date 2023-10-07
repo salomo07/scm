@@ -10,23 +10,34 @@ import (
 )
 
 func RegisterCompany(ctx *fasthttp.RequestCtx) {
-	var dataCompany models.Company
-	dataCompany.IdCompany = "c_" + strconv.FormatInt(time.Now().UnixNano()/1000, 10)
-	models.JsonToStruct(string(ctx.PostBody()), &dataCompany)
-	// jsonBody := `{"selector": {"table":"company","alias":"`+dataCompany.Alias+`"}}`
-	// existCompany, _:=services.FindDocument([]byte(jsonBody))
+	var companyModel models.Company
+	var findResponseModel models.FindResponse
 
-	resReg, errReg := services.InsertDocument([]byte(models.StructToJson(dataCompany)))
-	print("\n\nIni response" + resReg + "\n\n")
-	if errReg != "" {
-		services.ShowResponseDefault(ctx, fasthttp.StatusBadGateway, errReg)
-		return
+	models.JsonToStruct(string(ctx.PostBody()), &companyModel)
+	jsonBody := `{"selector": {"table":"company","alias":"` + companyModel.Alias + `"}}`
+	existCompany, errFind, statuscode := services.FindDocument([]byte(jsonBody))
+	if errFind != "" {
+		services.ShowResponseDefault(ctx, statuscode, errFind)
+	} else if existCompany != "" {
+		models.JsonToStruct(existCompany, &findResponseModel)
+		print(findResponseModel)
+		if len(findResponseModel.Docs) > 0 {
+			services.ShowResponseDefault(ctx, statuscode, `"alias" has already been used`)
+		} else {
+			// Insert document company
+			companyModel.IdCompany = "c_" + strconv.FormatInt(time.Now().UnixNano()/1000, 10)
+			_, errInsert, statuscode := services.InsertDocument([]byte(models.StructToJson(companyModel)))
+			if errInsert != "" {
+				services.ShowResponseDefault(ctx, statuscode, errInsert)
+			} else {
+				services.ShowResponseDefault(ctx, statuscode, "Data saved successfully")
+			}
+		}
 	} else {
-		var company models.InsertDocumentResponse
-		models.JsonToStruct(resReg, &company)
-		createCompanyDB(company.Id)
+		print("xxxxxxxxxxxxxx")
 	}
 }
+
 func createCompanyDB(dbName string) {
 	services.CreateDB(dbName)
 }

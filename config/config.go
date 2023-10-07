@@ -103,7 +103,7 @@ func GetCredRedis() string {
 }
 
 func GetCredCDBFromIBM() string {
-	print(CDB_CRED_ADMIN)
+	print(CDB_CRED_ADMIN + "\n\n")
 	CDB := os.Getenv("CDB_USER_ADMIN")
 	if CDB != "" {
 		return CDB
