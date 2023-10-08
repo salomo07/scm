@@ -13,6 +13,11 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 	var companyModel models.Company
 	var findResponseModel models.FindResponse
 
+	if string(ctx.Request.Body()) == "" {
+		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
+		return
+	}
+
 	models.JsonToStruct(string(ctx.PostBody()), &companyModel)
 	jsonBody := `{"selector": {"table":"company","alias":"` + companyModel.Alias + `"}}`
 	existCompany, errFind, statuscode := services.FindDocument([]byte(jsonBody))
@@ -21,7 +26,7 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 	} else if existCompany != "" {
 		models.JsonToStruct(existCompany, &findResponseModel)
 		if len(findResponseModel.Docs) > 0 {
-			services.ShowResponseDefault(ctx, statuscode, `"alias" has already been used`)
+			services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, `alias has already been used`)
 		} else {
 			// Insert document company
 			companyModel.IdCompany = "c_" + strconv.FormatInt(time.Now().UnixNano()/1000, 10)
@@ -30,7 +35,7 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 				services.ShowResponseDefault(ctx, statuscode, errInsert)
 			} else {
 				createCompanyDB(ctx, companyModel.IdCompany)
-				services.ShowResponseDefault(ctx, statuscode, "Data saved successfully")
+				services.ShowResponseJson(ctx, statuscode, `{"idcompany":"`+companyModel.IdCompany+`","messege":"Company was saved"}`)
 			}
 		}
 	}
@@ -44,7 +49,19 @@ func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string) {
 		var createDBResponse models.CreateDBResponse
 		models.JsonToStruct(res, &createDBResponse)
 		if createDBResponse.Ok {
-
+			//Tambahkan user dan role untuk DB yang telah dibuat
+		}
+	}
+}
+func createUser(ctx *fasthttp.RequestCtx, dbName string) {
+	res, err, statuscode := services.CreateDB(dbName)
+	if err != "" {
+		services.ShowResponseDefault(ctx, statuscode, err)
+	} else {
+		var createDBResponse models.CreateDBResponse
+		models.JsonToStruct(res, &createDBResponse)
+		if createDBResponse.Ok {
+			//Tambahkan user dan role untuk DB yang telah dibuat
 		}
 	}
 }

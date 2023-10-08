@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"scm/controllers"
+	"scm/services"
 
 	"github.com/buaazp/fasthttprouter"
 	"github.com/valyala/fasthttp"
@@ -9,8 +9,12 @@ import (
 
 func CouchDBRouters(router *fasthttprouter.Router) {
 	router.POST("/createdb/:name", func(ctx *fasthttp.RequestCtx) {
-		// controllers.CreateCompanyDB(ctx)
-		controllers.RegisterCompany(ctx)
+		if ctx.UserValue("name") == "" {
+			services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "dbname is needed")
+		} else {
+			services.CreateDB(ctx.UserValue("name").(string))
+		}
+		//
 	})
 
 }

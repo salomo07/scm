@@ -22,7 +22,12 @@ func StructToJson(v any) string {
 	return string(res)
 }
 func ShowResponseDefault(ctx *fasthttp.RequestCtx, statuscode int, msg string) {
+	ctx.Response.SetStatusCode(statuscode)
 	fmt.Fprintf(ctx, StructToJson(models.DefaultResponse{Status: statuscode, Messege: msg}))
+}
+func ShowResponseJson(ctx *fasthttp.RequestCtx, statuscode int, jsonString string) {
+	ctx.Response.SetStatusCode(statuscode)
+	fmt.Fprintf(ctx, jsonString)
 }
 
 //<----

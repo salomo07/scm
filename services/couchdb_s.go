@@ -10,7 +10,7 @@ func init() {
 	url = config.GetCredCDB("", "") + "scm_core"
 }
 func CreateDB(dbname string) (resBody string, errStr string, statuscode int) {
-	urlDB := url + dbname
+	urlDB := config.GetCredCDB("", "") + dbname
 	var xxx []byte
 	return SendToNextServer(urlDB, "PUT", xxx)
 }
