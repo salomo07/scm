@@ -22,3 +22,8 @@ type ExecutionStats struct {
 	ResultsReturned         int64   `json:"results_returned"`
 	ExecutionTimeMS         float64 `json:"execution_time_ms"`
 }
+type UserDBModel struct {
+	Name     string `json:"name"`
+	Password string `json:"password"`
+	Type     string `json:"type"`
+}

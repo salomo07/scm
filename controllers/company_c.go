@@ -50,27 +50,14 @@ func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string) {
 		models.JsonToStruct(res, &createDBResponse)
 		if createDBResponse.Ok {
 			//Tambahkan user dan role untuk DB yang telah dibuat
-		}
-	}
-}
-func createUser(ctx *fasthttp.RequestCtx, dbName string) {
-	res, err, statuscode := services.CreateDB(dbName)
-	if err != "" {
-		services.ShowResponseDefault(ctx, statuscode, err)
-	} else {
-		var createDBResponse models.CreateDBResponse
-		models.JsonToStruct(res, &createDBResponse)
-		if createDBResponse.Ok {
-			//Tambahkan user dan role untuk DB yang telah dibuat
+			var userDBModel models.UserDBModel
+			models.JsonToStruct(string(ctx.Request.Body()), &userDBModel)
+			hashPass, _ := HashPassword(dbName)
+			userDBModel.Password = hashPass
+			services.AddUserDB(ctx.UserValue("name").(string), []byte(models.StructToJson(userDBModel)))
 		}
 	}
 }
 func SetRoleCompanyDB(ctx *fasthttp.RequestCtx) {
-	session := CheckSession(ctx)
-	println(session)
-	if session != "" {
 
-	} else {
-
-	}
 }

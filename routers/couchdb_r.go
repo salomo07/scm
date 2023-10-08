@@ -16,5 +16,13 @@ func CouchDBRouters(router *fasthttprouter.Router) {
 		}
 		//
 	})
+	router.POST("/createuserdb/:name", func(ctx *fasthttp.RequestCtx) {
+		if ctx.UserValue("name") == "" {
+			services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "username of db is needed")
+		} else {
+
+		}
+		//
+	})
 
 }

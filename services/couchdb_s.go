@@ -22,3 +22,7 @@ func InsertDocument(body []byte) (resBody string, errStr string, statuscode int)
 	urlDB := url
 	return SendToNextServer(urlDB, "POST", body)
 }
+func AddUserDB(idcompany string, body []byte) (resBody string, errStr string, statuscode int) {
+	urlDB := url + "_users/org.couchdb.user:" + idcompany
+	return SendToNextServer(urlDB, "PUT", body)
+}
