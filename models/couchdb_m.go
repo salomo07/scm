@@ -12,7 +12,9 @@ type FindResponse struct {
 	Warning        string         `json:"warning"`
 	ExecutionStats ExecutionStats `json:"execution_stats"`
 }
-
+type CreateDBResponse struct {
+	Ok bool `json:"ok"`
+}
 type ExecutionStats struct {
 	TotalKeysExamined       int64   `json:"total_keys_examined"`
 	TotalDocsExamined       int64   `json:"total_docs_examined"`

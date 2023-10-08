@@ -20,7 +20,6 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 		services.ShowResponseDefault(ctx, statuscode, errFind)
 	} else if existCompany != "" {
 		models.JsonToStruct(existCompany, &findResponseModel)
-		print(findResponseModel)
 		if len(findResponseModel.Docs) > 0 {
 			services.ShowResponseDefault(ctx, statuscode, `"alias" has already been used`)
 		} else {
@@ -30,16 +29,24 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 			if errInsert != "" {
 				services.ShowResponseDefault(ctx, statuscode, errInsert)
 			} else {
+				createCompanyDB(ctx, companyModel.IdCompany)
 				services.ShowResponseDefault(ctx, statuscode, "Data saved successfully")
 			}
 		}
-	} else {
-		print("xxxxxxxxxxxxxx")
 	}
 }
 
-func createCompanyDB(dbName string) {
-	services.CreateDB(dbName)
+func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string) {
+	res, err, statuscode := services.CreateDB(dbName)
+	if err != "" {
+		services.ShowResponseDefault(ctx, statuscode, err)
+	} else {
+		var createDBResponse models.CreateDBResponse
+		models.JsonToStruct(res, &createDBResponse)
+		if createDBResponse.Ok {
+
+		}
+	}
 }
 func SetRoleCompanyDB(ctx *fasthttp.RequestCtx) {
 	session := CheckSession(ctx)
