@@ -33,17 +33,17 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 			if companyModel.LevelMembership == "" {
 				companyModel.LevelMembership = "default"
 			}
-			_, errInsert, statuscode := services.InsertDocument([]byte(models.StructToJson(companyModel)))
+			companyInsertRes, errInsert, statuscode := services.InsertDocument([]byte(models.StructToJson(companyModel)))
 			if errInsert != "" {
 				services.ShowResponseDefault(ctx, statuscode, errInsert)
 			} else {
-				createCompanyDB(ctx, companyModel.IdCompany)
+				createCompanyDB(ctx, companyModel.IdCompany, companyInsertRes, models.StructToJson(companyModel))
 			}
 		}
 	}
 }
 
-func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string) {
+func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string, companyInsertRes string, companyModel string) {
 	res, err, statuscode := services.CreateDB(dbName)
 	if err != "" {
 		services.ShowResponseDefault(ctx, statuscode, err)
@@ -69,8 +69,16 @@ func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string) {
 				if err != "" {
 					services.ShowResponseDefault(ctx, statuscode, err)
 				}
-				print(models.StructToJson(userDBModel))
 				services.ShowResponseJson(ctx, statuscode, `{"idcompany":"`+dbName+`","messege":"Company was saved"}`)
+				var insertDocumentResponse models.InsertDocumentResponse
+				models.JsonToStruct(companyInsertRes, &insertDocumentResponse)
+				var companyMod models.CompanyEdit
+				models.JsonToStruct(companyModel, &companyMod)
+				companyMod.UserCDB = dbName
+				companyMod.PassCDB = userDBModel.Password
+				companyMod.Rev = insertDocumentResponse.Rev
+
+				go services.UpdateDocument(insertDocumentResponse.Id, []byte(models.StructToJson(companyMod)))
 				return
 			}
 		}

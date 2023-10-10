@@ -31,3 +31,7 @@ func AddAdminRoleForDB(idcompany string, body []byte) (resBody string, errStr st
 	urlDB := config.GetCredCDB("", "") + idcompany + "/_security"
 	return SendToNextServer(urlDB, "PUT", body)
 }
+func UpdateDocument(_id string, data []byte) (resBody string, errStr string, statuscode int) {
+	urlDB := config.GetCredCDB("", "") + "scm_core/" + _id
+	return SendToNextServer(urlDB, "PUT", data)
+}
