@@ -23,9 +23,10 @@ type ExecutionStats struct {
 	ExecutionTimeMS         float64 `json:"execution_time_ms"`
 }
 type UserDBModel struct {
-	Name     string `json:"name"`
-	Password string `json:"password"`
-	Type     string `json:"type"`
+	Name     string   `json:"name"`
+	Password string   `json:"password"`
+	Type     string   `json:"type"`
+	Roles    []string `json:"roles"`
 }
 
 type SecurityModel struct {

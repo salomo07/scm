@@ -38,7 +38,6 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 				services.ShowResponseDefault(ctx, statuscode, errInsert)
 			} else {
 				createCompanyDB(ctx, companyModel.IdCompany)
-				services.ShowResponseJson(ctx, statuscode, `{"idcompany":"`+companyModel.IdCompany+`","messege":"Company was saved"}`)
 			}
 		}
 	}
@@ -53,21 +52,26 @@ func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string) {
 		models.JsonToStruct(res, &createDBResponse)
 		if createDBResponse.Ok {
 			//Tambahkan user dan role untuk DB yang telah dibuat
-			print("Tambahkan user dan role untuk DB yang telah dibuat")
 			var userDBModel models.UserDBModel
 			models.JsonToStruct(string(ctx.Request.Body()), &userDBModel)
-			// hashPass, _ := HashPassword(dbName)
 			userDBModel.Name = dbName
 			userDBModel.Password = strconv.FormatInt(time.Now().UnixNano()/1000, 10)
 			userDBModel.Type = "user"
+			userDBModel.Roles = []string{"admin_role"}
 
-			// print(models.StructToJson(userDBModel))
+			//
 			_, err, statuscode := services.AddUserDB(dbName, []byte(models.StructToJson(userDBModel)))
 			if err != "" {
 				services.ShowResponseDefault(ctx, statuscode, err)
 			} else {
-				jsonSecurity := `{"admins": {"names": ["` + dbName + `"], "roles": []}, "members": {"names": [], "roles": []}}`
-				setRoleCompanyDB(dbName, []byte(jsonSecurity))
+				jsonSecurity := `{"admins": {"names": ["` + dbName + `"],"roles": ["admin_role"]},"members": {"names": [],"roles": []}}`
+				_, err, statuscode := services.AddAdminRoleForDB(dbName, []byte(jsonSecurity))
+				if err != "" {
+					services.ShowResponseDefault(ctx, statuscode, err)
+				}
+				print(models.StructToJson(userDBModel))
+				services.ShowResponseJson(ctx, statuscode, `{"idcompany":"`+dbName+`","messege":"Company was saved"}`)
+				return
 			}
 		}
 	}

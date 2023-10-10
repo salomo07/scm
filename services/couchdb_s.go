@@ -27,6 +27,7 @@ func AddUserDB(idcompany string, body []byte) (resBody string, errStr string, st
 	return SendToNextServer(urlDB, "PUT", body)
 }
 func AddAdminRoleForDB(idcompany string, body []byte) (resBody string, errStr string, statuscode int) {
+
 	urlDB := config.GetCredCDB("", "") + idcompany + "/_security"
 	return SendToNextServer(urlDB, "PUT", body)
 }
