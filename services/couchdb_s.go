@@ -23,6 +23,10 @@ func InsertDocument(body []byte) (resBody string, errStr string, statuscode int)
 	return SendToNextServer(urlDB, "POST", body)
 }
 func AddUserDB(idcompany string, body []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := url + "_users/org.couchdb.user:" + idcompany
+	urlDB := config.GetCredCDB("", "") + "_users/org.couchdb.user:" + idcompany
+	return SendToNextServer(urlDB, "PUT", body)
+}
+func AddAdminRoleForDB(idcompany string, body []byte) (resBody string, errStr string, statuscode int) {
+	urlDB := config.GetCredCDB("", "") + idcompany + "/_security"
 	return SendToNextServer(urlDB, "PUT", body)
 }

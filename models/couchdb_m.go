@@ -27,3 +27,17 @@ type UserDBModel struct {
 	Password string `json:"password"`
 	Type     string `json:"type"`
 }
+
+type SecurityModel struct {
+	Admins  Admins  `json:"admins"`
+	Members Members `json:"members"`
+}
+
+type Admins struct {
+	Names []string      `json:"names"`
+	Roles []interface{} `json:"roles"`
+}
+type Members struct {
+	Names []string      `json:"names"`
+	Roles []interface{} `json:"roles"`
+}
