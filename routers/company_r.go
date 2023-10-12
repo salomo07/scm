@@ -9,7 +9,11 @@ import (
 
 func CompanyRouters(router *fasthttprouter.Router) {
 	router.POST("/company/create/", func(ctx *fasthttp.RequestCtx) {
-		controllers.RegisterCompany(ctx)
+		print(controllers.CheckSession(ctx))
+		if controllers.CheckSession(ctx) != "" {
+			controllers.RegisterCompany(ctx)
+		}
+		// controllers.RegisterCompany(ctx)
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 }

@@ -19,6 +19,7 @@ func StructToJson(v any) string {
 	if err != nil {
 		println("Fail to convert to JSON")
 	}
+	print(string(res))
 	return string(res)
 }
 func ShowResponseDefault(ctx *fasthttp.RequestCtx, statuscode int, msg string) {
