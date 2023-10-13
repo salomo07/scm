@@ -53,7 +53,7 @@ func DecodedCredtial(encoded string) (string, string) {
 }
 
 func GetCredCDB(userdb string, passdb string) string {
-	return "http://admin:123@localhost:5984/"
+	// return "http://admin:123@localhost:5984/"
 	protocol := ""
 	if !isLocal {
 		protocol = "https://"
