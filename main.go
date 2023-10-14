@@ -16,6 +16,7 @@ func main() {
 	router := fasthttprouter.New()
 	routers.CompanyRouters(router)
 	routers.CouchDBRouters(router)
+	routers.UserRouters(router)
 	// print("\nUser: " + config.HashingBcrypt("admin") + "\n")
 	// print("\nPass: " + config.HashingBcrypt("123") + "\n")
 	// print("\nHost: " + config.HashingBcrypt("10.180.8.74") + "\n")

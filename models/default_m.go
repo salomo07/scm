@@ -20,14 +20,14 @@ type SessionData struct {
 	PassCDB   string `json:"pcdb" validate:"required"`
 }
 type AdminCred struct {
-	AppId     string `json:"appid" validate:"required"`
-	UserCDB   string `json:"usercdb" validate:"required"`
-	PassCDB   string `json:"passcdb" validate:"required"`
-	HostCDB   string `json:"hostcdb" validate:"required"`
-	UserRedis string `json:"userredis" validate:"required"`
-	PassRedis string `json:"passredis" validate:"required"`
-	HostRedis string `json:"hostredis" validate:"required"`
-	PortRedis string `json:"portredis" validate:"required"`
+	AppId     string `json:"appid"`
+	UserCDB   string `json:"usercdb"`
+	PassCDB   string `json:"passcdb"`
+	HostCDB   string `json:"hostcdb"`
+	UserRedis string `json:"userredis"`
+	PassRedis string `json:"passredis"`
+	HostRedis string `json:"hostredis"`
+	PortRedis string `json:"portredis"`
 }
 
 func JsonToStruct(jsonStr string, dynamic any) interface{} {

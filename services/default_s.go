@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"scm/models"
 	"strconv"
+	"time"
 
 	"github.com/valyala/fasthttp"
 )
@@ -34,7 +35,9 @@ func ShowResponseJson(ctx *fasthttp.RequestCtx, statuscode int, jsonString strin
 //<----
 
 func SendToNextServer(url string, method string, body []byte) (resBody string, errStr string, statuscode int) {
-	client := &fasthttp.Client{}
+	client := &fasthttp.Client{
+		MaxIdleConnDuration: 5 * time.Second,
+	}
 	forwardedRequest := fasthttp.AcquireRequest()
 	forwardedRequest.SetRequestURI(url)
 	forwardedRequest.SetBody(body)
@@ -51,5 +54,26 @@ func SendToNextServer(url string, method string, body []byte) (resBody string, e
 	fasthttp.ReleaseRequest(forwardedRequest)
 	// fasthttp.ReleaseResponse(forwardedResponse)
 	return string(forwardedResponse.Body()), "", fasthttp.StatusOK
+}
 
+func ToCDBCompany(url string, method string, body []byte) (resBody string, errStr string, statuscode int) {
+	client := &fasthttp.Client{
+		MaxIdleConnDuration: 5 * time.Second,
+	}
+	forwardedRequest := fasthttp.AcquireRequest()
+	forwardedRequest.SetRequestURI(url)
+	forwardedRequest.SetBody(body)
+	forwardedRequest.Header.SetMethod(string(method))
+	forwardedRequest.Header.SetContentType("application/json")
+
+	forwardedResponse := fasthttp.AcquireResponse()
+	err := client.Do(forwardedRequest, forwardedResponse)
+	if err != nil {
+		print(err.Error())
+		return "", err.Error(), fasthttp.StatusInternalServerError
+	}
+	print("\n" + strconv.Itoa(forwardedResponse.StatusCode()) + " - " + string(forwardedResponse.Body()))
+	fasthttp.ReleaseRequest(forwardedRequest)
+	// fasthttp.ReleaseResponse(forwardedResponse)
+	return string(forwardedResponse.Body()), "", fasthttp.StatusOK
 }

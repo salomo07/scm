@@ -9,11 +9,15 @@ import (
 
 func CompanyRouters(router *fasthttprouter.Router) {
 	router.POST("/company/create/", func(ctx *fasthttp.RequestCtx) {
-		// print(controllers.CheckSession(ctx))
-		// if controllers.CheckSession(ctx) != "" {
-		controllers.RegisterCompany(ctx)
-		// }
-		// controllers.RegisterCompany(ctx)
+		if controllers.CheckSession(ctx) != "" {
+			controllers.RegisterCompany(ctx)
+		}
+		ctx.Response.Header.Set("Content-Type", "application/json")
+	})
+	router.POST("/company/adduser/", func(ctx *fasthttp.RequestCtx) {
+		if controllers.CheckSession(ctx) != "" {
+			controllers.AddUser(ctx)
+		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 }

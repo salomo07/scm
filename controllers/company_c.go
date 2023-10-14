@@ -9,6 +9,9 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
+func AddUser(ctx *fasthttp.RequestCtx) {
+
+}
 func RegisterCompany(ctx *fasthttp.RequestCtx) {
 	var companyModel models.Company
 	var findResponseModel models.FindResponse
@@ -69,7 +72,7 @@ func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string, companyInsertRes s
 				if err != "" {
 					services.ShowResponseDefault(ctx, statuscode, err)
 				}
-				services.ShowResponseJson(ctx, statuscode, `{"idcompany":"`+dbName+`","messege":"Company was saved"}`)
+				services.ShowResponseJson(ctx, statuscode, `{"idcompany":"`+dbName+`","usercdb":"`+dbName+`","passcdb":"`+userDBModel.Password+`","messege":"Company was saved"}`)
 				var insertDocumentResponse models.InsertDocumentResponse
 				models.JsonToStruct(companyInsertRes, &insertDocumentResponse)
 				var companyMod models.CompanyEdit
@@ -83,7 +86,4 @@ func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string, companyInsertRes s
 			}
 		}
 	}
-}
-func setRoleCompanyDB(dbname string, body []byte) {
-	services.AddAdminRoleForDB(dbname, body)
 }

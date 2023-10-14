@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/base64"
-	"os"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,11 +14,16 @@ var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
 // var CDB_PASS_ADMIN = "123"
 // var CDB_PORT_ADMIN = "5984"
 // var CDB_CRED_ADMIN = ""
-var CDB_HOST_ADMIN = "Wm1ZeVlUa3lORE10T1RBelpTMDBaRFZrTFRoaVl6QXRNVE14WlRrME9EZGlaVEF4TFdKc2RXVnRhWGd1WTJ4dmRXUmhiblJ1YjNOeGJHUmlMbUZ3Y0dSdmJXRnBiaTVqYkc5MVpBPT0="
-var CDB_USER_ADMIN = "WVhCcGEyVjVMWFl5TFRNeWQyNDBOelpwZFRRelp6aHNkbXRuYlhBM2QzZGpjM016YTJkM2RERTRPREkxWlRRMGJYWTFjelYy"
-var CDB_PASS_ADMIN = "TjJKbU9UazJObVJsWXpZMVlqVmlOMkUxTVRJM1pUQTJOVFUxWkdRNU5UUT0="
+
+var isLocal = true
+
+// var LocalCred = "http://admin:123@10.180.70.66:5984/"
+var LocalCred = "http://admin:123@192.168.0.101:5984/"
+
+var CDB_USER_ADMIN = "WVdSdGFXND0="
+var CDB_PASS_ADMIN = "TVRJeg=="
+var CDB_HOST_ADMIN = "TVRreUxqRTJPQzR4TGpRPQ=="
 var CDB_CRED_ADMIN = ""
-var isLocal = false
 
 var REDIS_CRED = ""
 var REDIS_USER = "WkdWbVlYVnNkQT09"
@@ -52,21 +56,16 @@ func DecodedCredtial(encoded string) (string, string) {
 	return string(decodedText), ""
 }
 
-func GetCredCDB(userdb string, passdb string) string {
-	// return "http://admin:123@localhost:5984/"
-	protocol := ""
+func GetCredCDB() string {
 	if !isLocal {
-		protocol = "https://"
 		return GetCredCDBFromIBM()
 	} else {
-		protocol = "http://"
+		print(LocalCred)
+		return LocalCred
 	}
-	CDB_CRED_ADMIN = protocol + userdb + ":" + passdb + "@" + CDB_HOST_ADMIN + "/"
-	return CDB_CRED_ADMIN
 }
 
 func GetCredRedis() string {
-	// REDIS_CRED = "redis://localhost:5984" //Local
 	if REDIS_CRED != "" {
 		return REDIS_CRED
 	}
@@ -104,11 +103,6 @@ func GetCredRedis() string {
 }
 
 func GetCredCDBFromIBM() string {
-	print(CDB_CRED_ADMIN + "\n\n")
-	CDB := os.Getenv("CDB_USER_ADMIN")
-	if CDB != "" {
-		return CDB
-	}
 	if CDB_CRED_ADMIN != "" {
 		return CDB_CRED_ADMIN
 	}
@@ -121,7 +115,6 @@ func GetCredCDBFromIBM() string {
 	}
 
 	for x := 0; x < 2; x++ {
-
 		res, err := DecodedCredtial(CDB_PASS_ADMIN)
 		if err != "" {
 			print(err)
@@ -136,6 +129,6 @@ func GetCredCDBFromIBM() string {
 		CDB_HOST_ADMIN = res
 	}
 	CDB_CRED_ADMIN = "https://" + CDB_USER_ADMIN + ":" + CDB_PASS_ADMIN + "@" + CDB_HOST_ADMIN + "/"
-	print(CDB_CRED_ADMIN)
+	print()
 	return CDB_CRED_ADMIN
 }
