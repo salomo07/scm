@@ -18,6 +18,9 @@ func main() {
 	router.GET("/", func(ctx *fasthttp.RequestCtx) {
 		services.ShowResponseDefault(ctx, 200, "Welcome to SCM API")
 	})
+	router.GET("/company/", func(ctx *fasthttp.RequestCtx) {
+		services.ShowResponseDefault(ctx, 200, "Ini router /company/")
+	})
 	routers.CompanyRouters(router)
 	routers.CouchDBRouters(router)
 	routers.UserRouters(router)

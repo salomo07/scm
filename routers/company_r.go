@@ -9,9 +9,9 @@ import (
 )
 
 func CompanyRouters(router *fasthttprouter.Router) {
-	router.GET("/company/", func(ctx *fasthttp.RequestCtx) {
-		services.ShowResponseDefault(ctx, 200, "Ini router /company/")
-	})
+	// router.GET("/company/", func(ctx *fasthttp.RequestCtx) {
+	// 	services.ShowResponseDefault(ctx, 200, "Ini router /company/")
+	// })
 	router.GET("/company/xxx/", func(ctx *fasthttp.RequestCtx) {
 		services.ShowResponseDefault(ctx, 200, "Ini router /company/xxx/")
 	})
