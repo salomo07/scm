@@ -5,17 +5,18 @@ import (
 	"log"
 	"scm/models"
 	"scm/routers"
+	"scm/services"
 
 	"github.com/buaazp/fasthttprouter"
 	"github.com/valyala/fasthttp"
 )
 
-var port = "1234"
+var port = "8080"
 
 func main() {
 	router := fasthttprouter.New()
 	router.GET("/", func(ctx *fasthttp.RequestCtx) {
-		fmt.Fprintf(ctx, "Welcome to SCM API")
+		services.ShowResponseDefault(ctx, 200, "Welcome to SCM API")
 	})
 	routers.CompanyRouters(router)
 	routers.CouchDBRouters(router)
