@@ -14,6 +14,9 @@ var port = "1234"
 
 func main() {
 	router := fasthttprouter.New()
+	router.GET("/", func(ctx *fasthttp.RequestCtx) {
+		fmt.Fprintf(ctx, "Welcome to SCM API")
+	})
 	routers.CompanyRouters(router)
 	routers.CouchDBRouters(router)
 	routers.UserRouters(router)
