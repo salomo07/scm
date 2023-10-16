@@ -36,8 +36,6 @@ func main() {
 		fmt.Fprintf(ctx, models.StructToJson(models.DefaultResponse{Messege: "Your method is not allowed", Status: fasthttp.StatusMethodNotAllowed}))
 	}
 	router.NotFound = func(ctx *fasthttp.RequestCtx) {
-		log.Printf("404 Not Found: %s", ctx.Path())
-		ctx.Error("Not Found", fasthttp.StatusNotFound)
 		ctx.SetStatusCode(fasthttp.StatusNotFound)
 		ctx.Response.Header.Set("Content-Type", "application/json")
 		fmt.Fprintf(ctx, models.StructToJson(models.DefaultResponse{Messege: "API is not found", Status: fasthttp.StatusNotFound}))
