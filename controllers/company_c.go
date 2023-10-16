@@ -14,6 +14,7 @@ func AddUser(ctx *fasthttp.RequestCtx) {
 }
 func RegisterCompany(ctx *fasthttp.RequestCtx) {
 	var companyModel models.Company
+	// var companyModel = models.Company{Table: "", Name: "", Alias: "", LevelMembership: "", Contact: []models.Contact{}}
 	var findResponseModel models.FindResponse
 
 	if string(ctx.Request.Body()) == "" {
@@ -22,6 +23,7 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 	}
 
 	models.JsonToStruct(string(ctx.PostBody()), &companyModel)
+	print(models.StructToJson(companyModel))
 	jsonBody := `{"selector": {"table":"company","alias":"` + companyModel.Alias + `"}}`
 	existCompany, errFind, statuscode := services.FindDocument([]byte(jsonBody))
 	if companyModel.Alias == "" {
@@ -77,7 +79,7 @@ func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string, companyInsertRes s
 				services.ShowResponseJson(ctx, statuscode, `{"idcompany":"`+dbName+`","usercdb":"`+dbName+`","passcdb":"`+userDBModel.Password+`","messege":"Company was saved"}`)
 				var insertDocumentResponse models.InsertDocumentResponse
 				models.JsonToStruct(companyInsertRes, &insertDocumentResponse)
-				var companyMod models.CompanyEdit
+				var companyMod models.Company
 				models.JsonToStruct(companyModel, &companyMod)
 				companyMod.UserCDB = dbName
 				companyMod.PassCDB = userDBModel.Password
