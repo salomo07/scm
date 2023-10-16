@@ -10,20 +10,23 @@ import (
 )
 
 func AddUser(ctx *fasthttp.RequestCtx) {
-
-}
-func RegisterCompany(ctx *fasthttp.RequestCtx) {
-	var companyModel models.Company
-	// var companyModel = models.Company{Table: "", Name: "", Alias: "", LevelMembership: "", Contact: []models.Contact{}}
-	var findResponseModel models.FindResponse
-
 	if string(ctx.Request.Body()) == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
 		return
 	}
+	var userModel models.User
+	models.JsonToStruct(string(ctx.PostBody()), &userModel)
+	services.
+}
+func RegisterCompany(ctx *fasthttp.RequestCtx) {
+	if string(ctx.Request.Body()) == "" {
+		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
+		return
+	}
+	var companyModel models.Company
+	var findResponseModel models.FindResponse
 
 	models.JsonToStruct(string(ctx.PostBody()), &companyModel)
-	print(models.StructToJson(companyModel))
 	jsonBody := `{"selector": {"table":"company","alias":"` + companyModel.Alias + `"}}`
 	existCompany, errFind, statuscode := services.FindDocument([]byte(jsonBody))
 	if companyModel.Alias == "" {
@@ -66,7 +69,6 @@ func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string, companyInsertRes s
 			userDBModel.Type = "user"
 			userDBModel.Roles = []string{"admin_role"}
 
-			//
 			_, err, statuscode := services.AddUserDB(dbName, []byte(models.StructToJson(userDBModel)))
 			if err != "" {
 				services.ShowResponseDefault(ctx, statuscode, err)
@@ -79,7 +81,7 @@ func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string, companyInsertRes s
 				services.ShowResponseJson(ctx, statuscode, `{"idcompany":"`+dbName+`","usercdb":"`+dbName+`","passcdb":"`+userDBModel.Password+`","messege":"Company was saved"}`)
 				var insertDocumentResponse models.InsertDocumentResponse
 				models.JsonToStruct(companyInsertRes, &insertDocumentResponse)
-				var companyMod models.Company
+				var companyMod models.CompanyEdit
 				models.JsonToStruct(companyModel, &companyMod)
 				companyMod.UserCDB = dbName
 				companyMod.PassCDB = userDBModel.Password

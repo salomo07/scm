@@ -15,15 +15,15 @@ var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
 // var CDB_PORT_ADMIN = "5984"
 // var CDB_CRED_ADMIN = ""
 
-var isLocal = false
+var isLocal = true
 
 // var LocalCred = "http://admin:123@10.180.70.66:5984/"
 // var LocalCred = "http://admin:123@192.168.0.101:5984/"
-var LocalCred = "http://admin:123@1localhost:5984/"
+var LocalCred = "http://admin:123@localhost:5984/"
 
-var CDB_USER_ADMIN = "WVdSdGFXND0="
-var CDB_PASS_ADMIN = "TVRJeg=="
-var CDB_HOST_ADMIN = "TVRreUxqRTJPQzR4TGpRPQ=="
+var CDB_USER_ADMIN = ""
+var CDB_PASS_ADMIN = ""
+var CDB_HOST_ADMIN = ""
 var CDB_CRED_ADMIN = ""
 
 var REDIS_CRED = ""

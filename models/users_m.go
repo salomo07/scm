@@ -1,17 +1,20 @@
 package models
 
 type User struct {
-	IdUser      string      `json:"_id" validate:"required"`
-	Name        string      `json:"name" validate:"required"`
-	Username    string      `json:"username" validate:"required"`
-	Password    string      `json:"password" validate:"required"`
-	IdCompany   string      `json:"table" validate:"required"`
-	Role        Role        `json:"role"`
-	AccessMenu1 AccessMenu1 `json:"accessmenu1"`
-	AccessMenu2 []Contact   `json:"accessmenu2"`
+	IdUser      string        `json:"_id"`
+	Nik         string        `json:"nik"`
+	Name        string        `json:"name"`
+	Username    string        `json:"username"`
+	Password    string        `json:"password"`
+	Table       string        `json:"table"`
+	IdCompany   string        `json:"idcompany"`
+	IdRole      string        `json:"idrole"`
+	AccessMenu1 []AccessMenu1 `json:"accessmenu1"`
+	AccessMenu2 []AccessMenu2 `json:"accessmenu2"`
 }
 type Role struct {
 	IdRole string `json:"_id"`
+	Table  string `json:"table"`
 	Name   string `json:"name"`
 	Code   string `json:"code"`
 	Desc   string `json:"desc"`

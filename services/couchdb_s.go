@@ -5,6 +5,7 @@ import (
 	"scm/models"
 )
 
+// Admin
 func CreateDB(dbname string) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDB() + dbname
 	var xxx []byte
@@ -14,8 +15,8 @@ func FindDocument(body []byte) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDB() + "scm_core" + "/_find"
 	return SendToNextServer(urlDB, "POST", body)
 }
-func InsertDocument(body []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDB() + "scm_core"
+func InsertDocument(body []byte, dbname string) (resBody string, errStr string, statuscode int) {
+	urlDB := config.GetCredCDB() + dbname
 	return SendToNextServer(urlDB, "POST", body)
 }
 func AddUserDB(idcompany string, body []byte) (resBody string, errStr string, statuscode int) {
@@ -31,6 +32,7 @@ func UpdateDocument(_id string, data []byte) (resBody string, errStr string, sta
 	return SendToNextServer(urlDB, "PUT", data)
 }
 
+// As Company
 func InsertDocumentAsComp(company models.Company, body []byte) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDB() + company.IdCompany
 	return ToCDBCompany(urlDB, "POST", body)
