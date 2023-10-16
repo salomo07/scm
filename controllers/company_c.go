@@ -24,7 +24,9 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 	models.JsonToStruct(string(ctx.PostBody()), &companyModel)
 	jsonBody := `{"selector": {"table":"company","alias":"` + companyModel.Alias + `"}}`
 	existCompany, errFind, statuscode := services.FindDocument([]byte(jsonBody))
-	if errFind != "" {
+	if companyModel.Alias == "" {
+		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "alias is mandatory")
+	} else if errFind != "" {
 		services.ShowResponseDefault(ctx, statuscode, errFind)
 	} else if existCompany != "" {
 		models.JsonToStruct(existCompany, &findResponseModel)
