@@ -28,7 +28,7 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 
 	models.JsonToStruct(string(ctx.PostBody()), &companyModel)
 	jsonBody := `{"selector": {"table":"company","alias":"` + companyModel.Alias + `"}}`
-	existCompany, errFind, statuscode := services.FindDocument([]byte(jsonBody))
+	existCompany, errFind, statuscode := services.FindDocument([]byte(jsonBody), "scm_core")
 	if companyModel.Alias == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "alias is mandatory")
 	} else if errFind != "" {
@@ -43,7 +43,7 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 			if companyModel.LevelMembership == "" {
 				companyModel.LevelMembership = "default"
 			}
-			companyInsertRes, errInsert, statuscode := services.InsertDocument([]byte(models.StructToJson(companyModel)))
+			companyInsertRes, errInsert, statuscode := services.InsertDocument([]byte(models.StructToJson(companyModel)), companyModel.IdCompany)
 			if errInsert != "" {
 				services.ShowResponseDefault(ctx, statuscode, errInsert)
 			} else {

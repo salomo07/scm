@@ -18,8 +18,9 @@ var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
 var isLocal = true
 
 // var LocalCred = "http://admin:123@10.180.70.66:5984/"
-// var LocalCred = "http://admin:123@192.168.0.101:5984/"
-var LocalCred = "http://admin:123@localhost:5984/"
+var LocalCred = "http://admin:123@192.168.0.101:5984/"
+
+// var LocalCred = "http://admin:123@localhost:5984/"
 
 var CDB_USER_ADMIN = ""
 var CDB_PASS_ADMIN = ""

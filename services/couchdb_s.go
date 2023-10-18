@@ -11,8 +11,8 @@ func CreateDB(dbname string) (resBody string, errStr string, statuscode int) {
 	var xxx []byte
 	return SendToNextServer(urlDB, "PUT", xxx)
 }
-func FindDocument(body []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDB() + "scm_core" + "/_find"
+func FindDocument(body []byte, dbname string) (resBody string, errStr string, statuscode int) {
+	urlDB := config.GetCredCDB() + dbname + "/_find"
 	return SendToNextServer(urlDB, "POST", body)
 }
 func InsertDocument(body []byte, dbname string) (resBody string, errStr string, statuscode int) {
