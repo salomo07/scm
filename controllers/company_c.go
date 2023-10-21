@@ -16,7 +16,7 @@ func AddUser(ctx *fasthttp.RequestCtx) {
 	}
 	var userModel models.User
 	models.JsonToStruct(string(ctx.PostBody()), &userModel)
-	// services.
+	// services.InsertDocument()
 }
 func RegisterCompany(ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Body()) == "" {

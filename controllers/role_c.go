@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"scm/config"
 	"scm/models"
 	"scm/services"
 
@@ -18,6 +17,6 @@ func AddRole(ctx *fasthttp.RequestCtx) {
 	if roleModel.Name == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadGateway, "name is mandatory")
 	} else {
-		services.InsertDocument(ctx.PostBody(), config.CDB_USER_ADMIN)
+		services.InsertDocument(ctx.PostBody(), "scm_core")
 	}
 }
