@@ -5,6 +5,7 @@ type InsertDocumentResponse struct {
 	Id  string `json:"id"`
 	Rev string `json:"rev"`
 }
+type InsertBulkDocumentResponse []InsertDocumentResponse
 
 type FindResponse struct {
 	Docs           []any          `json:"docs"`

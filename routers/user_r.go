@@ -20,6 +20,12 @@ func UserRouters(router *fasthttprouter.Router) {
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
+	router.POST("/admin/role/createbulk", func(ctx *fasthttp.RequestCtx) {
+		if controllers.CheckSession(ctx) != "" {
+			controllers.AddRoleBulk(ctx)
+		}
+		ctx.Response.Header.Set("Content-Type", "application/json")
+	})
 	router.POST("/admin/user/createbulk", func(ctx *fasthttp.RequestCtx) {
 		if controllers.CheckSession(ctx) != "" {
 			controllers.AddUser(ctx)

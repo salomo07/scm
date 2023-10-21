@@ -19,6 +19,12 @@ func InsertDocument(body []byte, dbname string) (resBody string, errStr string, 
 	urlDB := config.GetCredCDB() + dbname
 	return SendToNextServer(urlDB, "POST", body)
 }
+func InsertBulkDocument(body []byte, dbname string) (resBody string, errStr string, statuscode int) {
+	urlDB := config.GetCredCDB() + "/" + dbname + "/_bulk_docs"
+	jsonData := `{"docs":` + string(body) + `}`
+	print(jsonData)
+	return SendToNextServer(urlDB, "POST", []byte(jsonData))
+}
 func AddUserDB(idcompany string, body []byte) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDB() + "_users/org.couchdb.user:" + idcompany
 	return SendToNextServer(urlDB, "PUT", body)

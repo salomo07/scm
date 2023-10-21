@@ -13,11 +13,11 @@ type User struct {
 	AccessMenu2 []AccessMenu2 `json:"accessmenu2"`
 }
 type Role struct {
-	IdRole string `json:"_id"`
-	Table  string `json:"table"`
-	Name   string `json:"name"`
-	Code   string `json:"code"`
-	Desc   string `json:"desc"`
+	Table     string `json:"table"`
+	IdCompany string `json:"idcompany"`
+	Name      string `json:"name"`
+	Code      string `json:"code"`
+	Desc      string `json:"desc"`
 }
 type AccessMenu1 struct {
 	IdAccessMenu1 string `json:"_id"`

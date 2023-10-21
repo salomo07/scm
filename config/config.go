@@ -18,10 +18,10 @@ var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
 var isLocal = true
 
 // var LocalCred = "http://admin:123@10.180.70.66:5984/"
-var LocalCred = "http://admin:123@192.168.0.101:5984/"
-
+// var LocalCred = "http://admin:123@192.168.0.101:5984/"
 // var LocalCred = "http://admin:123@localhost:5984/"
 
+var TABLE_CORE_NAME = "scm_core"
 var CDB_USER_ADMIN = ""
 var CDB_PASS_ADMIN = ""
 var CDB_HOST_ADMIN = ""
@@ -59,12 +59,40 @@ func DecodedCredtial(encoded string) (string, string) {
 }
 
 func GetCredCDB() string {
-	if !isLocal {
-		return GetCredCDBFromIBM()
-	} else {
-		print(LocalCred)
-		return LocalCred
+	if CDB_CRED_ADMIN != "" {
+		return CDB_CRED_ADMIN
 	}
+
+	for x := 0; x < 2; x++ {
+		res, err := DecodedCredtial(CDB_USER_ADMIN)
+		if err != "" {
+			print(err)
+		}
+		CDB_USER_ADMIN = res
+	}
+
+	for x := 0; x < 2; x++ {
+		res, err := DecodedCredtial(CDB_PASS_ADMIN)
+		if err != "" {
+			print(err)
+		}
+		CDB_PASS_ADMIN = res
+	}
+	for x := 0; x < 2; x++ {
+		res, err := DecodedCredtial(CDB_HOST_ADMIN)
+		if err != "" {
+			print(err)
+		}
+		CDB_HOST_ADMIN = res
+	}
+	var protocol = "https://"
+	if isLocal {
+		protocol = "http://"
+	}
+
+	CDB_CRED_ADMIN = protocol + CDB_USER_ADMIN + ":" + CDB_PASS_ADMIN + "@" + CDB_HOST_ADMIN + "/"
+	print("\n" + CDB_CRED_ADMIN + "\n")
+	return CDB_CRED_ADMIN
 }
 
 func GetCredRedis() string {
@@ -101,36 +129,6 @@ func GetCredRedis() string {
 		REDIS_PORT = res
 	}
 	REDIS_CRED = "redis://" + REDIS_USER + ":" + REDIS_PASS + "@" + REDIS_HOST + ":" + REDIS_PORT
+	print(REDIS_CRED)
 	return REDIS_CRED
-}
-
-func GetCredCDBFromIBM() string {
-	if CDB_CRED_ADMIN != "" {
-		return CDB_CRED_ADMIN
-	}
-	for x := 0; x < 2; x++ {
-		res, err := DecodedCredtial(CDB_USER_ADMIN)
-		if err != "" {
-			print(err)
-		}
-		CDB_USER_ADMIN = res
-	}
-
-	for x := 0; x < 2; x++ {
-		res, err := DecodedCredtial(CDB_PASS_ADMIN)
-		if err != "" {
-			print(err)
-		}
-		CDB_PASS_ADMIN = res
-	}
-	for x := 0; x < 2; x++ {
-		res, err := DecodedCredtial(CDB_HOST_ADMIN)
-		if err != "" {
-			print(err)
-		}
-		CDB_HOST_ADMIN = res
-	}
-	CDB_CRED_ADMIN = "https://" + CDB_USER_ADMIN + ":" + CDB_PASS_ADMIN + "@" + CDB_HOST_ADMIN + "/"
-	print()
-	return CDB_CRED_ADMIN
 }

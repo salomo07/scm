@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"scm/config"
 	"scm/models"
 	"scm/services"
 	"strconv"
@@ -28,7 +29,7 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 
 	models.JsonToStruct(string(ctx.PostBody()), &companyModel)
 	jsonBody := `{"selector": {"table":"company","alias":"` + companyModel.Alias + `"}}`
-	existCompany, errFind, statuscode := services.FindDocument([]byte(jsonBody), "scm_core")
+	existCompany, errFind, statuscode := services.FindDocument([]byte(jsonBody), config.TABLE_CORE_NAME)
 	if companyModel.Alias == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "alias is mandatory")
 	} else if errFind != "" {
@@ -43,7 +44,7 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 			if companyModel.LevelMembership == "" {
 				companyModel.LevelMembership = "default"
 			}
-			companyInsertRes, errInsert, statuscode := services.InsertDocument([]byte(models.StructToJson(companyModel)), companyModel.IdCompany)
+			companyInsertRes, errInsert, statuscode := services.InsertDocument([]byte(models.StructToJson(companyModel)), config.TABLE_CORE_NAME)
 			if errInsert != "" {
 				services.ShowResponseDefault(ctx, statuscode, errInsert)
 			} else {
