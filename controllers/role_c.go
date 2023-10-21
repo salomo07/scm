@@ -1,11 +1,8 @@
 package controllers
 
 import (
-<<<<<<< HEAD
-=======
 	"log"
 	"scm/config"
->>>>>>> 27cfed7b05a49f3fc905a649193c47781c1784d2
 	"scm/models"
 	"scm/services"
 
@@ -24,9 +21,6 @@ func AddRole(ctx *fasthttp.RequestCtx) {
 	} else if roleModel.IdCompany == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadGateway, "idcompany is mandatory")
 	} else {
-<<<<<<< HEAD
-		services.InsertDocument(ctx.PostBody(), "scm_core")
-=======
 		roleModel.Table = "role"
 		resBody, errStr, statuscode := services.InsertDocument([]byte(models.StructToJson(roleModel)), config.TABLE_CORE_NAME)
 		if resBody != "" {
@@ -62,6 +56,5 @@ func AddRoleBulk(ctx *fasthttp.RequestCtx) {
 		services.ShowResponseJson(ctx, statuscode, resBody)
 	} else {
 		services.ShowResponseDefault(ctx, statuscode, errStr)
->>>>>>> 27cfed7b05a49f3fc905a649193c47781c1784d2
 	}
 }
