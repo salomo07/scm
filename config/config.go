@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/base64"
+	"os"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -34,7 +35,10 @@ var REDIS_HOST = "WVhCdU1TMXJaWGt0Wm1sdVkyZ3RNelExTnpZdWRYQnpkR0Z6YUM1cGJ3PT0="
 var REDIS_PORT = "TXpRMU56WT0="
 
 func init() {
-	print(HashingBcrypt("passwordscm"))
+	user := os.Getenv("COUCHDB_USER")
+	pass := os.Getenv("COUCHDB_PASSWORD")
+	host := os.Getenv("COUCHDB_HOST")
+	CDB_CRED_ADMIN = "http://" + user + ":" + pass + "@" + host + "/"
 }
 func HashingBcrypt(password string) string {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -61,6 +65,16 @@ func DecodedCredtial(encoded string) (string, string) {
 	return string(decodedText), ""
 }
 
+func GetCredCDBAdmin() string {
+	if CDB_CRED_ADMIN == "" {
+		user := os.Getenv("COUCHDB_USER")
+		pass := os.Getenv("COUCHDB_PASSWORD")
+		host := os.Getenv("COUCHDB_HOST")
+		CDB_CRED_ADMIN = "http://" + user + ":" + pass + "@" + host + "/"
+	}
+	print("Admin : " + CDB_CRED_ADMIN)
+	return CDB_CRED_ADMIN
+}
 func GetCredCDB() string {
 	if CDB_CRED_ADMIN != "" {
 		return CDB_CRED_ADMIN

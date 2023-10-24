@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kaniko-build
+spec:
+  containers:
+    - name: kaniko
+      image: gcr.io/kaniko-project/executor:latest
+      args: ["--dockerfile=Dockerfile", "--context=gs://scmbucket/scm/Dockerfile", "--destination=asia-southeast2-docker.pkg.dev/supplychainsmanagement/scmrepo"]
+  restartPolicy: Never

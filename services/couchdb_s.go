@@ -7,34 +7,34 @@ import (
 
 // Admin
 func CreateDB(dbname string) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDB() + dbname
+	urlDB := config.GetCredCDBAdmin() + dbname
 	var xxx []byte
 	return SendToNextServer(urlDB, "PUT", xxx)
 }
 func FindDocument(body []byte, dbname string) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDB() + dbname + "/_find"
+	urlDB := config.GetCredCDBAdmin() + dbname + "/_find"
 	return SendToNextServer(urlDB, "POST", body)
 }
 func InsertDocument(body []byte, dbname string) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDB() + dbname
+	urlDB := config.GetCredCDBAdmin() + dbname
 	return SendToNextServer(urlDB, "POST", body)
 }
 func InsertBulkDocument(body []byte, dbname string) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDB() + "/" + dbname + "/_bulk_docs"
+	urlDB := config.GetCredCDBAdmin() + "/" + dbname + "/_bulk_docs"
 	jsonData := `{"docs":` + string(body) + `}`
 	print(jsonData)
 	return SendToNextServer(urlDB, "POST", []byte(jsonData))
 }
 func AddUserDB(idcompany string, body []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDB() + "_users/org.couchdb.user:" + idcompany
+	urlDB := config.GetCredCDBAdmin() + "_users/org.couchdb.user:" + idcompany
 	return SendToNextServer(urlDB, "PUT", body)
 }
 func AddAdminRoleForDB(idcompany string, body []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDB() + idcompany + "/_security"
+	urlDB := config.GetCredCDBAdmin() + idcompany + "/_security"
 	return SendToNextServer(urlDB, "PUT", body)
 }
 func UpdateDocument(_id string, data []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDB() + "scm_core/" + _id
+	urlDB := config.GetCredCDBAdmin() + "scm_core/" + _id
 	return SendToNextServer(urlDB, "PUT", data)
 }
 
