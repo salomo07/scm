@@ -4,8 +4,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN go get -d -v ./...
-RUN go install -v ./...
+RUN go get
 RUN go build main.go
 
 EXPOSE 1234
