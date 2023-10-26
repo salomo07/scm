@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: couchdb-deployment
+  name: golang-deployment
   labels: 
-    app: couchdb
+    app: golang
     environment: dev
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: couchdb
+      app: golang
   template:
     metadata:
       labels:
-        app: couchdb
+        app: golang
     spec:
       containers:
-      - name: couchdb-container
-        image: couchdb:latest
+      - name: go-app
+        image: salomo07/scmproject:latest
         ports:
-        - containerPort: 5984
+        - containerPort: 8080
         env:
         - name: COUCHDB_USER
           value: admindev

@@ -1,15 +1,23 @@
-FROM golang:1.21.3
-
+# Stage 1: Build the Go application
+FROM golang:1.21.3 as builder
 WORKDIR /app
-
 COPY . .
+RUN go build -o myapp
 
-RUN go get
-RUN go build main.go
-RUN apt-get update && apt-get install -y redis-server
+# Stage 2: Create the final image with Redis
+FROM redis:latest
 
-EXPOSE 1234
-EXPOSE 6379
+# Set the Redis password
+ENV REDIS_PASSWORD your-redis-password
 
-CMD ["redis-server", "--daemonize yes"]
-CMD ["./main"]
+# Copy the compiled Go application from the previous stage
+COPY --from=builder /app/myapp /myapp
+
+# Expose the port for your Go application
+EXPOSE 8080
+
+# Start Redis with the configured password
+CMD ["redis-server", "--requirepass", "$REDIS_PASSWORD"]
+
+# Start your Go application
+CMD ["/myapp"]
