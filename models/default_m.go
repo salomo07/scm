@@ -21,13 +21,10 @@ type SessionData struct {
 }
 type AdminCred struct {
 	AppId     string `json:"appid"`
+	IdCompany string `json:"idcompany"`
 	UserCDB   string `json:"usercdb"`
 	PassCDB   string `json:"passcdb"`
 	HostCDB   string `json:"hostcdb"`
-	UserRedis string `json:"userredis"`
-	PassRedis string `json:"passredis"`
-	HostRedis string `json:"hostredis"`
-	PortRedis string `json:"portredis"`
 }
 
 func JsonToStruct(jsonStr string, dynamic any) interface{} {

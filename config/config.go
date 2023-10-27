@@ -28,11 +28,7 @@ var CDB_PASS_ADMIN = ""
 var CDB_HOST_ADMIN = ""
 var CDB_CRED_ADMIN = ""
 
-var REDIS_CRED = ""
-var REDIS_USER = "WkdWbVlYVnNkQT09"
-var REDIS_PASS = "TUdFek9EZzJZMkl3TXpZME5EUm1aV0l3WXpVM01UY3dOV0UyWldKa04yST0="
-var REDIS_HOST = "WVhCdU1TMXJaWGt0Wm1sdVkyZ3RNelExTnpZdWRYQnpkR0Z6YUM1cGJ3PT0="
-var REDIS_PORT = "TXpRMU56WT0="
+var REDIS_CRED_ADMIN = ""
 
 func init() {
 	user := os.Getenv("COUCHDB_USER")
@@ -75,77 +71,19 @@ func GetCredCDBAdmin() string {
 	print("Admin : " + CDB_CRED_ADMIN)
 	return CDB_CRED_ADMIN
 }
-func GetCredCDB() string {
+func GetCredCDBCompany() string {
 	if CDB_CRED_ADMIN != "" {
 		return CDB_CRED_ADMIN
 	}
 
-	for x := 0; x < 2; x++ {
-		res, err := DecodedCredtial(CDB_USER_ADMIN)
-		if err != "" {
-			print(err)
-		}
-		CDB_USER_ADMIN = res
-	}
-
-	for x := 0; x < 2; x++ {
-		res, err := DecodedCredtial(CDB_PASS_ADMIN)
-		if err != "" {
-			print(err)
-		}
-		CDB_PASS_ADMIN = res
-	}
-	for x := 0; x < 2; x++ {
-		res, err := DecodedCredtial(CDB_HOST_ADMIN)
-		if err != "" {
-			print(err)
-		}
-		CDB_HOST_ADMIN = res
-	}
-	var protocol = "https://"
-	if isLocal {
-		protocol = "http://"
-	}
-
-	CDB_CRED_ADMIN = protocol + CDB_USER_ADMIN + ":" + CDB_PASS_ADMIN + "@" + CDB_HOST_ADMIN + "/"
-	print("\n" + CDB_CRED_ADMIN + "\n")
+	CDB_CRED_ADMIN = "http://" + CDB_USER_ADMIN + ":" + CDB_PASS_ADMIN + "@" + CDB_HOST_ADMIN + "/"
 	return CDB_CRED_ADMIN
 }
-
 func GetCredRedis() string {
-	if REDIS_CRED != "" {
-		return REDIS_CRED
-	}
-	for x := 0; x < 2; x++ {
-		res, err := DecodedCredtial(REDIS_USER)
-		if err != "" {
-			print(err)
-		}
-		REDIS_USER = res
-	}
-	for x := 0; x < 2; x++ {
-		res, err := DecodedCredtial(REDIS_PASS)
-		if err != "" {
-			print(err)
-		}
-		REDIS_PASS = res
-	}
-	for x := 0; x < 2; x++ {
-		res, err := DecodedCredtial(REDIS_HOST)
-		if err != "" {
-			print(err)
-		}
-		REDIS_HOST = res
-	}
-
-	for x := 0; x < 2; x++ {
-		res, err := DecodedCredtial(REDIS_PORT)
-		if err != "" {
-			print(err)
-		}
-		REDIS_PORT = res
-	}
-	REDIS_CRED = "redis://" + REDIS_USER + ":" + REDIS_PASS + "@" + REDIS_HOST + ":" + REDIS_PORT
-	print(REDIS_CRED)
-	return REDIS_CRED
+	// if REDIS_CRED_ADMIN != "" {
+	// 	return REDIS_CRED_ADMIN
+	// }
+	REDIS_CRED_ADMIN = os.Getenv("COUCHDB_PASSWORD")
+	print("xxxx" + REDIS_CRED_ADMIN)
+	return REDIS_CRED_ADMIN
 }

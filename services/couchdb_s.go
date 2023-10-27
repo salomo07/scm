@@ -40,18 +40,18 @@ func UpdateDocument(_id string, data []byte) (resBody string, errStr string, sta
 
 // As Company
 func InsertDocumentAsComp(company models.Company, body []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDB() + company.IdCompany
+	urlDB := config.GetCredCDBCompany() + company.IdCompany
 	return ToCDBCompany(urlDB, "POST", body)
 }
 func FindDocumentAsComp(company models.Company, body []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDB() + company.IdCompany + "/_find"
+	urlDB := config.GetCredCDBCompany() + company.IdCompany + "/_find"
 	return ToCDBCompany(urlDB, "POST", body)
 }
 func UpdateDocumentAsComp(company models.Company, _iddoc string, data []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDB() + company.IdCompany + "/" + _iddoc
+	urlDB := config.GetCredCDBCompany() + company.IdCompany + "/" + _iddoc
 	return ToCDBCompany(urlDB, "PUT", data)
 }
 func DeleteDocumentAsComp(company models.Company, _iddoc string, data []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDB() + company.IdCompany + "/" + _iddoc
+	urlDB := config.GetCredCDBCompany() + company.IdCompany + "/" + _iddoc
 	return ToCDBCompany(urlDB, "DELETE", data)
 }
