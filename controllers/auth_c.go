@@ -62,7 +62,6 @@ func CheckSession(ctx *fasthttp.RequestCtx) string {
 					config.CDB_PASS_ADMIN = adminCred.PassCDB
 					return "Accessed by Company"
 				}
-				// print(data)
 				return data
 			} else {
 				print("\n" + "Token is valid" + "\n")
