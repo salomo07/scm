@@ -16,11 +16,14 @@ func SaveValueRedis(key string, value string) {
 	print(key + " is saved")
 }
 
-func GetValueRedis(key string) string {
+func GetValueRedis(key string) (val string, err string) {
 	var ctx = context.Background()
 
-	opt, _ := redis.ParseURL(config.GetCredRedis())
+	opt, error := redis.ParseURL(config.GetCredRedis())
+	if error != nil {
+		return "", error.Error()
+	}
 	client := redis.NewClient(opt)
 	var res = client.Get(ctx, key).Val()
-	return res
+	return res, ""
 }

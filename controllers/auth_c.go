@@ -37,7 +37,6 @@ func CheckSession(ctx *fasthttp.RequestCtx) string {
 	authHeader := ctx.Request.Header.Peek("Authorization")
 	tokenString, err := extractBearerToken(authHeader)
 	if err != nil {
-		print("\n" + err.Error() + "\n")
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, err.Error())
 		return ""
 	} else {
@@ -46,15 +45,13 @@ func CheckSession(ctx *fasthttp.RequestCtx) string {
 		})
 
 		if errToken != nil {
-			print("\n" + errToken.Error() + "\n")
 			services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, errToken.Error())
 			return ""
 		} else {
 			if token.Valid {
 				ctx.Response.SetStatusCode(fasthttp.StatusOK)
-				claim := claimJWT(token)
-
-				// print(claim.IdUser)
+				host := os.Getenv("COUCHDB_HOST")
+				print(host)
 				var adminCred models.AdminCred
 				claims := token.Claims.(jwt.MapClaims)
 				data := claims["data"].(string)
@@ -63,16 +60,10 @@ func CheckSession(ctx *fasthttp.RequestCtx) string {
 					config.CDB_HOST_ADMIN = os.Getenv("COUCHDB_HOST")
 					config.CDB_USER_ADMIN = adminCred.UserCDB
 					config.CDB_PASS_ADMIN = adminCred.PassCDB
-					print("CDB credential has been set\n\n")
 					return "Accessed by Company"
 				}
-				sessionData := services.GetValueRedis(claim.IdUser)
-				if sessionData == "" {
-					services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Session not found")
-					return ""
-				} else {
-					return sessionData
-				}
+				// print(data)
+				return data
 			} else {
 				print("\n" + "Token is valid" + "\n")
 				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Token is valid")

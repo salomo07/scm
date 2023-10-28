@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"os"
 
+	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -31,10 +32,14 @@ var CDB_CRED_ADMIN = ""
 var REDIS_CRED_ADMIN = ""
 
 func init() {
+	er := godotenv.Load()
+	if er != nil {
+		panic("Fail to load .env file")
+	}
 	user := os.Getenv("COUCHDB_USER")
 	pass := os.Getenv("COUCHDB_PASSWORD")
 	host := os.Getenv("COUCHDB_HOST")
-	CDB_CRED_ADMIN = "http://" + user + ":" + pass + "@" + host + "/"
+	CDB_CRED_ADMIN = "http://" + user + ":" + pass + "@" + host + ":5984/"
 }
 func HashingBcrypt(password string) string {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -62,11 +67,11 @@ func DecodedCredtial(encoded string) (string, string) {
 }
 
 func GetCredCDBAdmin() string {
+	user := os.Getenv("COUCHDB_USER")
+	pass := os.Getenv("COUCHDB_PASSWORD")
+	host := os.Getenv("COUCHDB_HOST")
 	if CDB_CRED_ADMIN == "" {
-		user := os.Getenv("COUCHDB_USER")
-		pass := os.Getenv("COUCHDB_PASSWORD")
-		host := os.Getenv("COUCHDB_HOST")
-		CDB_CRED_ADMIN = "http://" + user + ":" + pass + "@" + host + "/"
+		CDB_CRED_ADMIN = "http://" + user + ":" + pass + "@" + host + ":5984/"
 	}
 	print("Admin : " + CDB_CRED_ADMIN)
 	return CDB_CRED_ADMIN
@@ -80,11 +85,12 @@ func GetCredCDBCompany() string {
 	return CDB_CRED_ADMIN
 }
 func GetCredRedis() string {
+	print("apn1-key-finch-34576.upstash.io:34576")
 	return "apn1-key-finch-34576.upstash.io:34576"
-	if REDIS_CRED_ADMIN != "" {
-		return REDIS_CRED_ADMIN
-	}
-	// REDIS_CRED_ADMIN = os.Getenv("COUCHDB_PASSWORD")
-	print("xxxx" + os.Getenv("COUCHDB_PASSWORD"))
-	return REDIS_CRED_ADMIN
+	// if REDIS_CRED_ADMIN != "" {
+	// 	return REDIS_CRED_ADMIN
+	// }
+	// // REDIS_CRED_ADMIN = os.Getenv("COUCHDB_PASSWORD")
+	// print("xxxx" + os.Getenv("COUCHDB_PASSWORD"))
+	// return REDIS_CRED_ADMIN
 }
