@@ -40,7 +40,7 @@ func StructToJson(v any) string {
 	}
 	return string(res)
 }
-func ValidateStruct(myStruct any, ctx *fasthttp.RequestCtx) string {
+func ValidateStruct(myStruct any, ctx *fasthttp.RequestCtx) (err string) {
 	validate := validator.New()
 	if err := validate.Struct(myStruct); err != nil {
 		ShowResponseDefault(ctx, fasthttp.StatusBadRequest, err.Error())

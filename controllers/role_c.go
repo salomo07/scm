@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"log"
 	"scm/config"
 	"scm/models"
 	"scm/services"
@@ -36,17 +35,14 @@ func AddRoleBulk(ctx *fasthttp.RequestCtx) {
 	var roleModelTemp []models.Role
 	models.JsonToStruct(string(ctx.Request.Body()), &roleModel)
 	for _, value := range roleModel {
-		if value.Name == "" {
-			services.ShowResponseDefault(ctx, fasthttp.StatusBadGateway, "name is mandatory")
-			return
-		} else if value.IdCompany == "" {
-			services.ShowResponseDefault(ctx, fasthttp.StatusBadGateway, "idcompany is mandatory")
+		err := models.ValidateStruct(value, ctx)
+		if err == "" {
+			value.Table = "role"
+			roleModelTemp = append(roleModelTemp, value)
+		} else {
 			return
 		}
-		value.Table = "role"
-		roleModelTemp = append(roleModelTemp, value)
 	}
-	log.Println(roleModelTemp)
 	resBody, errStr, statuscode := services.InsertBulkDocument([]byte(models.StructToJson(roleModelTemp)), config.TABLE_CORE_NAME)
 	if resBody != "" {
 		services.ShowResponseJson(ctx, statuscode, resBody)

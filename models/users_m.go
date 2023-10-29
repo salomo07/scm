@@ -21,11 +21,11 @@ type Role struct {
 }
 type AccessMenu1 struct {
 	IdAccessMenu1 string `json:"_id"`
-	Idmenu1       string `json:"idmenu1"`
-	Create        bool   `json:"create"`
-	Read          bool   `json:"read"`
-	Update        bool   `json:"update"`
-	Delete        bool   `json:"delete"`
+	Idmenu1       string `json:"idmenu1" validate:"required"`
+	Create        bool   `json:"create" validate:"required"`
+	Read          bool   `json:"read" validate:"required"`
+	Update        bool   `json:"update" validate:"required"`
+	Delete        bool   `json:"delete" validate:"required"`
 }
 type AccessMenu2 struct {
 	IdAccessMenu2 string `json:"_id"`
@@ -37,15 +37,15 @@ type AccessMenu2 struct {
 }
 type Menu1 struct {
 	IdMenu1 string `json:"_id"`
-	Name    string `json:"name"`
+	Name    string `json:"name" validate:"required"`
 	Url     string `json:"url"`
 	Icon    string `json:"icon"`
 	Desc    string `json:"desc"`
 }
 type Menu2 struct {
 	IdMenu2 string `json:"_id"`
-	IdMenu1 string `json:"idmenu1"`
-	Name    string `json:"name"`
+	IdMenu1 string `json:"idmenu1" validate:"required"`
+	Name    string `json:"name" validate:"required"`
 	Url     string `json:"url"`
 	Icon    string `json:"icon"`
 	Desc    string `json:"desc"`

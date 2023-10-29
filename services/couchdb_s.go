@@ -11,6 +11,10 @@ func CreateDB(dbname string) (resBody string, errStr string, statuscode int) {
 	var xxx []byte
 	return SendToNextServer(urlDB, "PUT", xxx)
 }
+func CreateIndexPerCompany(dbname string) (resBody string, errStr string, statuscode int) {
+	urlDB := config.GetCredCDBAdmin() + dbname
+	return SendToNextServer(urlDB, "POST", []byte(`{"index":{"fields":["table","idcompany"]},"name":"companydata","ddoc":"companydata","type":"json"}`))
+}
 func FindDocument(body []byte, dbname string) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBAdmin() + dbname + "/_find"
 	return SendToNextServer(urlDB, "POST", body)
@@ -22,7 +26,6 @@ func InsertDocument(body []byte, dbname string) (resBody string, errStr string, 
 func InsertBulkDocument(body []byte, dbname string) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBAdmin() + "/" + dbname + "/_bulk_docs"
 	jsonData := `{"docs":` + string(body) + `}`
-	print(jsonData)
 	return SendToNextServer(urlDB, "POST", []byte(jsonData))
 }
 func AddUserDB(idcompany string, body []byte) (resBody string, errStr string, statuscode int) {

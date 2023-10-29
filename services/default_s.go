@@ -53,7 +53,7 @@ func SendToNextServer(url string, method string, body []byte) (resBody string, e
 	print("\n" + strconv.Itoa(forwardedResponse.StatusCode()) + " - " + string(forwardedResponse.Body()))
 	fasthttp.ReleaseRequest(forwardedRequest)
 	// fasthttp.ReleaseResponse(forwardedResponse)
-	return string(forwardedResponse.Body()), "", fasthttp.StatusOK
+	return string(forwardedResponse.Body()), "", forwardedResponse.StatusCode()
 }
 
 func ToCDBCompany(url string, method string, body []byte) (resBody string, errStr string, statuscode int) {
