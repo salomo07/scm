@@ -16,11 +16,8 @@ func AddRole(ctx *fasthttp.RequestCtx) {
 	}
 	var roleModel models.Role
 	models.JsonToStruct(string(ctx.PostBody()), &roleModel)
-	if roleModel.Name == "" {
-		services.ShowResponseDefault(ctx, fasthttp.StatusBadGateway, "name is mandatory")
-	} else if roleModel.IdCompany == "" {
-		services.ShowResponseDefault(ctx, fasthttp.StatusBadGateway, "idcompany is mandatory")
-	} else {
+	err := models.ValidateStruct(roleModel, ctx)
+	if err == "" {
 		roleModel.Table = "role"
 		resBody, errStr, statuscode := services.InsertDocument([]byte(models.StructToJson(roleModel)), config.TABLE_CORE_NAME)
 		if resBody != "" {
@@ -28,7 +25,6 @@ func AddRole(ctx *fasthttp.RequestCtx) {
 		} else {
 			services.ShowResponseDefault(ctx, statuscode, errStr)
 		}
-
 	}
 }
 func AddRoleBulk(ctx *fasthttp.RequestCtx) {

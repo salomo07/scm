@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"scm/config"
 	"scm/models"
 	"scm/services"
@@ -17,6 +18,11 @@ func AddUser(ctx *fasthttp.RequestCtx) {
 	}
 	var userModel models.User
 	models.JsonToStruct(string(ctx.PostBody()), &userModel)
+	err := models.ValidateStruct(userModel, ctx)
+	if err == "" {
+
+	}
+	log.Println(userModel)
 	// services.InsertDocument()
 }
 func RegisterCompany(ctx *fasthttp.RequestCtx) {

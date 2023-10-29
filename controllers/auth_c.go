@@ -7,7 +7,6 @@ import (
 	"scm/models"
 	"scm/services"
 	"strings"
-	"time"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/valyala/fasthttp"
@@ -25,19 +24,28 @@ func GenerateJWT(json []byte, expiredtime int64, ctx *fasthttp.RequestCtx) strin
 	if err != nil {
 		fmt.Fprintf(ctx, services.StructToJson(models.DefaultResponse{Status: fasthttp.StatusBadRequest, Messege: "GenerateJWT : " + err.Error()}))
 	}
-
+	print(ss)
 	return ss
 }
+func CheckAdminKey(key string) string {
+	val, err := services.GetValueRedis(key)
+	if err != "" {
+		print("Error : " + err + "\n\n")
+		return ""
+	} else {
+		return val
+	}
+}
 func CheckSession(ctx *fasthttp.RequestCtx) string {
-	expTime := time.Now().Local().Add(time.Hour*24*30).UnixNano() / 1000
-	go GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm"})), expTime, ctx)
+	// expTime := time.Now().Local().Add(time.Hour*24*30).UnixNano() / 1000
+	// go GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", AdminKey: "$2a$10$4IKUOc7Y9/ofzqik6B73/unL4EQfGExo.jeObRO5Rt9JQ2Q6qcJxG"})), expTime, ctx)
 
 	// go GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", UserCDB: "WVdSdGFXNWtaWFk9", PassCDB:"WTFKM2IwOUhNRlZxZUdKWFRIZDVXRXRTYUUxaVpYQTBZakZNZWtwV1NYQmhZbWxXWjIwMWFHSlFUMlZ4TkZsVFNrSnlRVXM9", HostCDB: "YUhSMGNEb3ZMek0wTGpFeU9TNHlOeTQyTlRvMU9UZzA=", HostRedis: "WVhCdU1TMXJaWGt0Wm1sdVkyZ3RNelExTnpZdWRYQnpkR0Z6YUM1cGJ3PT0=", PortRedis: "TXpRMU56WT0="})), expTime, ctx)
 
 	authHeader := ctx.Request.Header.Peek("Authorization")
 	tokenString, err := extractBearerToken(authHeader)
 	if err != nil {
-		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, err.Error())
+		services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, err.Error())
 		return ""
 	} else {
 		token, errToken := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -50,22 +58,28 @@ func CheckSession(ctx *fasthttp.RequestCtx) string {
 		} else {
 			if token.Valid {
 				ctx.Response.SetStatusCode(fasthttp.StatusOK)
-				host := os.Getenv("COUCHDB_HOST")
-				print(host)
+
 				var adminCred models.AdminCred
 				claims := token.Claims.(jwt.MapClaims)
 				data := claims["data"].(string)
 				services.JsonToStruct(string(data), &adminCred)
+				// log.Println("\nxxx-" + adminCred.AdminKey + "-xxx\n\n")
+				// return ""
 				if adminCred.IdCompany != "" {
 					config.CDB_HOST_ADMIN = os.Getenv("COUCHDB_HOST")
-					config.CDB_USER_ADMIN = adminCred.UserCDB
-					config.CDB_PASS_ADMIN = adminCred.PassCDB
+					config.CDB_USER_ADMIN = os.Getenv("COUCHDB_USER")
+					config.CDB_PASS_ADMIN = os.Getenv("COUCHDB_PASSWORD")
 					return "Accessed by Company"
+				} else if adminCred.AdminKey != "" && adminCred.AdminKey == CheckAdminKey("apikeyscm") {
+					print("API key is valid\n" + data + "\n\n")
+					return data
 				}
-				return data
+				print("API key is invalid\n")
+				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Token is invalid")
+				return ""
 			} else {
-				print("\n" + "Token is valid" + "\n")
-				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Token is valid")
+				print("\n" + "Token is invalid" + "\n")
+				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Token is invalid")
 				return ""
 			}
 		}

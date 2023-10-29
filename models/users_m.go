@@ -2,21 +2,21 @@ package models
 
 type User struct {
 	IdUser      string        `json:"_id"`
-	Nik         string        `json:"nik"`
-	Name        string        `json:"name"`
-	Username    string        `json:"username"`
-	Password    string        `json:"password"`
+	Nik         string        `json:"nik" validate:"required"`
+	Name        string        `json:"name" validate:"required"`
+	Username    string        `json:"username" validate:"required"`
+	Password    string        `json:"password" validate:"required"`
 	Table       string        `json:"table"`
 	IdCompany   string        `json:"idcompany"`
-	IdRole      string        `json:"idrole"`
+	IdRole      string        `json:"idrole" validate:"required"`
 	AccessMenu1 []AccessMenu1 `json:"accessmenu1"`
 	AccessMenu2 []AccessMenu2 `json:"accessmenu2"`
 }
 type Role struct {
 	Table     string `json:"table"`
-	IdCompany string `json:"idcompany"`
-	Name      string `json:"name"`
-	Code      string `json:"code"`
+	IdCompany string `json:"idcompany" validate:"required"`
+	Name      string `json:"name" validate:"required"`
+	Code      string `json:"code" validate:"required"`
 	Desc      string `json:"desc"`
 }
 type AccessMenu1 struct {

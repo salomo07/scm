@@ -2,9 +2,10 @@ package models
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"reflect"
+
+	"github.com/valyala/fasthttp"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 type DefaultResponse struct {
@@ -25,6 +26,7 @@ type AdminCred struct {
 	UserCDB   string `json:"usercdb"`
 	PassCDB   string `json:"passcdb"`
 	HostCDB   string `json:"hostcdb"`
+	AdminKey  string `json:"adminkey"`
 }
 
 func JsonToStruct(jsonStr string, dynamic any) interface{} {
@@ -38,32 +40,15 @@ func StructToJson(v any) string {
 	}
 	return string(res)
 }
-func validateStruct(s any) error {
-	t := reflect.TypeOf(s)
-	v := reflect.ValueOf(s)
-
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		value := v.Field(i).Interface()
-
-		tag := field.Tag.Get("validate")
-
-		if tag == "required" {
-			// Check if the field is empty
-			if isEmpty(value) {
-				return errors.New(fmt.Sprintf("Field '%s' is required but is empty.", field.Name))
-			}
-		}
+func ValidateStruct(myStruct any, ctx *fasthttp.RequestCtx) string {
+	validate := validator.New()
+	if err := validate.Struct(myStruct); err != nil {
+		ShowResponseDefault(ctx, fasthttp.StatusBadRequest, err.Error())
+		return err.Error()
 	}
-
-	return nil
+	return ""
 }
-
-func isEmpty(value interface{}) bool {
-	switch reflect.TypeOf(value).Kind() {
-	case reflect.String:
-		return value.(string) == ""
-	default:
-		return false
-	}
+func ShowResponseDefault(ctx *fasthttp.RequestCtx, statuscode int, msg string) {
+	ctx.Response.SetStatusCode(statuscode)
+	fmt.Fprintf(ctx, StructToJson(DefaultResponse{Status: statuscode, Messege: msg}))
 }

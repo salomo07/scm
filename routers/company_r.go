@@ -20,4 +20,10 @@ func CompanyRouters(router *fasthttprouter.Router) {
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
+	router.POST("/admin/company/role/addrole", func(ctx *fasthttp.RequestCtx) {
+		if controllers.CheckSession(ctx) != "" {
+			controllers.AddRole(ctx)
+		}
+		ctx.Response.Header.Set("Content-Type", "application/json")
+	})
 }

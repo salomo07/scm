@@ -80,17 +80,9 @@ func GetCredCDBCompany() string {
 	if CDB_CRED_ADMIN != "" {
 		return CDB_CRED_ADMIN
 	}
-
 	CDB_CRED_ADMIN = "http://" + CDB_USER_ADMIN + ":" + CDB_PASS_ADMIN + "@" + CDB_HOST_ADMIN + "/"
 	return CDB_CRED_ADMIN
 }
 func GetCredRedis() string {
-	print("apn1-key-finch-34576.upstash.io:34576")
-	return "apn1-key-finch-34576.upstash.io:34576"
-	// if REDIS_CRED_ADMIN != "" {
-	// 	return REDIS_CRED_ADMIN
-	// }
-	// // REDIS_CRED_ADMIN = os.Getenv("COUCHDB_PASSWORD")
-	// print("xxxx" + os.Getenv("COUCHDB_PASSWORD"))
-	// return REDIS_CRED_ADMIN
+	return os.Getenv("REDIS_CRED_ADMIN")
 }
