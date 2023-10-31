@@ -10,7 +10,7 @@ import (
 func Access_MenuRouters(router *fasthttprouter.Router) {
 	router.POST("/admin/menu/add", func(ctx *fasthttp.RequestCtx) {
 		if controllers.CheckSession(ctx) != "" {
-			controllers.AddUser(ctx)
+			controllers.AddMenu(ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})

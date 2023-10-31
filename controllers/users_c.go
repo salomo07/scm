@@ -19,8 +19,11 @@ func AddMenu(ctx *fasthttp.RequestCtx) {
 	var menuModel models.Menu1
 	models.JsonToStruct(string(ctx.PostBody()), &menuModel)
 	err := models.ValidateStruct(menuModel, ctx)
-	if err == "" {
+	if err != "" {
 
+	} else {
+		menuModel.Table = "menu"
+		services.InsertDocument([]byte(models.StructToJson(menuModel)), "scm_core")
 	}
 	log.Println(menuModel)
 	// services.InsertDocument()
