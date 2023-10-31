@@ -9,19 +9,7 @@ import (
 )
 
 var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
-
-// var CDB_HOST_ADMIN = "10.180.8.74"
-// var CDB_HOST_ADMIN = "localhost"
-// var CDB_USER_ADMIN = "admin"
-// var CDB_PASS_ADMIN = "123"
-// var CDB_PORT_ADMIN = "5984"
-// var CDB_CRED_ADMIN = ""
-
-var isLocal = true
-
-// var LocalCred = "http://admin:123@10.180.70.66:5984/"
-// var LocalCred = "http://admin:123@192.168.0.101:5984/"
-// var LocalCred = "http://admin:123@localhost:5984/"
+var usingIBM = false
 
 var TABLE_CORE_NAME = "scm_core"
 var CDB_USER_ADMIN = ""
@@ -39,7 +27,13 @@ func init() {
 	user := os.Getenv("COUCHDB_USER")
 	pass := os.Getenv("COUCHDB_PASSWORD")
 	host := os.Getenv("COUCHDB_HOST")
-	CDB_CRED_ADMIN = "http://" + user + ":" + pass + "@" + host + ":5984/"
+
+	if usingIBM {
+		CDB_CRED_ADMIN = "https://" + user + ":" + pass + "@" + host
+	} else {
+		CDB_CRED_ADMIN = "http://" + user + ":" + pass + "@" + host + ":5984/"
+	}
+	print(CDB_CRED_ADMIN + "\n")
 }
 func HashingBcrypt(password string) string {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -71,7 +65,11 @@ func GetCredCDBAdmin() string {
 	pass := os.Getenv("COUCHDB_PASSWORD")
 	host := os.Getenv("COUCHDB_HOST")
 	if CDB_CRED_ADMIN == "" {
-		CDB_CRED_ADMIN = "http://" + user + ":" + pass + "@" + host + ":5984/"
+		if usingIBM {
+			CDB_CRED_ADMIN = "https://" + user + ":" + pass + "@" + host
+		} else {
+			CDB_CRED_ADMIN = "http://" + user + ":" + pass + "@" + host + ":5984/"
+		}
 	}
 	print("Admin : " + CDB_CRED_ADMIN)
 	return CDB_CRED_ADMIN

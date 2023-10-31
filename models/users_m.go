@@ -20,37 +20,36 @@ type Role struct {
 	Desc      string `json:"desc"`
 }
 type AccessMenu1 struct {
-	Table         string `json:"table"`
-	IdAccessMenu1 string `json:"_id"`
-	Idmenu1       string `json:"idmenu1" validate:"required"`
-	Create        bool   `json:"create" validate:"required"`
-	Read          bool   `json:"read" validate:"required"`
-	Update        bool   `json:"update" validate:"required"`
-	Delete        bool   `json:"delete" validate:"required"`
+	Table     string `json:"table"`
+	IdCompany string `json:"idcompany" validate:"required"`
+	IdRole    string `json:"idrole" validate:"required"`
+	Idmenu1   string `json:"idmenu1" validate:"required"`
+	Create    bool   `json:"create" validate:"required"`
+	Read      bool   `json:"read" validate:"required"`
+	Update    bool   `json:"update" validate:"required"`
+	Delete    bool   `json:"delete" validate:"required"`
 }
 type AccessMenu2 struct {
-	Table         string `json:"table"`
-	IdAccessMenu2 string `json:"_id"`
-	Idmenu2       string `json:"idmenu2"`
-	Create        bool   `json:"create"`
-	Read          bool   `json:"read"`
-	Update        bool   `json:"update"`
-	Delete        bool   `json:"delete"`
+	Table     string `json:"table"`
+	IdCompany string `json:"idcompany" validate:"required"`
+	IdRole    string `json:"idrole" validate:"required"`
+	Idmenu2   string `json:"idmenu2"`
+	Create    bool   `json:"create"`
+	Read      bool   `json:"read"`
+	Update    bool   `json:"update"`
+	Delete    bool   `json:"delete"`
 }
 type Menu1 struct {
-	Table     string `json:"table"`
-	IdMenu1   string `json:"_id"`
-	Name      string `json:"name" validate:"required"`
-	Url       string `json:"url" validate:"required"`
-	IdCompany string `json:"idcompany" validate:"required"`
-	Icon      string `json:"icon"`
-	Desc      string `json:"desc"`
+	Table     string  `json:"table"`
+	IdCompany string  `json:"idcompany" validate:"required"`
+	Name      string  `json:"name" validate:"required"`
+	Url       string  `json:"url" validate:"required"`
+	Icon      string  `json:"icon"`
+	Desc      string  `json:"desc"`
+	Submenu   []Menu2 `json:"submenu" validate:"required"`
 }
 type Menu2 struct {
-	IdMenu2 string `json:"_id"`
-	IdMenu1 string `json:"idmenu1" validate:"required"`
-	Name    string `json:"name" validate:"required"`
-
+	Name string `json:"name" validate:"required"`
 	Url  string `json:"url"`
 	Icon string `json:"icon"`
 	Desc string `json:"desc"`
