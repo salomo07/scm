@@ -21,6 +21,7 @@ func main() {
 	router.GET("/company/", func(ctx *fasthttp.RequestCtx) {
 		services.ShowResponseDefault(ctx, 200, "Ini router /company/")
 	})
+	routers.Access_MenuRouters(router)
 	routers.CompanyRouters(router)
 	routers.CouchDBRouters(router)
 	routers.UserRouters(router)

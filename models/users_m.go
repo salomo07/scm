@@ -20,6 +20,7 @@ type Role struct {
 	Desc      string `json:"desc"`
 }
 type AccessMenu1 struct {
+	Table         string `json:"table"`
 	IdAccessMenu1 string `json:"_id"`
 	Idmenu1       string `json:"idmenu1" validate:"required"`
 	Create        bool   `json:"create" validate:"required"`
@@ -28,6 +29,7 @@ type AccessMenu1 struct {
 	Delete        bool   `json:"delete" validate:"required"`
 }
 type AccessMenu2 struct {
+	Table         string `json:"table"`
 	IdAccessMenu2 string `json:"_id"`
 	Idmenu2       string `json:"idmenu2"`
 	Create        bool   `json:"create"`
@@ -36,17 +38,20 @@ type AccessMenu2 struct {
 	Delete        bool   `json:"delete"`
 }
 type Menu1 struct {
-	IdMenu1 string `json:"_id"`
-	Name    string `json:"name" validate:"required"`
-	Url     string `json:"url"`
-	Icon    string `json:"icon"`
-	Desc    string `json:"desc"`
+	Table     string `json:"table"`
+	IdMenu1   string `json:"_id"`
+	Name      string `json:"name" validate:"required"`
+	Url       string `json:"url" validate:"required"`
+	IdCompany string `json:"idcompany" validate:"required"`
+	Icon      string `json:"icon"`
+	Desc      string `json:"desc"`
 }
 type Menu2 struct {
 	IdMenu2 string `json:"_id"`
 	IdMenu1 string `json:"idmenu1" validate:"required"`
 	Name    string `json:"name" validate:"required"`
-	Url     string `json:"url"`
-	Icon    string `json:"icon"`
-	Desc    string `json:"desc"`
+
+	Url  string `json:"url"`
+	Icon string `json:"icon"`
+	Desc string `json:"desc"`
 }
