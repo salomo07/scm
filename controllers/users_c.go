@@ -38,7 +38,7 @@ func AddAccess1(ctx *fasthttp.RequestCtx) {
 	err := models.ValidateStruct(menuModel, ctx)
 	if err == "" {
 		menuModel.Table = "access1"
-		query := `{"selector":{"$and":[{"idcompany":"c_1697456451227950","table":"menu","_id":"5712a9da17e9ce468530be602523f705"},{"idcompany":"c_1697456451227950","table":"access1","idmenu1":"5712a9da17e9ce468530be602523f705"}]},"use_index":"_design/companydata"}`
+		query := `{"selector":{"idcompany":"c_1697456451227950","table":"access1","idmenu1":"5712a9da17e9ce468530be602523f705"},"use_index":"_design/companydata"}`
 		res, err, stts := services.FindDocument([]byte(query), "scm_core")
 		if err == "" {
 			var findRes models.FindResponse
