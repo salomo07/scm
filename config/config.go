@@ -24,16 +24,7 @@ func init() {
 	if er != nil {
 		panic("Fail to load .env file")
 	}
-	user := os.Getenv("COUCHDB_USER")
-	pass := os.Getenv("COUCHDB_PASSWORD")
-	host := os.Getenv("COUCHDB_HOST")
-
-	if usingIBM {
-		CDB_CRED_ADMIN = "https://" + user + ":" + pass + "@" + host
-	} else {
-		CDB_CRED_ADMIN = "http://" + user + ":" + pass + "@" + host + ":5984/"
-	}
-	print(CDB_CRED_ADMIN + "\n")
+	GetCredCDBAdmin()
 }
 func HashingBcrypt(password string) string {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -61,17 +52,22 @@ func DecodedCredtial(encoded string) (string, string) {
 }
 
 func GetCredCDBAdmin() string {
+	if CDB_CRED_ADMIN != "" {
+		return CDB_CRED_ADMIN
+	}
+	userIBM := os.Getenv("COUCHDB_USER_IBM")
+	passIBM := os.Getenv("COUCHDB_PASSWORD_IBM")
+	hostIBM := os.Getenv("COUCHDB_HOST_IBM")
 	user := os.Getenv("COUCHDB_USER")
 	pass := os.Getenv("COUCHDB_PASSWORD")
 	host := os.Getenv("COUCHDB_HOST")
-	if CDB_CRED_ADMIN == "" {
-		if usingIBM {
-			CDB_CRED_ADMIN = "https://" + user + ":" + pass + "@" + host
-		} else {
-			CDB_CRED_ADMIN = "http://" + user + ":" + pass + "@" + host + ":5984/"
-		}
+
+	if usingIBM {
+		CDB_CRED_ADMIN = "https://" + userIBM + ":" + passIBM + "@" + hostIBM
+	} else {
+		CDB_CRED_ADMIN = "http://" + user + ":" + pass + "@" + host + ":5984/"
 	}
-	print("Admin : " + CDB_CRED_ADMIN)
+	print(CDB_CRED_ADMIN + "\n")
 	return CDB_CRED_ADMIN
 }
 func GetCredCDBCompany() string {

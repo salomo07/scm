@@ -8,25 +8,25 @@ import (
 )
 
 func UserRouters(router *fasthttprouter.Router) {
-	router.POST("/admin/user/create", func(ctx *fasthttp.RequestCtx) {
+	router.POST("api/v1/admin/user/create", func(ctx *fasthttp.RequestCtx) {
 		if controllers.CheckSession(ctx) != "" {
 			controllers.AddUser(ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
-	router.POST("/admin/role/create", func(ctx *fasthttp.RequestCtx) {
+	router.POST("api/v1/admin/role/create", func(ctx *fasthttp.RequestCtx) {
 		if controllers.CheckSession(ctx) != "" {
 			controllers.AddRole(ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
-	router.POST("/admin/role/createbulk", func(ctx *fasthttp.RequestCtx) {
+	router.POST("api/v1/admin/role/createbulk", func(ctx *fasthttp.RequestCtx) {
 		if controllers.CheckSession(ctx) != "" {
 			controllers.AddRoleBulk(ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
-	router.POST("/admin/user/createbulk", func(ctx *fasthttp.RequestCtx) {
+	router.POST("api/v1/admin/user/createbulk", func(ctx *fasthttp.RequestCtx) {
 		if controllers.CheckSession(ctx) != "" {
 			controllers.AddUser(ctx)
 		}

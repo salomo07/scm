@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"scm/controllers"
 	"scm/models"
 	"scm/routers"
 	"scm/services"
@@ -14,6 +15,17 @@ import (
 var port = "8080"
 
 func main() {
+	// @Version 1.0.0
+	// @Title SCM API
+	// @Description API usually works as expected. But sometimes its not true.
+	// @ContactName Salomo Sitompul
+	// @ContactEmail sitompulsalomo@gmail.com
+	// @LicenseName MIT
+	// @LicenseURL https://en.wikipedia.org/wiki/MIT_License
+	// @Server http://www.fake.com Server-1
+	// @Server http://www.fake2.com Server-2
+	// @Security AuthorizationHeader read write
+	// @SecurityScheme AuthorizationHeader http bearer Input your token
 	router := fasthttprouter.New()
 	router.GET("/", func(ctx *fasthttp.RequestCtx) {
 		services.ShowResponseDefault(ctx, 200, "Welcome to SCM API")
@@ -21,14 +33,26 @@ func main() {
 	router.GET("/company/", func(ctx *fasthttp.RequestCtx) {
 		services.ShowResponseDefault(ctx, 200, "Ini router /company/")
 	})
+
+	// @Title Menambahkan menu aplikasi
+	// @Description Get users related to a specific group.
+	// @Header models.Menu1
+	// @Param  body
+	// @Success  200  object  services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")  "UsersResponse JSON"
+	// @Failure  400  object  ErrorResponse  "ErrorResponse JSON"
+	// @Resource users
+	// @Route /api/group/{groupID}/users [get]
+	router.POST("api/v1/admin/menu/add", func(ctx *fasthttp.RequestCtx) {
+		if controllers.CheckSession(ctx) != "" {
+			controllers.AddMenu(ctx)
+		}
+		ctx.Response.Header.Set("Content-Type", "application/json")
+	})
+
 	routers.Access_MenuRouters(router)
 	routers.CompanyRouters(router)
 	routers.CouchDBRouters(router)
 	routers.UserRouters(router)
-	// print("\nUser: " + config.HashingBcrypt("admin") + "\n")
-	// print("\nPass: " + config.HashingBcrypt("123") + "\n")
-	// print("\nHost: " + config.HashingBcrypt("10.180.8.74") + "\n")
-	// print("\nPort: " + config.HashingBcrypt("5984") + "\n")
 
 	router.HandleMethodNotAllowed = false
 	router.MethodNotAllowed = func(ctx *fasthttp.RequestCtx) {

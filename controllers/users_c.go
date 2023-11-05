@@ -10,6 +10,14 @@ import (
 func AddCompany() {
 
 }
+
+// @Title Menambahkan menu untuk aplikasi
+// @Description Get users related to a specific group.
+// @Param  models.RequestHeaders
+// @Success  200  object  UsersResponse  "UsersResponse JSON"
+// @Failure  400  object  ErrorResponse  "ErrorResponse JSON"
+// @Resource users
+// @Route /api/group/{groupID}/users [get]
 func AddMenu(ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Body()) == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")

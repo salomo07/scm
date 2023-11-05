@@ -8,7 +8,7 @@ import (
 )
 
 func CouchDBRouters(router *fasthttprouter.Router) {
-	router.POST("/createdb/:name", func(ctx *fasthttp.RequestCtx) {
+	router.POST("api/v1/createdb/:name", func(ctx *fasthttp.RequestCtx) {
 		if ctx.UserValue("name") == "" {
 			services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "dbname is needed")
 		} else {
@@ -16,7 +16,7 @@ func CouchDBRouters(router *fasthttprouter.Router) {
 		}
 		//
 	})
-	router.POST("/createuserdb/:name", func(ctx *fasthttp.RequestCtx) {
+	router.POST("api/v1/createuserdb/:name", func(ctx *fasthttp.RequestCtx) {
 		if ctx.UserValue("name") == "" {
 			services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "username of db is needed")
 		} else {
