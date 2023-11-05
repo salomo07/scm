@@ -11,72 +11,21 @@ func AddCompany() {
 
 }
 
-// @Title Menambahkan menu untuk aplikasi
-// @Description Get users related to a specific group.
-// @Param  models.RequestHeaders
-// @Success  200  object  UsersResponse  "UsersResponse JSON"
-// @Failure  400  object  ErrorResponse  "ErrorResponse JSON"
-// @Resource users
-// @Route /api/group/{groupID}/users [get]
 func AddMenu(ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Body()) == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
 		return
 	}
-	var menuModel models.Menu1
+	var menuModel models.Menu
 	models.JsonToStruct(string(ctx.PostBody()), &menuModel)
 	err := models.ValidateStruct(menuModel, ctx)
 	if err == "" {
 		menuModel.Table = "menu"
-		res, err, stts := services.InsertDocument([]byte(models.StructToJson(menuModel)), "scm_core")
-		if err != "" {
-			services.ShowResponseJson(ctx, stts, err)
-		} else {
-			services.ShowResponseJson(ctx, stts, res)
-		}
-	}
-}
-func AddAccess1(ctx *fasthttp.RequestCtx) {
-	if string(ctx.Request.Body()) == "" {
-		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
-		return
-	}
-	var menuModel models.AccessMenu1
-	models.JsonToStruct(string(ctx.PostBody()), &menuModel)
-	err := models.ValidateStruct(menuModel, ctx)
-	if err == "" {
-		menuModel.Table = "access1"
-		query := `{"selector":{"idcompany":"c_1697456451227950","table":"access1","idmenu1":"5712a9da17e9ce468530be602523f705"},"use_index":"_design/companydata"}`
-		res, err, stts := services.FindDocument([]byte(query), "scm_core")
-		if err == "" {
-			var findRes models.FindResponse
-			models.JsonToStruct(res, &findRes)
-			if len(findRes.Docs) > 1 {
-				print("\nAccess untuk menu ini sudah ada")
-			} else if len(findRes.Docs) == 0 {
-				print("\nMenu yang anda pilih tidak dikenali")
-			} else {
-				print("\nNah ini baru insert access baru")
+		if len(menuModel.Submenu) > 0 {
+			for i, _ := range menuModel.Submenu {
+				menuModel.Submenu[i].IdSubmenu = i + 1
 			}
 		}
-		// res, err, stts := services.InsertDocument([]byte(models.StructToJson(menuModel)), "scm_core")
-		if err != "" {
-			services.ShowResponseJson(ctx, stts, err)
-		} else {
-			services.ShowResponseJson(ctx, stts, res)
-		}
-	}
-}
-func AddAccess2(ctx *fasthttp.RequestCtx) {
-	if string(ctx.Request.Body()) == "" {
-		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
-		return
-	}
-	var menuModel models.AccessMenu1
-	models.JsonToStruct(string(ctx.PostBody()), &menuModel)
-	err := models.ValidateStruct(menuModel, ctx)
-	if err == "" {
-		menuModel.Table = "access1"
 		res, err, stts := services.InsertDocument([]byte(models.StructToJson(menuModel)), "scm_core")
 		if err != "" {
 			services.ShowResponseJson(ctx, stts, err)
@@ -85,5 +34,48 @@ func AddAccess2(ctx *fasthttp.RequestCtx) {
 		}
 	}
 }
+func AddAccess(ctx *fasthttp.RequestCtx) {
+	if string(ctx.Request.Body()) == "" {
+		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
+		return
+	}
+	var accessModel models.AccessMenu
+	models.JsonToStruct(string(ctx.PostBody()), &accessModel)
+	// err := models.ValidateStruct(accessModel, ctx)
+	// if err == "" {
+	accessModel.Table = "access"
 
-// {"idcompany":""}
+	query := `{"selector":{"table":"access","idcompany":"` + accessModel.IdCompany + `","idrole":"` + accessModel.IdRole + `","idmenu":"` + accessModel.Idmenu + `"},"use_index":"_design/companydata"}`
+	print(query)
+	res, err, sts := services.FindDocument([]byte(query), "scm_core")
+	if err == "" {
+		var findRes models.FindResponse
+		models.JsonToStruct(res, &findRes)
+
+		if len(findRes.Docs) > 0 {
+			var accessRes models.AccessMenuUpdate
+			models.JsonToStruct(models.StructToJson(findRes.Docs[0]), &accessRes)
+			var accessTemp models.AccessMenuUpdate
+			models.JsonToStruct(string(ctx.PostBody()), &accessTemp)
+			accessTemp.IdAccess = accessRes.IdAccess
+			accessTemp.Rev = accessRes.Rev
+			resBody, errRes, stscode := services.UpdateDocument(accessRes.IdAccess, []byte(models.StructToJson(accessTemp)))
+			if errRes != "" {
+				models.ShowResponseDefault(ctx, stscode, errRes)
+			} else {
+				services.ShowResponseJson(ctx, stscode, resBody)
+			}
+		} else {
+			resBody, errRes, stscode := services.InsertDocument([]byte(models.StructToJson(accessModel)), "scm_core")
+			if errRes != "" {
+				models.ShowResponseDefault(ctx, stscode, errRes)
+			} else {
+				services.ShowResponseJson(ctx, stscode, resBody)
+			}
+
+		}
+	} else {
+		models.ShowResponseDefault(ctx, sts, err)
+	}
+	// }
+}

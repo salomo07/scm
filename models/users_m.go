@@ -1,16 +1,15 @@
 package models
 
 type User struct {
-	IdUser      string        `json:"_id"`
-	Nik         string        `json:"nik" validate:"required"`
-	Name        string        `json:"name" validate:"required"`
-	Username    string        `json:"username" validate:"required"`
-	Password    string        `json:"password" validate:"required"`
-	Table       string        `json:"table"`
-	IdCompany   string        `json:"idcompany"`
-	IdRole      string        `json:"idrole" validate:"required"`
-	AccessMenu1 []AccessMenu1 `json:"accessmenu1"`
-	AccessMenu2 []AccessMenu2 `json:"accessmenu2"`
+	IdUser     string       `json:"_id"`
+	Nik        string       `json:"nik" validate:"required"`
+	Name       string       `json:"name" validate:"required"`
+	Username   string       `json:"username" validate:"required"`
+	Password   string       `json:"password" validate:"required"`
+	Table      string       `json:"table"`
+	IdCompany  string       `json:"idcompany"`
+	IdRole     string       `json:"idrole" validate:"required"`
+	AccessMenu []AccessMenu `json:"accessmenu"`
 }
 type Role struct {
 	Table     string `json:"table"`
@@ -19,38 +18,50 @@ type Role struct {
 	Code      string `json:"code" validate:"required"`
 	Desc      string `json:"desc"`
 }
-type AccessMenu1 struct {
-	Table     string `json:"table"`
-	IdCompany string `json:"idcompany" validate:"required"`
-	IdRole    string `json:"idrole" validate:"required"`
-	Idmenu1   string `json:"idmenu1" validate:"required"`
-	Create    bool   `json:"create" validate:"required"`
-	Read      bool   `json:"read" validate:"required"`
-	Update    bool   `json:"update" validate:"required"`
-	Delete    bool   `json:"delete" validate:"required"`
+type AccessMenu struct {
+	Table         string          `json:"table"`
+	IdCompany     string          `json:"idcompany" validate:"required"`
+	IdRole        string          `json:"idrole" validate:"required"`
+	Idmenu        string          `json:"idmenu" validate:"required"`
+	AccessSubmenu []AccessSubmenu `json:"accesssubmenu" validate:"required"`
+	Create        bool            `json:"create" validate:"required"`
+	Read          bool            `json:"read" validate:"required"`
+	Update        bool            `json:"update" validate:"required"`
+	Delete        bool            `json:"delete" validate:"required"`
 }
-type AccessMenu2 struct {
-	Table     string `json:"table"`
-	IdCompany string `json:"idcompany" validate:"required"`
-	IdRole    string `json:"idrole" validate:"required"`
-	Idmenu2   string `json:"idmenu2"`
-	Create    bool   `json:"create"`
-	Read      bool   `json:"read"`
-	Update    bool   `json:"update"`
-	Delete    bool   `json:"delete"`
+type AccessMenuUpdate struct {
+	IdAccess      string          `json:"_id"`
+	Rev           string          `json:"_rev"`
+	Table         string          `json:"table"`
+	IdCompany     string          `json:"idcompany" validate:"required"`
+	IdRole        string          `json:"idrole" validate:"required"`
+	Idmenu        string          `json:"idmenu" validate:"required"`
+	AccessSubmenu []AccessSubmenu `json:"accesssubmenu" validate:"required"`
+	Create        bool            `json:"create" validate:"required"`
+	Read          bool            `json:"read" validate:"required"`
+	Update        bool            `json:"update" validate:"required"`
+	Delete        bool            `json:"delete" validate:"required"`
 }
-type Menu1 struct {
-	Table     string  `json:"table"`
-	IdCompany string  `json:"idcompany" validate:"required"`
-	Name      string  `json:"name" validate:"required"`
-	Url       string  `json:"url" validate:"required"`
-	Icon      string  `json:"icon"`
-	Desc      string  `json:"desc"`
-	Submenu   []Menu2 `json:"submenu" validate:"required"`
+type AccessSubmenu struct {
+	Idsubmenu int  `json:"idsubmenu"`
+	Create    bool `json:"create"`
+	Read      bool `json:"read"`
+	Update    bool `json:"update"`
+	Delete    bool `json:"delete"`
 }
-type Menu2 struct {
-	Name string `json:"name" validate:"required"`
-	Url  string `json:"url"`
-	Icon string `json:"icon"`
-	Desc string `json:"desc"`
+type Menu struct {
+	Table     string    `json:"table"`
+	IdCompany string    `json:"idcompany" validate:"required"`
+	Name      string    `json:"name" validate:"required"`
+	Url       string    `json:"url" validate:"required"`
+	Icon      string    `json:"icon"`
+	Desc      string    `json:"desc"`
+	Submenu   []Submenu `json:"submenu" validate:"required"`
+}
+type Submenu struct {
+	IdSubmenu int    `json:"idsubmenu" validate:"required"`
+	Name      string `json:"name" validate:"required"`
+	Url       string `json:"url"`
+	Icon      string `json:"icon"`
+	Desc      string `json:"desc"`
 }
