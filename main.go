@@ -11,7 +11,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-var port = "8080"
+var port = "1234"
 
 func main() {
 
@@ -27,6 +27,7 @@ func main() {
 	routers.CompanyRouters(router)
 	routers.CouchDBRouters(router)
 	routers.UserRouters(router)
+	routers.AuthRouters(router)
 
 	router.HandleMethodNotAllowed = false
 	router.MethodNotAllowed = func(ctx *fasthttp.RequestCtx) {

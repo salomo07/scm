@@ -25,8 +25,14 @@ type AdminCred struct {
 	IdCompany string `json:"idcompany"`
 	UserCDB   string `json:"usercdb"`
 	PassCDB   string `json:"passcdb"`
-	HostCDB   string `json:"hostcdb"`
 	AdminKey  string `json:"adminkey"`
+}
+type LoginCred struct {
+	AppId     string `json:"appid"`
+	IdCompany string `json:"idcompany"`
+	PassCDB   string `json:"passcdb"`
+	UserApp   string `json:"userapp"`
+	PassApp   string `json:"passapp"`
 }
 
 func JsonToStruct(jsonStr string, dynamic any) interface{} {

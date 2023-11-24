@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"scm/config"
 	"scm/models"
@@ -12,6 +14,37 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
+func Logining(ctx *fasthttp.RequestCtx) string {
+	rawJSON := ctx.Request.Body()
+	var loginInput models.LoginInput
+	err := json.Unmarshal(rawJSON, &loginInput)
+	if err == nil {
+		log.Println(loginInput)
+		jsonResponse, errResponse := services.GetValueRedis(loginInput.Username)
+		if errResponse == "" {
+			print(services.GetValueRedis("Salomo07"))
+			token, errToken := jwt.Parse(jsonResponse, func(token *jwt.Token) (interface{}, error) {
+				return []byte(config.TOKEN_SALT), nil
+			})
+			if errToken != nil {
+				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, errToken.Error())
+				return ""
+			} else {
+				if token.Valid {
+
+				} else {
+					CheckingToDB()
+				}
+			}
+		}
+		print("\n")
+	}
+
+	return ""
+}
+func CheckingToDB() {
+
+}
 func GenerateJWT(json []byte, expiredtime int64, ctx *fasthttp.RequestCtx) string {
 	mySigningKey := []byte(config.TOKEN_SALT)
 	type Claims struct {
@@ -40,7 +73,7 @@ func CheckSession(ctx *fasthttp.RequestCtx) string {
 	// expTime := time.Now().Local().Add(time.Hour*24*30).UnixNano() / 1000
 	// go GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", AdminKey: "$2a$10$4IKUOc7Y9/ofzqik6B73/unL4EQfGExo.jeObRO5Rt9JQ2Q6qcJxG"})), expTime, ctx)
 
-	// go GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", UserCDB: "WVdSdGFXNWtaWFk9", PassCDB:"WTFKM2IwOUhNRlZxZUdKWFRIZDVXRXRTYUUxaVpYQTBZakZNZWtwV1NYQmhZbWxXWjIwMWFHSlFUMlZ4TkZsVFNrSnlRVXM9", HostCDB: "YUhSMGNEb3ZMek0wTGpFeU9TNHlOeTQyTlRvMU9UZzA=", HostRedis: "WVhCdU1TMXJaWGt0Wm1sdVkyZ3RNelExTnpZdWRYQnpkR0Z6YUM1cGJ3PT0=", PortRedis: "TXpRMU56WT0="})), expTime, ctx)
+	// go GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", UserCDB: "WVdSdGFXNWtaWFk9", PassCDB: "WTFKM2IwOUhNRlZxZUdKWFRIZDVXRXRTYUUxaVpYQTBZakZNZWtwV1NYQmhZbWxXWjIwMWFHSlFUMlZ4TkZsVFNrSnlRVXM9"})), expTime, ctx)
 
 	authHeader := ctx.Request.Header.Peek("Authorization")
 	tokenString, err := extractBearerToken(authHeader)
@@ -63,8 +96,6 @@ func CheckSession(ctx *fasthttp.RequestCtx) string {
 				claims := token.Claims.(jwt.MapClaims)
 				data := claims["data"].(string)
 				services.JsonToStruct(string(data), &adminCred)
-				// log.Println("\nxxx-" + adminCred.AdminKey + "-xxx\n\n")
-				// return ""
 				if adminCred.IdCompany != "" {
 					config.CDB_HOST_ADMIN = os.Getenv("COUCHDB_HOST")
 					config.CDB_USER_ADMIN = os.Getenv("COUCHDB_USER")
