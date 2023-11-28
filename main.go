@@ -11,7 +11,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-var port = "1234"
+var port = "8080"
 
 func main() {
 

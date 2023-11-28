@@ -76,6 +76,7 @@ func CheckSession(ctx *fasthttp.RequestCtx) string {
 	// go GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", UserCDB: "WVdSdGFXNWtaWFk9", PassCDB: "WTFKM2IwOUhNRlZxZUdKWFRIZDVXRXRTYUUxaVpYQTBZakZNZWtwV1NYQmhZbWxXWjIwMWFHSlFUMlZ4TkZsVFNrSnlRVXM9"})), expTime, ctx)
 
 	authHeader := ctx.Request.Header.Peek("Authorization")
+	println(authHeader)
 	tokenString, err := extractBearerToken(authHeader)
 	if err != nil {
 		services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, err.Error())

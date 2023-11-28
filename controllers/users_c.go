@@ -45,7 +45,7 @@ func AddAccess(ctx *fasthttp.RequestCtx) {
 	// if err == "" {
 	accessModel.Table = "access"
 
-	query := `{"selector":{"table":"access","idcompany":"` + accessModel.IdCompany + `","idrole":"` + accessModel.IdRole + `","idmenu":"` + accessModel.Idmenu + `"},"use_index":"_design/companydata"}`
+	query := `{"selector":{"table":"access","idcompany":"` + accessModel.IdCompany + `","idrole":"` + accessModel.IdRole + `","idmenu":"` + accessModel.Idmenu + `","limit":1},"use_index":"_design/companydata"}`
 	print(query)
 	res, err, sts := services.FindDocument([]byte(query), "scm_core")
 	if err == "" {

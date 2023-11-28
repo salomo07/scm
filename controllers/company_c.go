@@ -23,7 +23,6 @@ func AddUser(ctx *fasthttp.RequestCtx) {
 
 	}
 	log.Println(userModel)
-	// services.InsertDocument()
 }
 func RegisterCompany(ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Body()) == "" {
@@ -34,7 +33,7 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 	var findResponseModel models.FindResponse
 
 	models.JsonToStruct(string(ctx.PostBody()), &companyModel)
-	jsonBody := `{"selector": {"table":"company","alias":"` + companyModel.Alias + `"}}`
+	jsonBody := `{"selector": {"table":"company","alias":"` + companyModel.Alias + `","limit":1}}`
 	existCompany, errFind, statuscode := services.FindDocument([]byte(jsonBody), config.TABLE_CORE_NAME)
 	if companyModel.Alias == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "alias is mandatory")
@@ -98,5 +97,36 @@ func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string, companyInsertRes s
 				return
 			}
 		}
+	}
+}
+
+func CopyInitiateData(ctx *fasthttp.RequestCtx) {
+	if string(ctx.Request.Body()) == "" {
+		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
+		return
+	}
+	var companyData struct {
+		IdCompany string `json:"idcompany"`
+	}
+	models.JsonToStruct(string(ctx.PostBody()), &companyData)
+	if companyData.IdCompany == "" {
+		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "idcompany cant empty")
+	} else {
+		query := `{"selector":{"idcompany":"` + companyData.IdCompany + `"},"use_index":"_design/companydata"}`
+		print(query)
+		res, err, code := services.FindDocument([]byte(query), "scm_core")
+		if err != "" {
+			services.ShowResponseDefault(ctx, code, err)
+		} else {
+			var findRes models.FindResponse
+			services.JsonToStruct(res, findRes)
+			if len(findRes.Docs) == 0 {
+				services.ShowResponseDefault(ctx, fasthttp.StatusNotFound, "Data default tidak ditemukan")
+			} else {
+				services.InsertBulkDocument([]byte(models.StructToJson(findRes.Docs)), companyData.IdCompany)
+			}
+
+		}
+
 	}
 }
