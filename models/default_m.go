@@ -58,3 +58,21 @@ func ShowResponseDefault(ctx *fasthttp.RequestCtx, statuscode int, msg string) {
 	ctx.Response.SetStatusCode(statuscode)
 	fmt.Fprintf(ctx, StructToJson(DefaultResponse{Status: statuscode, Messege: msg}))
 }
+
+type DynamicStruct map[string]interface{}
+
+func RemoveField(original any, fieldName string) DynamicStruct {
+	var resultValue DynamicStruct
+	if valueMap, ok := original.(map[string]interface{}); ok {
+		// Now valueMap is a map[string]interface{}
+		fmt.Println(valueMap)
+		// models.RemoveField(valueMap, "_rev")
+		// services.InsertBulkDocument([]byte(models.StructToJson(findRes.Docs)), companyData.IdCompany)
+		delete(valueMap, fieldName)
+		resultValue = valueMap
+	} else {
+		fmt.Println("The value is not a map[string]interface{}")
+	}
+
+	return resultValue
+}

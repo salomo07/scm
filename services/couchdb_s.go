@@ -1,7 +1,6 @@
 package services
 
 import (
-	"log"
 	"scm/config"
 	"scm/models"
 )
@@ -18,7 +17,6 @@ func CreateIndexPerCompany(dbname string) (resBody string, errStr string, status
 }
 func FindDocument(body []byte, dbname string) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBAdmin() + dbname + "/_find"
-	log.Println(urlDB, string(body))
 	return SendToNextServer(urlDB, "POST", body)
 }
 func InsertDocument(body []byte, dbname string) (resBody string, errStr string, statuscode int) {
@@ -26,7 +24,7 @@ func InsertDocument(body []byte, dbname string) (resBody string, errStr string, 
 	return SendToNextServer(urlDB, "POST", body)
 }
 func InsertBulkDocument(body []byte, dbname string) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDBAdmin() + "/" + dbname + "/_bulk_docs"
+	urlDB := config.GetCredCDBAdmin() + dbname + "/_bulk_docs"
 	jsonData := `{"docs":` + string(body) + `}`
 	return SendToNextServer(urlDB, "POST", []byte(jsonData))
 }

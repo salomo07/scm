@@ -113,17 +113,28 @@ func CopyInitiateData(ctx *fasthttp.RequestCtx) {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "idcompany cant empty")
 	} else {
 		query := `{"selector":{"idcompany":"` + companyData.IdCompany + `"},"use_index":"_design/companydata"}`
-		print(query)
 		res, err, code := services.FindDocument([]byte(query), "scm_core")
+		// println(res)
 		if err != "" {
 			services.ShowResponseDefault(ctx, code, err)
 		} else {
 			var findRes models.FindResponse
-			services.JsonToStruct(res, findRes)
+			services.JsonToStruct(res, &findRes)
+			var tempData []any
 			if len(findRes.Docs) == 0 {
 				services.ShowResponseDefault(ctx, fasthttp.StatusNotFound, "Data default tidak ditemukan")
 			} else {
-				services.InsertBulkDocument([]byte(models.StructToJson(findRes.Docs)), companyData.IdCompany)
+				for _, value := range findRes.Docs {
+					xxx := models.RemoveField(value, "_rev")
+					tempData = append(tempData, xxx)
+				}
+				resInsert, errInsert, codeInsert := services.InsertBulkDocument([]byte(models.StructToJson(tempData)), companyData.IdCompany)
+				if errInsert != "" {
+					services.ShowResponseDefault(ctx, codeInsert, errInsert)
+				} else {
+					services.ShowResponseJson(ctx, codeInsert, resInsert)
+				}
+
 			}
 
 		}
