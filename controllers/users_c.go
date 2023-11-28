@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"scm/config"
 	"scm/models"
 	"scm/services"
 
@@ -26,7 +27,7 @@ func AddMenu(ctx *fasthttp.RequestCtx) {
 				menuModel.Submenu[i].IdSubmenu = i + 1
 			}
 		}
-		res, err, stts := services.InsertDocument([]byte(models.StructToJson(menuModel)), "scm_core")
+		res, err, stts := services.InsertDocument([]byte(models.StructToJson(menuModel)), config.TABLE_CORE_NAME)
 		if err != "" {
 			services.ShowResponseJson(ctx, stts, err)
 		} else {
@@ -45,9 +46,9 @@ func AddAccess(ctx *fasthttp.RequestCtx) {
 	// if err == "" {
 	accessModel.Table = "access"
 
-	query := `{"selector":{"table":"access","idcompany":"` + accessModel.IdCompany + `","idrole":"` + accessModel.IdRole + `","idmenu":"` + accessModel.Idmenu + `","limit":1},"use_index":"_design/companydata"}`
+	query := `{"selector":{"table":"access","idcompany":"` + accessModel.IdCompany + `","idrole":"` + accessModel.IdRole + `","idmenu":"` + accessModel.Idmenu + `"},"use_index":"_design/companydata","limit":1}`
 	print(query)
-	res, err, sts := services.FindDocument([]byte(query), "scm_core")
+	res, err, sts := services.FindDocument([]byte(query), config.TABLE_CORE_NAME)
 	if err == "" {
 		var findRes models.FindResponse
 		models.JsonToStruct(res, &findRes)

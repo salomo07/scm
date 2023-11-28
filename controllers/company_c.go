@@ -33,8 +33,9 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 	var findResponseModel models.FindResponse
 
 	models.JsonToStruct(string(ctx.PostBody()), &companyModel)
-	jsonBody := `{"selector": {"table":"company","alias":"` + companyModel.Alias + `","limit":1}}`
+	jsonBody := `{"selector": {"table":"company","alias":"` + companyModel.Alias + `"},"limit":1}`
 	existCompany, errFind, statuscode := services.FindDocument([]byte(jsonBody), config.TABLE_CORE_NAME)
+	print(jsonBody)
 	if companyModel.Alias == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "alias is mandatory")
 	} else if errFind != "" {
@@ -94,6 +95,7 @@ func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string, companyInsertRes s
 				companyMod.Rev = insertDocumentResponse.Rev
 
 				go services.UpdateDocument(insertDocumentResponse.Id, []byte(models.StructToJson(companyMod)))
+				go CopyInitiateData(ctx)
 				return
 			}
 		}
@@ -101,7 +103,8 @@ func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string, companyInsertRes s
 }
 
 func CopyInitiateData(ctx *fasthttp.RequestCtx) {
-	if string(ctx.Request.Body()) == "" {
+	log.Println(ctx)
+	if string(ctx.PostBody()) == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
 		return
 	}
@@ -109,12 +112,12 @@ func CopyInitiateData(ctx *fasthttp.RequestCtx) {
 		IdCompany string `json:"idcompany"`
 	}
 	models.JsonToStruct(string(ctx.PostBody()), &companyData)
+	println("\n\n" + companyData.IdCompany)
 	if companyData.IdCompany == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "idcompany cant empty")
 	} else {
-		query := `{"selector":{"idcompany":"` + companyData.IdCompany + `"},"use_index":"_design/companydata"}`
-		res, err, code := services.FindDocument([]byte(query), "scm_core")
-		// println(res)
+		query := `{"selector":{"type":"initialdata"}}`
+		res, err, code := services.FindDocument([]byte(query), config.TABLE_CORE_NAME)
 		if err != "" {
 			services.ShowResponseDefault(ctx, code, err)
 		} else {
