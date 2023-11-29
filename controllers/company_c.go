@@ -95,46 +95,34 @@ func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string, companyInsertRes s
 				companyMod.Rev = insertDocumentResponse.Rev
 
 				go services.UpdateDocument(insertDocumentResponse.Id, []byte(models.StructToJson(companyMod)))
-				go CopyInitiateData(ctx)
+				go CopyInitiateData(nil, dbName)
 				return
 			}
 		}
 	}
 }
 
-func CopyInitiateData(ctx *fasthttp.RequestCtx) {
-	log.Println(ctx)
-	if string(ctx.PostBody()) == "" {
-		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
-		return
-	}
-	var companyData struct {
-		IdCompany string `json:"idcompany"`
-	}
-	models.JsonToStruct(string(ctx.PostBody()), &companyData)
-	println("\n\n" + companyData.IdCompany)
-	if companyData.IdCompany == "" {
-		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "idcompany cant empty")
+func CopyInitiateData(ctx *fasthttp.RequestCtx, idcompany string) {
+	query := `{"selector":{"type":"initialdata"}}`
+	res, err, code := services.FindDocument([]byte(query), config.TABLE_CORE_NAME)
+	if err != "" {
+		services.ShowResponseDefault(ctx, code, err)
 	} else {
-		query := `{"selector":{"type":"initialdata"}}`
-		res, err, code := services.FindDocument([]byte(query), config.TABLE_CORE_NAME)
-		if err != "" {
-			services.ShowResponseDefault(ctx, code, err)
+		var findRes models.FindResponse
+		services.JsonToStruct(res, &findRes)
+		var tempData []any
+		if len(findRes.Docs) == 0 {
+			services.ShowResponseDefault(ctx, fasthttp.StatusNotFound, "Data default tidak ditemukan")
 		} else {
-			var findRes models.FindResponse
-			services.JsonToStruct(res, &findRes)
-			var tempData []any
-			if len(findRes.Docs) == 0 {
-				services.ShowResponseDefault(ctx, fasthttp.StatusNotFound, "Data default tidak ditemukan")
+			for _, value := range findRes.Docs {
+				xxx := models.RemoveField(value, "_rev")
+				tempData = append(tempData, xxx)
+			}
+			resInsert, errInsert, codeInsert := services.InsertBulkDocument([]byte(models.StructToJson(tempData)), idcompany)
+			if errInsert != "" {
+				services.ShowResponseDefault(ctx, codeInsert, errInsert)
 			} else {
-				for _, value := range findRes.Docs {
-					xxx := models.RemoveField(value, "_rev")
-					tempData = append(tempData, xxx)
-				}
-				resInsert, errInsert, codeInsert := services.InsertBulkDocument([]byte(models.StructToJson(tempData)), companyData.IdCompany)
-				if errInsert != "" {
-					services.ShowResponseDefault(ctx, codeInsert, errInsert)
-				} else {
+				if ctx != nil {
 					services.ShowResponseJson(ctx, codeInsert, resInsert)
 				}
 
