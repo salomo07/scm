@@ -9,9 +9,9 @@ import (
 )
 
 var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
-var usingIBM = false
+var usingIBM = true
 
-var TABLE_CORE_NAME = "scm_core"
+var DB_CORE_NAME = "scm_core"
 var CDB_USER_ADMIN = ""
 var CDB_PASS_ADMIN = ""
 var CDB_HOST_ADMIN = ""

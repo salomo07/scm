@@ -18,7 +18,7 @@ func AddRole(ctx *fasthttp.RequestCtx) {
 	err := models.ValidateStruct(roleModel, ctx)
 	if err == "" {
 		roleModel.Table = "role"
-		resBody, errStr, statuscode := services.InsertDocument([]byte(models.StructToJson(roleModel)), config.TABLE_CORE_NAME)
+		resBody, errStr, statuscode := services.InsertDocument([]byte(models.StructToJson(roleModel)), config.DB_CORE_NAME)
 		if resBody != "" {
 			services.ShowResponseJson(ctx, statuscode, resBody)
 		} else {
@@ -43,7 +43,7 @@ func AddRoleBulk(ctx *fasthttp.RequestCtx) {
 			return
 		}
 	}
-	resBody, errStr, statuscode := services.InsertBulkDocument([]byte(models.StructToJson(roleModelTemp)), config.TABLE_CORE_NAME)
+	resBody, errStr, statuscode := services.InsertBulkDocument([]byte(models.StructToJson(roleModelTemp)), config.DB_CORE_NAME)
 	if resBody != "" {
 		services.ShowResponseJson(ctx, statuscode, resBody)
 	} else {

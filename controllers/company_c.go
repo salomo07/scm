@@ -3,6 +3,7 @@ package controllers
 import (
 	"log"
 	"scm/config"
+	"scm/consts"
 	"scm/models"
 	"scm/services"
 	"strconv"
@@ -33,9 +34,8 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 	var findResponseModel models.FindResponse
 
 	models.JsonToStruct(string(ctx.PostBody()), &companyModel)
-	jsonBody := `{"selector": {"table":"company","alias":"` + companyModel.Alias + `"},"limit":1}`
-	existCompany, errFind, statuscode := services.FindDocument([]byte(jsonBody), config.TABLE_CORE_NAME)
-	print(jsonBody)
+	query := consts.QueryCompanyAlias(companyModel.Alias)
+	existCompany, errFind, statuscode := services.FindDocument([]byte(query), config.DB_CORE_NAME)
 	if companyModel.Alias == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "alias is mandatory")
 	} else if errFind != "" {
@@ -50,7 +50,7 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 			if companyModel.LevelMembership == "" {
 				companyModel.LevelMembership = "default"
 			}
-			companyInsertRes, errInsert, statuscode := services.InsertDocument([]byte(models.StructToJson(companyModel)), config.TABLE_CORE_NAME)
+			companyInsertRes, errInsert, statuscode := services.InsertDocument([]byte(models.StructToJson(companyModel)), config.DB_CORE_NAME)
 			if errInsert != "" {
 				services.ShowResponseDefault(ctx, statuscode, errInsert)
 			} else {
@@ -80,8 +80,8 @@ func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string, companyInsertRes s
 			if err != "" {
 				services.ShowResponseDefault(ctx, statuscode, err)
 			} else {
-				jsonSecurity := `{"admins": {"names": ["` + dbName + `"],"roles": ["admin_role"]},"members": {"names": [],"roles": []}}`
-				_, err, statuscode := services.AddAdminRoleForDB(dbName, []byte(jsonSecurity))
+				jsonBody := consts.BodySecurity(dbName)
+				_, err, statuscode := services.AddAdminRoleForDB(dbName, []byte(jsonBody))
 				if err != "" {
 					services.ShowResponseDefault(ctx, statuscode, err)
 				}
@@ -103,8 +103,8 @@ func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string, companyInsertRes s
 }
 
 func CopyInitiateData(ctx *fasthttp.RequestCtx, idcompany string) {
-	query := `{"selector":{"type":"initialdata"}}`
-	res, err, code := services.FindDocument([]byte(query), config.TABLE_CORE_NAME)
+	query := consts.QueryInit
+	res, err, code := services.FindDocument([]byte(query), config.DB_CORE_NAME)
 	if err != "" {
 		services.ShowResponseDefault(ctx, code, err)
 	} else {

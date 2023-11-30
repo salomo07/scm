@@ -27,7 +27,7 @@ func AddMenu(ctx *fasthttp.RequestCtx) {
 				menuModel.Submenu[i].IdSubmenu = i + 1
 			}
 		}
-		res, err, stts := services.InsertDocument([]byte(models.StructToJson(menuModel)), config.TABLE_CORE_NAME)
+		res, err, stts := services.InsertDocument([]byte(models.StructToJson(menuModel)), config.DB_CORE_NAME)
 		if err != "" {
 			services.ShowResponseJson(ctx, stts, err)
 		} else {
@@ -48,7 +48,7 @@ func AddAccess(ctx *fasthttp.RequestCtx) {
 
 	query := `{"selector":{"table":"access","idcompany":"` + accessModel.IdCompany + `","idrole":"` + accessModel.IdRole + `","idmenu":"` + accessModel.Idmenu + `"},"use_index":"_design/companydata","limit":1}`
 	print(query)
-	res, err, sts := services.FindDocument([]byte(query), config.TABLE_CORE_NAME)
+	res, err, sts := services.FindDocument([]byte(query), config.DB_CORE_NAME)
 	if err == "" {
 		var findRes models.FindResponse
 		models.JsonToStruct(res, &findRes)
