@@ -27,8 +27,10 @@ type AdminCred struct {
 	PassCDB   string `json:"passcdb"`
 	AdminKey  string `json:"adminkey"`
 }
-type LoginCred struct {
+
+type LoginResponse struct {
 	AppId     string `json:"appid"`
+	UserData  User   `json:"userdata"`
 	IdCompany string `json:"idcompany"`
 	PassCDB   string `json:"passcdb"`
 	UserApp   string `json:"userapp"`

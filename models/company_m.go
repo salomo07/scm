@@ -21,6 +21,7 @@ type CompanyEdit struct {
 	UserCDB         string    `json:"usercdb"`
 	PassCDB         string    `json:"passcdb"`
 	Contact         []Contact `json:"contact"`
+	Users           []string  `json:"users"`
 }
 type Contact struct {
 	Email  string `json:"email"`

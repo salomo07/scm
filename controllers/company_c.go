@@ -31,8 +31,6 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	var companyModel models.Company
-	var findResponseModel models.FindResponse
-
 	models.JsonToStruct(string(ctx.PostBody()), &companyModel)
 	query := consts.QueryCompanyAlias(companyModel.Alias)
 	existCompany, errFind, statuscode := services.FindDocument([]byte(query), config.DB_CORE_NAME)
@@ -40,9 +38,8 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "alias is mandatory")
 	} else if errFind != "" {
 		services.ShowResponseDefault(ctx, statuscode, errFind)
-	} else if existCompany != "" {
-		models.JsonToStruct(existCompany, &findResponseModel)
-		if len(findResponseModel.Docs) > 0 {
+	} else if len(existCompany.Docs) > 0 {
+		if len(existCompany.Docs) > 0 {
 			services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, `alias has already been used`)
 		} else {
 			// Insert document company
@@ -108,13 +105,11 @@ func CopyInitiateData(ctx *fasthttp.RequestCtx, idcompany string) {
 	if err != "" {
 		services.ShowResponseDefault(ctx, code, err)
 	} else {
-		var findRes models.FindResponse
-		services.JsonToStruct(res, &findRes)
 		var tempData []any
-		if len(findRes.Docs) == 0 {
+		if len(res.Docs) == 0 {
 			services.ShowResponseDefault(ctx, fasthttp.StatusNotFound, "Data default tidak ditemukan")
 		} else {
-			for _, value := range findRes.Docs {
+			for _, value := range res.Docs {
 				xxx := models.RemoveField(value, "_rev")
 				tempData = append(tempData, xxx)
 			}

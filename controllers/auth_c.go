@@ -23,27 +23,46 @@ func Logining(ctx *fasthttp.RequestCtx) string {
 		jsonResponse, errResponse := services.GetValueRedis(loginInput.Username)
 		if errResponse == "" {
 			print(services.GetValueRedis("Salomo07"))
-			token, errToken := jwt.Parse(jsonResponse, func(token *jwt.Token) (interface{}, error) {
-				return []byte(config.TOKEN_SALT), nil
-			})
-			if errToken != nil {
-				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, errToken.Error())
-				return ""
-			} else {
-				if token.Valid {
-
+			if jsonResponse != "" {
+				token, errToken := jwt.Parse(jsonResponse, func(token *jwt.Token) (interface{}, error) {
+					return []byte(config.TOKEN_SALT), nil
+				})
+				if errToken != nil {
+					services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, errToken.Error())
+					return ""
 				} else {
-					CheckingToDB()
+					if token.Valid {
+						print("Token valid, checkingpassword")
+
+					} else {
+						findRes := GetUserDataToCoreDB(ctx, loginInput.IdCompany, loginInput.Username)
+						if len(findRes.Docs) > 0 {
+
+						}
+					}
 				}
+			} else {
+				print("Gak nemu di redis")
+				// docs := GetUserDataToCoreDB(ctx, loginInput.IdCompany, loginInput.Username)
+				// print(docs)
 			}
+		} else {
+			services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, errResponse)
 		}
 		print("\n")
 	}
 
 	return ""
 }
-func CheckingToDB() {
-
+func GetUserDataToCoreDB(ctx *fasthttp.RequestCtx, idcompany string, username string) models.FindResponse {
+	findUserCoreDB := `{"selector":{"id":"` + idcompany + `","users":{"$elemMatch":{"$eq":"` + username + `"}}}}`
+	res, err, code := services.FindDocument([]byte(findUserCoreDB), config.DB_CORE_NAME)
+	if err != "" {
+		models.ShowResponseDefault(ctx, code, err)
+	} else {
+		return res
+	}
+	return res
 }
 func GenerateJWT(json []byte, expiredtime int64, ctx *fasthttp.RequestCtx) string {
 	mySigningKey := []byte(config.TOKEN_SALT)

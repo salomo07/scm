@@ -1,6 +1,7 @@
 package models
 
 type LoginInput struct {
-	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required"`
+	IdCompany string `json:"idcompany" validate:"required"`
+	Username  string `json:"username" validate:"required"`
+	Password  string `json:"password" validate:"required"`
 }
