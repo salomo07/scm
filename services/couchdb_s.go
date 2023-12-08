@@ -15,9 +15,12 @@ func CreateIndexPerCompany(dbname string) (resBody string, errStr string, status
 	urlDB := config.GetCredCDBAdmin() + dbname
 	return SendToNextServer(urlDB, "POST", []byte(`{"index":{"fields":["table","idcompany"]},"name":"companydata","ddoc":"companydata","type":"json"}`))
 }
-func FindDocument(body []byte, dbname string) (resBody string, errStr string, statuscode int) {
+func FindDocument(body []byte, dbname string) (findRes models.FindResponse, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBAdmin() + dbname + "/_find"
-	return SendToNextServer(urlDB, "POST", body)
+	print(string(body))
+	res, err, code := SendToNextServer(urlDB, "POST", body)
+	JsonToStruct(res, &findRes)
+	return findRes, err, code
 }
 func InsertDocument(body []byte, dbname string) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBAdmin() + dbname

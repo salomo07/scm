@@ -50,12 +50,9 @@ func AddAccess(ctx *fasthttp.RequestCtx) {
 	print(query)
 	res, err, sts := services.FindDocument([]byte(query), config.DB_CORE_NAME)
 	if err == "" {
-		var findRes models.FindResponse
-		models.JsonToStruct(res, &findRes)
-
-		if len(findRes.Docs) > 0 {
+		if len(res.Docs) > 0 {
 			var accessRes models.AccessMenuUpdate
-			models.JsonToStruct(models.StructToJson(findRes.Docs[0]), &accessRes)
+			models.JsonToStruct(models.StructToJson(res.Docs[0]), &accessRes)
 			var accessTemp models.AccessMenuUpdate
 			models.JsonToStruct(string(ctx.PostBody()), &accessTemp)
 			accessTemp.IdAccess = accessRes.IdAccess
