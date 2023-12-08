@@ -17,6 +17,7 @@ func CreateIndexPerCompany(dbname string) (resBody string, errStr string, status
 }
 func FindDocument(body []byte, dbname string) (findRes models.FindResponse, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBAdmin() + dbname + "/_find"
+	print(string(body))
 	res, err, code := SendToNextServer(urlDB, "POST", body)
 	JsonToStruct(res, &findRes)
 	return findRes, err, code

@@ -43,8 +43,8 @@ func Logining(ctx *fasthttp.RequestCtx) string {
 				}
 			} else {
 				print("Gak nemu di redis")
-				// docs := GetUserDataToCoreDB(ctx, loginInput.IdCompany, loginInput.Username)
-				// print(docs)
+				docs := GetUserDataToCoreDB(ctx, loginInput.IdCompany, loginInput.Username)
+				log.Println(docs)
 			}
 		} else {
 			services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, errResponse)
@@ -55,7 +55,7 @@ func Logining(ctx *fasthttp.RequestCtx) string {
 	return ""
 }
 func GetUserDataToCoreDB(ctx *fasthttp.RequestCtx, idcompany string, username string) models.FindResponse {
-	findUserCoreDB := `{"selector":{"id":"` + idcompany + `","users":{"$elemMatch":{"$eq":"` + username + `"}}}}`
+	findUserCoreDB := `{"selector":{"id":"` + idcompany + `","users":{"$elemMatch":{"$eq":"` + username + `"}},"include_docs":true}}`
 	res, err, code := services.FindDocument([]byte(findUserCoreDB), config.DB_CORE_NAME)
 	if err != "" {
 		models.ShowResponseDefault(ctx, code, err)

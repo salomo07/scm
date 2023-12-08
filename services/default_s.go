@@ -39,7 +39,7 @@ func SendToNextServer(url string, method string, body []byte) (resBody string, e
 		MaxIdleConnDuration: 5 * time.Second,
 	}
 	forwardedRequest := fasthttp.AcquireRequest()
-	print("\n\nReq to : " + method + " --> " + url)
+	// print("\n\nReq to : " + method + " --> " + url)
 	forwardedRequest.SetRequestURI(url)
 	forwardedRequest.SetBody(body)
 	forwardedRequest.Header.SetMethod(string(method))
