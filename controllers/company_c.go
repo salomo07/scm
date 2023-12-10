@@ -39,20 +39,19 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 	} else if errFind != "" {
 		services.ShowResponseDefault(ctx, statuscode, errFind)
 	} else if len(existCompany.Docs) > 0 {
-		if len(existCompany.Docs) > 0 {
-			services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, `alias has already been used`)
+		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, `alias has already been used`)
+	} else {
+		// Insert document company
+		companyModel.IdCompany = "c_" + strconv.FormatInt(time.Now().UnixNano()/1000, 10)
+		if companyModel.LevelMembership == "" {
+			companyModel.LevelMembership = "default"
+		}
+		log.Println(companyModel)
+		companyInsertRes, errInsert, statuscode := services.InsertDocument([]byte(models.StructToJson(companyModel)), config.DB_CORE_NAME)
+		if errInsert != "" {
+			services.ShowResponseDefault(ctx, statuscode, errInsert)
 		} else {
-			// Insert document company
-			companyModel.IdCompany = "c_" + strconv.FormatInt(time.Now().UnixNano()/1000, 10)
-			if companyModel.LevelMembership == "" {
-				companyModel.LevelMembership = "default"
-			}
-			companyInsertRes, errInsert, statuscode := services.InsertDocument([]byte(models.StructToJson(companyModel)), config.DB_CORE_NAME)
-			if errInsert != "" {
-				services.ShowResponseDefault(ctx, statuscode, errInsert)
-			} else {
-				createCompanyDB(ctx, companyModel.IdCompany, companyInsertRes, models.StructToJson(companyModel))
-			}
+			createCompanyDB(ctx, companyModel.IdCompany, companyInsertRes, models.StructToJson(companyModel))
 		}
 	}
 }
