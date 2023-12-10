@@ -42,8 +42,6 @@ func AddAccess(ctx *fasthttp.RequestCtx) {
 	}
 	var accessModel models.AccessMenu
 	models.JsonToStruct(string(ctx.PostBody()), &accessModel)
-	// err := models.ValidateStruct(accessModel, ctx)
-	// if err == "" {
 	accessModel.Table = "access"
 
 	query := `{"selector":{"table":"access","idcompany":"` + accessModel.IdCompany + `","idrole":"` + accessModel.IdRole + `","idmenu":"` + accessModel.Idmenu + `"},"use_index":"_design/companydata","limit":1}`
@@ -75,5 +73,4 @@ func AddAccess(ctx *fasthttp.RequestCtx) {
 	} else {
 		models.ShowResponseDefault(ctx, sts, err)
 	}
-	// }
 }

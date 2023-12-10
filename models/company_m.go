@@ -10,6 +10,7 @@ type Company struct {
 	PassCDB         string    `json:"passcdb"`
 	Contact         []Contact `json:"contact"`
 	Role            []Role    `json:"role"`
+	Users           []string  `json:"users"`
 }
 type CompanyEdit struct {
 	IdCompany       string    `json:"_id"`

@@ -33,7 +33,6 @@ func Logining(ctx *fasthttp.RequestCtx) string {
 				} else {
 					if token.Valid {
 						print("Token valid, checkingpassword")
-
 					} else {
 						findRes := GetUserDataToCoreDB(ctx, loginInput.IdCompany, loginInput.Username)
 						if len(findRes.Docs) > 0 {
@@ -60,11 +59,12 @@ func GetUserDataToCoreDB(ctx *fasthttp.RequestCtx, idcompany string, username st
 	if err != "" {
 		models.ShowResponseDefault(ctx, code, err)
 	} else {
+		log.Println("ggggggggggggggggggggggggggg", res)
 		return res
 	}
 	return res
 }
-func GenerateJWT(json []byte, expiredtime int64, ctx *fasthttp.RequestCtx) string {
+func GenerateJWT(json []byte, expiredtime int64) string {
 	mySigningKey := []byte(config.TOKEN_SALT)
 	type Claims struct {
 		Json string `json:"data"`
@@ -74,9 +74,9 @@ func GenerateJWT(json []byte, expiredtime int64, ctx *fasthttp.RequestCtx) strin
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString(mySigningKey)
 	if err != nil {
-		fmt.Fprintf(ctx, services.StructToJson(models.DefaultResponse{Status: fasthttp.StatusBadRequest, Messege: "GenerateJWT : " + err.Error()}))
+		log.Println(services.StructToJson(models.DefaultResponse{Status: fasthttp.StatusBadRequest, Messege: "GenerateJWT : " + err.Error()}))
 	}
-	print(ss)
+	log.Println(ss)
 	return ss
 }
 func CheckAdminKey(key string) string {
@@ -90,9 +90,9 @@ func CheckAdminKey(key string) string {
 }
 func CheckSession(ctx *fasthttp.RequestCtx) string {
 	// expTime := time.Now().Local().Add(time.Hour*24*30).UnixNano() / 1000
-	// go GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", AdminKey: "$2a$10$4IKUOc7Y9/ofzqik6B73/unL4EQfGExo.jeObRO5Rt9JQ2Q6qcJxG"})), expTime, ctx)
+	// go GenerateJWT([]byte(services.StructToJson(models.AdminCred{CREDADMIN: "", AppId: "scm", AdminKey: "$2a$10$4IKUOc7Y9/ofzqik6B73/unL4EQfGExo.jeObRO5Rt9JQ2Q6qcJxG"})), expTime)
 
-	// go GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", UserCDB: "WVdSdGFXNWtaWFk9", PassCDB: "WTFKM2IwOUhNRlZxZUdKWFRIZDVXRXRTYUUxaVpYQTBZakZNZWtwV1NYQmhZbWxXWjIwMWFHSlFUMlZ4TkZsVFNrSnlRVXM9"})), expTime, ctx)
+	// go GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", UserCDB: "WVdSdGFXNWtaWFk9", PassCDB: "WTFKM2IwOUhNRlZxZUdKWFRIZDVXRXRTYUUxaVpYQTBZakZNZWtwV1NYQmhZbWxXWjIwMWFHSlFUMlZ4TkZsVFNrSnlRVXM9"})), expTime)
 
 	authHeader := ctx.Request.Header.Peek("Authorization")
 	println(authHeader)
@@ -122,7 +122,8 @@ func CheckSession(ctx *fasthttp.RequestCtx) string {
 					config.CDB_PASS_ADMIN = os.Getenv("COUCHDB_PASSWORD")
 					return "Accessed by Company"
 				} else if adminCred.AdminKey != "" && adminCred.AdminKey == CheckAdminKey("apikeyscm") {
-					print("API key is valid\n" + data + "\n\n")
+					config.CDB_CRED_ADMIN = config.CompareHashAndPassword(adminCred.CREDADMIN, adminCred.AdminKey)
+					print("API key is valid\n" + config.CDB_CRED_ADMIN + "\n\nChecking to Redis\n")
 					return data
 				}
 				print("API key is invalid\n")

@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/base64"
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -9,7 +10,7 @@ import (
 )
 
 var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
-var usingIBM = true
+var usingIBM = false
 
 var DB_CORE_NAME = "scm_core"
 var CDB_USER_ADMIN = ""
@@ -26,13 +27,18 @@ func init() {
 	}
 	GetCredCDBAdmin()
 }
-func HashingBcrypt(password string) string {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		println("Error : ", err)
+func CompareHashAndPassword(oripass string, hashedPassword string) string {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(oripass))
+	if err == nil {
+		log.Println("Password is correct!")
+		return oripass
+	} else if err == bcrypt.ErrMismatchedHashAndPassword {
+		log.Println("Password is incorrect.")
+		return ""
+	} else {
+		log.Println("An error occurred:", err)
 		return ""
 	}
-	return string(hashedPassword)
 }
 func EncodingBcrypt(p string) string {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(p), 1)
