@@ -54,7 +54,7 @@ func Logining(ctx *fasthttp.RequestCtx) string {
 	return ""
 }
 func GetUserDataToCoreDB(ctx *fasthttp.RequestCtx, idcompany string, username string) models.FindResponse {
-	findUserCoreDB := `{"selector":{"$or":[{"_id":"` + idcompany + `"},{"users":"` + username + `"}]}}`
+	findUserCoreDB := `{"selector":{"$or":[{"_id":"` + idcompany + `"},{"users":"` + username + `"}]},"fields":["users","_id","usercdb","passcdb"]}`
 	res, err, code := services.FindDocument([]byte(findUserCoreDB), config.DB_CORE_NAME)
 	// Jika username terdaftar di DB center / SCM_CORE, login ke DB Company
 	// Jika tidak beri notif username tidak terdaftar
@@ -62,9 +62,9 @@ func GetUserDataToCoreDB(ctx *fasthttp.RequestCtx, idcompany string, username st
 		models.ShowResponseDefault(ctx, code, err)
 	} else {
 		if len(res.Docs) == 0 {
-			println("Coba ke DB")
+			log.Println("Coba ke DB", res)
 		} else {
-			println("notif")
+			log.Println("notif", res)
 			findUserCoreDB = `{"selector":{"_id":"` + idcompany + `"},{"users":"` + username + `"}},"fields":[]}`
 		}
 		return res
