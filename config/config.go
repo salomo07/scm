@@ -10,13 +10,14 @@ import (
 )
 
 var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
-var usingIBM = true
+var usingIBM = false
 
 var DB_CORE_NAME = "scm_core"
 var CDB_USER_ADMIN = ""
 var CDB_PASS_ADMIN = ""
 var CDB_HOST_ADMIN = ""
 var CDB_CRED_ADMIN = ""
+var CDB_HOST_COMPANY = "192.168.0.102"
 
 var REDIS_CRED_ADMIN = ""
 
@@ -76,12 +77,8 @@ func GetCredCDBAdmin() string {
 	print(CDB_CRED_ADMIN + "\n")
 	return CDB_CRED_ADMIN
 }
-func GetCredCDBCompany() string {
-	if CDB_CRED_ADMIN != "" {
-		return CDB_CRED_ADMIN
-	}
-	CDB_CRED_ADMIN = "http://" + CDB_USER_ADMIN + ":" + CDB_PASS_ADMIN + "@" + CDB_HOST_ADMIN + "/"
-	return CDB_CRED_ADMIN
+func GetCredCDBCompany(user string, pass string) string {
+	return "http://" + user + ":" + pass + "@" + CDB_HOST_COMPANY + ":5984/"
 }
 func GetCredRedis() string {
 	return os.Getenv("REDIS_CRED_ADMIN")

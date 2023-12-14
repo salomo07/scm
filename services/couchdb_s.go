@@ -19,7 +19,6 @@ func CreateIndexPerCompany(dbname string) (resBody string, errStr string, status
 func FindDocument(body []byte, dbname string) (findRes models.FindResponse, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBAdmin() + dbname + "/_find"
 	res, err, code := SendToNextServer(urlDB, "POST", body)
-	log.Println(string(body))
 	JsonToStruct(res, &findRes)
 	return findRes, err, code
 }
@@ -47,18 +46,19 @@ func UpdateDocument(_id string, data []byte) (resBody string, errStr string, sta
 
 // As Company
 func InsertDocumentAsComp(company models.Company, body []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDBCompany() + company.IdCompany
+	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany
 	return ToCDBCompany(urlDB, "POST", body)
 }
 func FindDocumentAsComp(company models.Company, body []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDBCompany() + company.IdCompany + "/_find"
+	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany + "/_find"
+	log.Println("\n\n zzzzzzzzzzzzzzzzzzzzzzzzzzzzzz "+urlDB, string(body))
 	return ToCDBCompany(urlDB, "POST", body)
 }
 func UpdateDocumentAsComp(company models.Company, _iddoc string, data []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDBCompany() + company.IdCompany + "/" + _iddoc
+	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany + "/" + _iddoc
 	return ToCDBCompany(urlDB, "PUT", data)
 }
 func DeleteDocumentAsComp(company models.Company, _iddoc string, data []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDBCompany() + company.IdCompany + "/" + _iddoc
+	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany + "/" + _iddoc
 	return ToCDBCompany(urlDB, "DELETE", data)
 }

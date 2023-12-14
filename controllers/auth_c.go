@@ -22,7 +22,7 @@ func Logining(ctx *fasthttp.RequestCtx) string {
 		log.Println(loginInput)
 		jsonResponse, errResponse := services.GetValueRedis(loginInput.Username)
 		if errResponse == "" {
-			print(services.GetValueRedis("Salomo07"))
+			// print(services.GetValueRedis("Salomo07"))
 			if jsonResponse != "" {
 				token, errToken := jwt.Parse(jsonResponse, func(token *jwt.Token) (interface{}, error) {
 					return []byte(config.TOKEN_SALT), nil
@@ -54,7 +54,8 @@ func Logining(ctx *fasthttp.RequestCtx) string {
 	return ""
 }
 func GetUserDataToCoreDB(ctx *fasthttp.RequestCtx, idcompany string, username string) models.FindResponse {
-	findUserCoreDB := `{"selector":{"$or":[{"_id":"` + idcompany + `"},{"users":"` + username + `"}]},"fields":["users","_id","usercdb","passcdb"]}`
+	findUserCoreDB := `{"selector":{"$or":[{"_id":"` + idcompany + `"},{"users":"` + username + `"}]}}`
+
 	res, err, code := services.FindDocument([]byte(findUserCoreDB), config.DB_CORE_NAME)
 	// Jika username terdaftar di DB center / SCM_CORE, login ke DB Company
 	// Jika tidak beri notif username tidak terdaftar
@@ -62,10 +63,28 @@ func GetUserDataToCoreDB(ctx *fasthttp.RequestCtx, idcompany string, username st
 		models.ShowResponseDefault(ctx, code, err)
 	} else {
 		if len(res.Docs) == 0 {
-			log.Println("Coba ke DB", res)
+			services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "User tidak ditemukan pada server")
 		} else {
-			log.Println("notif", res)
-			findUserCoreDB = `{"selector":{"_id":"` + idcompany + `"},{"users":"` + username + `"}},"fields":[]}`
+			var adminDB models.Company
+			jsonString := models.StructToJson(res.Docs[0])
+			models.JsonToStruct(jsonString, &adminDB)
+
+			// log.Println(adminDB)
+			findUserCoreDB = `{"selector":{"table":"user","_id":"` + username + `"},"use_index":"_design/companytable"}`
+			resBody, err, code := services.FindDocumentAsComp(adminDB, []byte(findUserCoreDB))
+
+			if err != "" {
+				services.ShowResponseDefault(ctx, code, err)
+			} else {
+				var userData models.User
+				var fr models.FindResponse
+				models.JsonToStruct(resBody, &fr)
+				if len(fr.Docs) > 0 {
+					jsonStr := models.StructToJson(fr.Docs[0])
+					models.JsonToStruct(jsonStr, &userData)
+					log.Println(userData)
+				}
+			}
 		}
 		return res
 	}
