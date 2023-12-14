@@ -12,19 +12,6 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-func AddUser(ctx *fasthttp.RequestCtx) {
-	if string(ctx.Request.Body()) == "" {
-		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
-		return
-	}
-	var userModel models.User
-	models.JsonToStruct(string(ctx.PostBody()), &userModel)
-	err := models.ValidateStruct(userModel, ctx)
-	if err == "" {
-
-	}
-	log.Println(userModel)
-}
 func RegisterCompany(ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Body()) == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")

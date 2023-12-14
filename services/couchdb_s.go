@@ -1,7 +1,6 @@
 package services
 
 import (
-	"log"
 	"scm/config"
 	"scm/models"
 )
@@ -51,7 +50,6 @@ func InsertDocumentAsComp(company models.Company, body []byte) (resBody string, 
 }
 func FindDocumentAsComp(company models.Company, body []byte) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany + "/_find"
-	log.Println("\n\n zzzzzzzzzzzzzzzzzzzzzzzzzzzzzz "+urlDB, string(body))
 	return ToCDBCompany(urlDB, "POST", body)
 }
 func UpdateDocumentAsComp(company models.Company, _iddoc string, data []byte) (resBody string, errStr string, statuscode int) {

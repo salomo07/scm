@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"scm/config"
 	"scm/models"
 	"scm/services"
@@ -72,5 +73,22 @@ func AddAccess(ctx *fasthttp.RequestCtx) {
 		}
 	} else {
 		models.ShowResponseDefault(ctx, sts, err)
+	}
+}
+func AddUser(ctx *fasthttp.RequestCtx) {
+	if string(ctx.Request.Body()) == "" {
+		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
+		return
+	}
+	var userModel models.User
+	models.JsonToStruct(string(ctx.PostBody()), &userModel)
+	err := models.ValidateStruct(userModel, ctx)
+	if err == "" {
+		encryptedPass := config.EncodingBcrypt(userModel.Password)
+		userModel.Password = encryptedPass
+		log.Print(models.Company)
+		// services.InsertDocumentAsComp()
+	} else {
+		models.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, err)
 	}
 }
