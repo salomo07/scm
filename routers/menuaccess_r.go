@@ -9,14 +9,16 @@ import (
 
 func Access_MenuRouters(router *fasthttprouter.Router) {
 	router.POST("/api/v1/admin/menu/add", func(ctx *fasthttp.RequestCtx) {
-		if controllers.CheckSession(ctx) != "" {
-			controllers.AddMenu(ctx)
+		adminCred, errMsg := controllers.CheckSession(ctx)
+		if errMsg == "" {
+			controllers.AddMenu(adminCred, ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 	router.POST("/api/v1/admin/access1/add", func(ctx *fasthttp.RequestCtx) {
-		if controllers.CheckSession(ctx) != "" {
-			controllers.AddAccess(ctx)
+		adminCred, errMsg := controllers.CheckSession(ctx)
+		if errMsg == "" {
+			controllers.AddAccess(adminCred, ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})

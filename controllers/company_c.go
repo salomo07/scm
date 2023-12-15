@@ -12,7 +12,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-func RegisterCompany(ctx *fasthttp.RequestCtx) {
+func RegisterCompany(adminCred string, ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Body()) == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
 		return
@@ -20,7 +20,7 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 	var companyModel models.Company
 	models.JsonToStruct(string(ctx.PostBody()), &companyModel)
 	query := consts.QueryCompanyAlias(companyModel.Alias)
-	existCompany, errFind, statuscode := services.FindDocument([]byte(query), config.DB_CORE_NAME)
+	existCompany, errFind, statuscode := services.FindDocument(adminCred, []byte(query), config.DB_CORE_NAME)
 	if companyModel.Alias == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "alias is mandatory")
 	} else if errFind != "" {
@@ -34,16 +34,16 @@ func RegisterCompany(ctx *fasthttp.RequestCtx) {
 			companyModel.LevelMembership = "default"
 		}
 		log.Println(companyModel)
-		companyInsertRes, errInsert, statuscode := services.InsertDocument([]byte(models.StructToJson(companyModel)), config.DB_CORE_NAME)
+		companyInsertRes, errInsert, statuscode := services.InsertDocument(adminCred, []byte(models.StructToJson(companyModel)), config.DB_CORE_NAME)
 		if errInsert != "" {
 			services.ShowResponseDefault(ctx, statuscode, errInsert)
 		} else {
-			createCompanyDB(ctx, companyModel.IdCompany, companyInsertRes, models.StructToJson(companyModel))
+			createCompanyDB(adminCred, ctx, companyModel.IdCompany, companyInsertRes, models.StructToJson(companyModel))
 		}
 	}
 }
 
-func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string, companyInsertRes string, companyModel string) {
+func createCompanyDB(adminCred string, ctx *fasthttp.RequestCtx, dbName string, companyInsertRes string, companyModel string) {
 	res, err, statuscode := services.CreateDB(dbName)
 	if err != "" {
 		services.ShowResponseDefault(ctx, statuscode, err)
@@ -59,12 +59,12 @@ func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string, companyInsertRes s
 			userDBModel.Type = "user"
 			userDBModel.Roles = []string{"admin_role"}
 
-			_, err, statuscode := services.AddUserDB(dbName, []byte(models.StructToJson(userDBModel)))
+			_, err, statuscode := services.AddUserDB(adminCred, dbName, []byte(models.StructToJson(userDBModel)))
 			if err != "" {
 				services.ShowResponseDefault(ctx, statuscode, err)
 			} else {
 				jsonBody := consts.BodySecurity(dbName)
-				_, err, statuscode := services.AddAdminRoleForDB(dbName, []byte(jsonBody))
+				_, err, statuscode := services.AddAdminRoleForDB(adminCred, dbName, []byte(jsonBody))
 				if err != "" {
 					services.ShowResponseDefault(ctx, statuscode, err)
 				}
@@ -77,17 +77,17 @@ func createCompanyDB(ctx *fasthttp.RequestCtx, dbName string, companyInsertRes s
 				companyMod.PassCDB = userDBModel.Password
 				companyMod.Rev = insertDocumentResponse.Rev
 
-				go services.UpdateDocument(insertDocumentResponse.Id, []byte(models.StructToJson(companyMod)))
-				go CopyInitiateData(nil, dbName)
+				go services.UpdateDocument(adminCred, insertDocumentResponse.Id, []byte(models.StructToJson(companyMod)))
+				go CopyInitiateData(adminCred, nil, dbName)
 				return
 			}
 		}
 	}
 }
 
-func CopyInitiateData(ctx *fasthttp.RequestCtx, idcompany string) {
+func CopyInitiateData(adminCred string, ctx *fasthttp.RequestCtx, idcompany string) {
 	query := consts.QueryInit
-	res, err, code := services.FindDocument([]byte(query), config.DB_CORE_NAME)
+	res, err, code := services.FindDocument(config.GetCredCDBAdmin(), []byte(query), config.DB_CORE_NAME)
 	if err != "" {
 		services.ShowResponseDefault(ctx, code, err)
 	} else {
@@ -99,7 +99,7 @@ func CopyInitiateData(ctx *fasthttp.RequestCtx, idcompany string) {
 				xxx := models.RemoveField(value, "_rev")
 				tempData = append(tempData, xxx)
 			}
-			resInsert, errInsert, codeInsert := services.InsertBulkDocument([]byte(models.StructToJson(tempData)), idcompany)
+			resInsert, errInsert, codeInsert := services.InsertBulkDocument(adminCred, []byte(models.StructToJson(tempData)), idcompany)
 			if errInsert != "" {
 				services.ShowResponseDefault(ctx, codeInsert, errInsert)
 			} else {

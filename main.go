@@ -3,11 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
-	"scm/controllers"
 	"scm/models"
 	"scm/routers"
 	"scm/services"
-	"time"
 
 	"github.com/buaazp/fasthttprouter"
 	"github.com/valyala/fasthttp"
@@ -17,10 +15,11 @@ var port = "8080"
 
 func main() {
 	// print(config.HashingBcrypt("http://admin:123@10.180.70.75:5984/"))
-	expTime := time.Now().Local().Add(time.Hour*24*30).UnixNano() / 1000
+	// expTime := time.Now().Local().Add(time.Hour*24*30).UnixNano() / 1000
 
-	// go controllers.GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", UserCDB: "WVdSdGFXND0=", PassCDB: "TVRJeg=="})), expTime)
-	go controllers.GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", AdminKey: "$2a$10$vwNlnoWznZXUoW6r6zDGSOwB6H/.Z9WbUC51JYdVJ93BXsF50dHCG", CREDADMIN: "http://admin:123@192.168.0.102:5984/"})), expTime)
+	// go controllers.GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", IdCompany: "c_1702549958278240", UserCDB: "WVhCcGEyVjVMWFl5TFRNeWQyNDBOelpwZFRRelp6aHNkbXRuYlhBM2QzZGpjM016YTJkM2RERTRPREkxWlRRMGJYWTFjelYy", PassCDB: "TjJKbU9UazJObVJsWXpZMVlqVmlOMkUxTVRJM1pUQTJOVFUxWkdRNU5UUT0="})), expTime)
+
+	// go controllers.GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", AdminKey: "$2a$10$vwNlnoWznZXUoW6r6zDGSOwB6H/.Z9WbUC51JYdVJ93BXsF50dHCG"})), expTime)
 
 	router := fasthttprouter.New()
 	router.GET("/", func(ctx *fasthttp.RequestCtx) {

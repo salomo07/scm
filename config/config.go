@@ -10,15 +10,16 @@ import (
 )
 
 var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
-var usingIBM = false
+var usingIBM = true
 
 var DB_CORE_NAME = "scm_core"
 var CDB_USER_ADMIN = ""
 var CDB_PASS_ADMIN = ""
-var CDB_HOST_ADMIN = ""
-var CDB_CRED_ADMIN = ""
-var CDB_HOST_COMPANY = "192.168.0.102"
 
+// var CDB_HOST_ADMIN = ""
+var CDB_CRED_ADMIN = ""
+var CDB_HOST = "192.168.0.102"
+var API_KEY_ADMIN = ""
 var REDIS_CRED_ADMIN = ""
 
 func init() {
@@ -68,6 +69,8 @@ func GetCredCDBAdmin() string {
 	user := os.Getenv("COUCHDB_USER")
 	pass := os.Getenv("COUCHDB_PASSWORD")
 	host := os.Getenv("COUCHDB_HOST")
+	API_KEY_ADMIN = os.Getenv("API_KEY_ADMIN")
+	CDB_HOST = os.Getenv("COUCHDB_HOST")
 
 	if usingIBM {
 		CDB_CRED_ADMIN = "https://" + userIBM + ":" + passIBM + "@" + hostIBM
@@ -78,7 +81,20 @@ func GetCredCDBAdmin() string {
 	return CDB_CRED_ADMIN
 }
 func GetCredCDBCompany(user string, pass string) string {
-	return "http://" + user + ":" + pass + "@" + CDB_HOST_COMPANY + ":5984/"
+	for i := 0; i < 2; i++ {
+		userDec, errUser := DecodedCredtial(user)
+		if errUser == "" {
+			user = userDec
+		}
+		passDec, errPass := DecodedCredtial(pass)
+		if errPass == "" {
+			pass = passDec
+		}
+	}
+	if usingIBM {
+		return "https://" + user + ":" + pass + "@" + CDB_HOST
+	}
+	return "http://" + user + ":" + pass + "@" + CDB_HOST + ":5984/"
 }
 func GetCredRedis() string {
 	return os.Getenv("REDIS_CRED_ADMIN")

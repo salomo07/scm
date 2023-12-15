@@ -8,7 +8,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-func AddRole(ctx *fasthttp.RequestCtx) {
+func AddRole(adminCred string, ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Body()) == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
 		return
@@ -18,7 +18,7 @@ func AddRole(ctx *fasthttp.RequestCtx) {
 	err := models.ValidateStruct(roleModel, ctx)
 	if err == "" {
 		roleModel.Table = "role"
-		resBody, errStr, statuscode := services.InsertDocument([]byte(models.StructToJson(roleModel)), config.DB_CORE_NAME)
+		resBody, errStr, statuscode := services.InsertDocument(adminCred, []byte(models.StructToJson(roleModel)), config.DB_CORE_NAME)
 		if resBody != "" {
 			services.ShowResponseJson(ctx, statuscode, resBody)
 		} else {
@@ -26,7 +26,7 @@ func AddRole(ctx *fasthttp.RequestCtx) {
 		}
 	}
 }
-func AddRoleBulk(ctx *fasthttp.RequestCtx) {
+func AddRoleBulk(adminCred string, ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Body()) == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
 		return
@@ -43,7 +43,7 @@ func AddRoleBulk(ctx *fasthttp.RequestCtx) {
 			return
 		}
 	}
-	resBody, errStr, statuscode := services.InsertBulkDocument([]byte(models.StructToJson(roleModelTemp)), config.DB_CORE_NAME)
+	resBody, errStr, statuscode := services.InsertBulkDocument(adminCred, []byte(models.StructToJson(roleModelTemp)), config.DB_CORE_NAME)
 	if resBody != "" {
 		services.ShowResponseJson(ctx, statuscode, resBody)
 	} else {

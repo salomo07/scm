@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"scm/config"
 	"scm/models"
 	"scm/services"
@@ -56,7 +55,7 @@ func Logining(ctx *fasthttp.RequestCtx) string {
 func GetUserDataToCoreDB(ctx *fasthttp.RequestCtx, idcompany string, username string) models.FindResponse {
 	findUserCoreDB := `{"selector":{"$or":[{"_id":"` + idcompany + `"},{"users":"` + username + `"}]}}`
 
-	res, err, code := services.FindDocument([]byte(findUserCoreDB), config.DB_CORE_NAME)
+	res, err, code := services.FindDocument(config.GetCredCDBAdmin(), []byte(findUserCoreDB), config.DB_CORE_NAME)
 	// Jika username terdaftar di DB center / SCM_CORE, login ke DB Company
 	// Jika tidak beri notif username tidak terdaftar
 	if err != "" {
@@ -114,18 +113,12 @@ func CheckAdminKey(key string) string {
 		return val
 	}
 }
-func CheckSession(ctx *fasthttp.RequestCtx) string {
-	// expTime := time.Now().Local().Add(time.Hour*24*30).UnixNano() / 1000
-	// go GenerateJWT([]byte(services.StructToJson(models.AdminCred{CREDADMIN: "", AppId: "scm", AdminKey: "$2a$10$4IKUOc7Y9/ofzqik6B73/unL4EQfGExo.jeObRO5Rt9JQ2Q6qcJxG"})), expTime)
-
-	// go GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", UserCDB: "WVdSdGFXNWtaWFk9", PassCDB: "WTFKM2IwOUhNRlZxZUdKWFRIZDVXRXRTYUUxaVpYQTBZakZNZWtwV1NYQmhZbWxXWjIwMWFHSlFUMlZ4TkZsVFNrSnlRVXM9"})), expTime)
-
+func CheckSession(ctx *fasthttp.RequestCtx) (string, string) {
 	authHeader := ctx.Request.Header.Peek("Authorization")
-	println(authHeader)
 	tokenString, err := extractBearerToken(authHeader)
 	if err != nil {
 		services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, err.Error())
-		return ""
+		return "", err.Error()
 	} else {
 		token, errToken := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return []byte(config.TOKEN_SALT), nil
@@ -133,7 +126,7 @@ func CheckSession(ctx *fasthttp.RequestCtx) string {
 
 		if errToken != nil {
 			services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, errToken.Error())
-			return ""
+			return "", err.Error()
 		} else {
 			if token.Valid {
 				ctx.Response.SetStatusCode(fasthttp.StatusOK)
@@ -143,22 +136,18 @@ func CheckSession(ctx *fasthttp.RequestCtx) string {
 				data := claims["data"].(string)
 				services.JsonToStruct(string(data), &adminCred)
 				if adminCred.IdCompany != "" {
-					config.CDB_HOST_ADMIN = os.Getenv("COUCHDB_HOST")
-					config.CDB_USER_ADMIN = os.Getenv("COUCHDB_USER")
-					config.CDB_PASS_ADMIN = os.Getenv("COUCHDB_PASSWORD")
-					return "Accessed by Company"
-				} else if adminCred.AdminKey != "" && adminCred.AdminKey == CheckAdminKey("apikeyscm") {
-					config.CDB_CRED_ADMIN = config.CompareHashAndPassword(adminCred.CREDADMIN, adminCred.AdminKey)
-					print("API key is valid\n" + config.CDB_CRED_ADMIN + "\n\nChecking to Redis\n")
-					return data
+					print("--You're Admin Company--\n" + config.GetCredCDBCompany(adminCred.UserCDB, adminCred.PassCDB))
+					return config.GetCredCDBCompany(adminCred.UserCDB, adminCred.PassCDB), ""
+				} else if adminCred.AdminKey != "" && adminCred.AdminKey == config.API_KEY_ADMIN {
+					print("--You're SuperAdmin--\n" + config.GetCredCDBAdmin())
+					return config.GetCredCDBAdmin(), ""
 				}
-				print("API key is invalid\n")
 				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Token is invalid")
-				return ""
+				return "", "Token is invalid"
 			} else {
 				print("\n" + "Token is invalid" + "\n")
 				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Token is invalid")
-				return ""
+				return "", "Token is invalid"
 			}
 		}
 	}

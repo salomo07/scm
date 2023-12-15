@@ -15,31 +15,32 @@ func CreateIndexPerCompany(dbname string) (resBody string, errStr string, status
 	urlDB := config.GetCredCDBAdmin() + dbname
 	return SendToNextServer(urlDB, "POST", []byte(`{"index":{"fields":["table","idcompany"]},"name":"companydata","ddoc":"companydata","type":"json"}`))
 }
-func FindDocument(body []byte, dbname string) (findRes models.FindResponse, errStr string, statuscode int) {
-	urlDB := config.GetCredCDBAdmin() + dbname + "/_find"
+func FindDocument(adminCred string, body []byte, dbname string) (findRes models.FindResponse, errStr string, statuscode int) {
+	urlDB := adminCred + dbname + "/_find"
+	println(urlDB)
 	res, err, code := SendToNextServer(urlDB, "POST", body)
 	JsonToStruct(res, &findRes)
 	return findRes, err, code
 }
-func InsertDocument(body []byte, dbname string) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDBAdmin() + dbname
+func InsertDocument(adminCred string, body []byte, dbname string) (resBody string, errStr string, statuscode int) {
+	urlDB := adminCred + dbname
 	return SendToNextServer(urlDB, "POST", body)
 }
-func InsertBulkDocument(body []byte, dbname string) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDBAdmin() + dbname + "/_bulk_docs"
+func InsertBulkDocument(adminCred string, body []byte, dbname string) (resBody string, errStr string, statuscode int) {
+	urlDB := adminCred + dbname + "/_bulk_docs"
 	jsonData := `{"docs":` + string(body) + `}`
 	return SendToNextServer(urlDB, "POST", []byte(jsonData))
 }
-func AddUserDB(idcompany string, body []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDBAdmin() + "_users/org.couchdb.user:" + idcompany
+func AddUserDB(adminCred string, idcompany string, body []byte) (resBody string, errStr string, statuscode int) {
+	urlDB := adminCred + "_users/org.couchdb.user:" + idcompany
 	return SendToNextServer(urlDB, "PUT", body)
 }
-func AddAdminRoleForDB(idcompany string, body []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDBAdmin() + idcompany + "/_security"
+func AddAdminRoleForDB(adminCred string, idcompany string, body []byte) (resBody string, errStr string, statuscode int) {
+	urlDB := adminCred + idcompany + "/_security"
 	return SendToNextServer(urlDB, "PUT", body)
 }
-func UpdateDocument(_id string, data []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDBAdmin() + config.DB_CORE_NAME + "/" + _id
+func UpdateDocument(adminCred string, _id string, data []byte) (resBody string, errStr string, statuscode int) {
+	urlDB := adminCred + config.DB_CORE_NAME + "/" + _id
 	return SendToNextServer(urlDB, "PUT", data)
 }
 

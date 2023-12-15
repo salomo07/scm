@@ -26,7 +26,6 @@ type AdminCred struct {
 	UserCDB   string `json:"usercdb"`
 	PassCDB   string `json:"passcdb"`
 	AdminKey  string `json:"adminkey"`
-	CREDADMIN string `json:"credadmin"`
 }
 
 type LoginResponse struct {
