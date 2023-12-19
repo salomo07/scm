@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"scm/config"
 	"scm/models"
 	"scm/services"
@@ -74,7 +75,7 @@ func AddAccess(adminCred string, ctx *fasthttp.RequestCtx) {
 		models.ShowResponseDefault(ctx, sts, err)
 	}
 }
-func AddUser(adminCred string, ctx *fasthttp.RequestCtx) {
+func AddUser(adminCred models.AdminCred, urlDB string, ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Body()) == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
 		return
@@ -85,9 +86,21 @@ func AddUser(adminCred string, ctx *fasthttp.RequestCtx) {
 	if err == "" {
 		encryptedPass := config.EncodingBcrypt(userModel.Password)
 		userModel.Password = encryptedPass
-		// log.Print(models.Company)
-		// services.InsertDocumentAsComp()
-	} else {
-		models.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, err)
+		userModel.Table = "user"
+		errC := 0
+		errM := ""
+		for i := 0; i < 2; i++ {
+			resBody, errMsg, code := services.InsertDocumentAsComp(userModel.IdCompany, urlDB, []byte(models.StructToJson(userModel)))
+			log.Println(userModel)
+			if errMsg == "" {
+				services.ShowResponseJson(ctx, code, resBody)
+				break
+			}
+			errC = code
+			errM = errMsg
+		}
+		if errC != 0 {
+			services.ShowResponseJson(ctx, errC, errM)
+		}
 	}
 }

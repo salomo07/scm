@@ -19,7 +19,9 @@ func main() {
 
 	// go controllers.GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", IdCompany: "c_1702549958278240", UserCDB: "WVhCcGEyVjVMWFl5TFRNeWQyNDBOelpwZFRRelp6aHNkbXRuYlhBM2QzZGpjM016YTJkM2RERTRPREkxWlRRMGJYWTFjelYy", PassCDB: "TjJKbU9UazJObVJsWXpZMVlqVmlOMkUxTVRJM1pUQTJOVFUxWkdRNU5UUT0="})), expTime)
 
-	// go controllers.GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", AdminKey: "$2a$10$vwNlnoWznZXUoW6r6zDGSOwB6H/.Z9WbUC51JYdVJ93BXsF50dHCG"})), expTime)
+	// API_KEY_ADMIN := os.Getenv("API_KEY_ADMIN")
+
+	// go controllers.GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", AdminKey: API_KEY_ADMIN})), expTime)
 
 	router := fasthttprouter.New()
 	router.GET("/", func(ctx *fasthttp.RequestCtx) {

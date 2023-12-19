@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"scm/config"
 	"scm/models"
 	"scm/services"
@@ -113,12 +114,12 @@ func CheckAdminKey(key string) string {
 		return val
 	}
 }
-func CheckSession(ctx *fasthttp.RequestCtx) (string, string) {
+func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminCred, string, string) {
 	authHeader := ctx.Request.Header.Peek("Authorization")
 	tokenString, err := extractBearerToken(authHeader)
 	if err != nil {
 		services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, err.Error())
-		return "", err.Error()
+		return models.AdminCred{}, "", err.Error()
 	} else {
 		token, errToken := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return []byte(config.TOKEN_SALT), nil
@@ -126,7 +127,7 @@ func CheckSession(ctx *fasthttp.RequestCtx) (string, string) {
 
 		if errToken != nil {
 			services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, errToken.Error())
-			return "", err.Error()
+			return models.AdminCred{}, "", err.Error()
 		} else {
 			if token.Valid {
 				ctx.Response.SetStatusCode(fasthttp.StatusOK)
@@ -135,19 +136,21 @@ func CheckSession(ctx *fasthttp.RequestCtx) (string, string) {
 				claims := token.Claims.(jwt.MapClaims)
 				data := claims["data"].(string)
 				services.JsonToStruct(string(data), &adminCred)
+				API_KEY_ADMIN := os.Getenv("API_KEY_ADMIN")
 				if adminCred.IdCompany != "" {
 					print("--You're Admin Company--\n" + config.GetCredCDBCompany(adminCred.UserCDB, adminCred.PassCDB))
-					return config.GetCredCDBCompany(adminCred.UserCDB, adminCred.PassCDB), ""
-				} else if adminCred.AdminKey != "" && adminCred.AdminKey == config.API_KEY_ADMIN {
-					print("--You're SuperAdmin--\n" + config.GetCredCDBAdmin())
-					return config.GetCredCDBAdmin(), ""
+					return models.AdminCred{}, config.GetCredCDBCompany(adminCred.UserCDB, adminCred.PassCDB), ""
+				} else if adminCred.AdminKey != "" && adminCred.AdminKey == API_KEY_ADMIN {
+					urlDB := config.GetCredCDBAdmin()
+					print("--You're SuperAdmin--\n" + urlDB + adminCred.IdCompany)
+					return models.AdminCred{UserCDB: os.Getenv("COUCHDB_USER_IBM"), PassCDB: os.Getenv("COUCHDB_PASSWORD_IBM"), IdCompany: adminCred.IdCompany}, urlDB, ""
 				}
 				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Token is invalid")
-				return "", "Token is invalid"
+				return models.AdminCred{}, "", "Token is invalid"
 			} else {
 				print("\n" + "Token is invalid" + "\n")
 				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Token is invalid")
-				return "", "Token is invalid"
+				return models.AdminCred{}, "", "Token is invalid"
 			}
 		}
 	}

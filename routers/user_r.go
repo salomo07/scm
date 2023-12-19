@@ -9,30 +9,30 @@ import (
 
 func UserRouters(router *fasthttprouter.Router) {
 	router.POST("/api/v1/admin/user/create", func(ctx *fasthttp.RequestCtx) {
-		adminCred, errMsg := controllers.CheckSession(ctx)
+		adminCred, urlDB, errMsg := controllers.CheckSession(ctx)
 		if errMsg == "" {
-			controllers.AddUser(adminCred, ctx)
+			controllers.AddUser(adminCred, urlDB, ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 	router.POST("/api/v1/admin/role/create", func(ctx *fasthttp.RequestCtx) {
-		adminCred, errMsg := controllers.CheckSession(ctx)
+		_, dbStringCred, errMsg := controllers.CheckSession(ctx)
 		if errMsg == "" {
-			controllers.AddRole(adminCred, ctx)
+			controllers.AddRole(dbStringCred, ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 	router.POST("/api/v1/admin/role/createbulk", func(ctx *fasthttp.RequestCtx) {
-		adminCred, errMsg := controllers.CheckSession(ctx)
+		_, dbStringCred, errMsg := controllers.CheckSession(ctx)
 		if errMsg == "" {
-			controllers.AddRoleBulk(adminCred, ctx)
+			controllers.AddRoleBulk(dbStringCred, ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 	router.POST("/api/v1/admin/user/createbulk", func(ctx *fasthttp.RequestCtx) {
-		adminCred, errMsg := controllers.CheckSession(ctx)
+		adminCred, urlDB, errMsg := controllers.CheckSession(ctx)
 		if errMsg == "" {
-			controllers.AddUser(adminCred, ctx)
+			controllers.AddUser(adminCred, urlDB, ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})

@@ -69,7 +69,7 @@ func GetCredCDBAdmin() string {
 	user := os.Getenv("COUCHDB_USER")
 	pass := os.Getenv("COUCHDB_PASSWORD")
 	host := os.Getenv("COUCHDB_HOST")
-	API_KEY_ADMIN = os.Getenv("API_KEY_ADMIN")
+
 	CDB_HOST = os.Getenv("COUCHDB_HOST")
 
 	if usingIBM {

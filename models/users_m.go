@@ -1,7 +1,6 @@
 package models
 
 type User struct {
-	IdUser     string   `json:"_id"`
 	Nik        string   `json:"nik" validate:"required"`
 	Name       string   `json:"name" validate:"required"`
 	Nickname   string   `json:"nickname"`

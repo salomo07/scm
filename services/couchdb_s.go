@@ -45,8 +45,8 @@ func UpdateDocument(adminCred string, _id string, data []byte) (resBody string, 
 }
 
 // As Company
-func InsertDocumentAsComp(company models.Company, body []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany
+func InsertDocumentAsComp(dbName string, url string, body []byte) (resBody string, errStr string, statuscode int) {
+	urlDB := url + dbName
 	return ToCDBCompany(urlDB, "POST", body)
 }
 func FindDocumentAsComp(company models.Company, body []byte) (resBody string, errStr string, statuscode int) {
