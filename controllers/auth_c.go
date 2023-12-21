@@ -56,7 +56,7 @@ func Logining(ctx *fasthttp.RequestCtx) string {
 func GetUserDataToCoreDB(ctx *fasthttp.RequestCtx, idcompany string, username string) models.FindResponse {
 	findUserCoreDB := `{"selector":{"$or":[{"_id":"` + idcompany + `"},{"users":"` + username + `"}]}}`
 
-	res, err, code := services.FindDocument(config.GetCredCDBAdmin(), []byte(findUserCoreDB), config.DB_CORE_NAME)
+	res, err, code := services.FindDocument(config.GetCredCDBAdmin(), findUserCoreDB, config.DB_CORE_NAME)
 	// Jika username terdaftar di DB center / SCM_CORE, login ke DB Company
 	// Jika tidak beri notif username tidak terdaftar
 	if err != "" {

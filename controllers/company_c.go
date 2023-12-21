@@ -20,7 +20,7 @@ func RegisterCompany(adminCred string, ctx *fasthttp.RequestCtx) {
 	var companyModel models.Company
 	models.JsonToStruct(string(ctx.PostBody()), &companyModel)
 	query := consts.QueryCompanyAlias(companyModel.Alias)
-	existCompany, errFind, statuscode := services.FindDocument(adminCred, []byte(query), config.DB_CORE_NAME)
+	existCompany, errFind, statuscode := services.FindDocument(adminCred, query, config.DB_CORE_NAME)
 	if companyModel.Alias == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "alias is mandatory")
 	} else if errFind != "" {
@@ -34,7 +34,7 @@ func RegisterCompany(adminCred string, ctx *fasthttp.RequestCtx) {
 			companyModel.LevelMembership = "default"
 		}
 		log.Println(companyModel)
-		companyInsertRes, errInsert, statuscode := services.InsertDocument(adminCred, []byte(models.StructToJson(companyModel)), config.DB_CORE_NAME)
+		companyInsertRes, errInsert, statuscode := services.InsertDocument(adminCred, models.StructToJson(companyModel), config.DB_CORE_NAME)
 		if errInsert != "" {
 			services.ShowResponseDefault(ctx, statuscode, errInsert)
 		} else {
@@ -59,12 +59,12 @@ func createCompanyDB(adminCred string, ctx *fasthttp.RequestCtx, dbName string, 
 			userDBModel.Type = "user"
 			userDBModel.Roles = []string{"admin_role"}
 
-			_, err, statuscode := services.AddUserDB(adminCred, dbName, []byte(models.StructToJson(userDBModel)))
+			_, err, statuscode := services.AddUserDB(adminCred, dbName, models.StructToJson(userDBModel))
 			if err != "" {
 				services.ShowResponseDefault(ctx, statuscode, err)
 			} else {
 				jsonBody := consts.BodySecurity(dbName)
-				_, err, statuscode := services.AddAdminRoleForDB(adminCred, dbName, []byte(jsonBody))
+				_, err, statuscode := services.AddAdminRoleForDB(adminCred, dbName, jsonBody)
 				if err != "" {
 					services.ShowResponseDefault(ctx, statuscode, err)
 				}
@@ -77,7 +77,7 @@ func createCompanyDB(adminCred string, ctx *fasthttp.RequestCtx, dbName string, 
 				companyMod.PassCDB = userDBModel.Password
 				companyMod.Rev = insertDocumentResponse.Rev
 
-				go services.UpdateDocument(adminCred, insertDocumentResponse.Id, []byte(models.StructToJson(companyMod)))
+				go services.UpdateDocument(adminCred, insertDocumentResponse.Id, models.StructToJson(companyMod))
 				go CopyInitiateData(adminCred, nil, dbName)
 				return
 			}
@@ -87,7 +87,7 @@ func createCompanyDB(adminCred string, ctx *fasthttp.RequestCtx, dbName string, 
 
 func CopyInitiateData(adminCred string, ctx *fasthttp.RequestCtx, idcompany string) {
 	query := consts.QueryInit
-	res, err, code := services.FindDocument(config.GetCredCDBAdmin(), []byte(query), config.DB_CORE_NAME)
+	res, err, code := services.FindDocument(config.GetCredCDBAdmin(), query, config.DB_CORE_NAME)
 	if err != "" {
 		services.ShowResponseDefault(ctx, code, err)
 	} else {
@@ -99,7 +99,7 @@ func CopyInitiateData(adminCred string, ctx *fasthttp.RequestCtx, idcompany stri
 				xxx := models.RemoveField(value, "_rev")
 				tempData = append(tempData, xxx)
 			}
-			resInsert, errInsert, codeInsert := services.InsertBulkDocument(adminCred, []byte(models.StructToJson(tempData)), idcompany)
+			resInsert, errInsert, codeInsert := services.InsertBulkDocument(adminCred, models.StructToJson(tempData), idcompany)
 			if errInsert != "" {
 				services.ShowResponseDefault(ctx, codeInsert, errInsert)
 			} else {

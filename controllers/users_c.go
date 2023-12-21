@@ -28,7 +28,7 @@ func AddMenu(adminCred string, ctx *fasthttp.RequestCtx) {
 				menuModel.Submenu[i].IdSubmenu = i + 1
 			}
 		}
-		res, err, stts := services.InsertDocument(adminCred, []byte(models.StructToJson(menuModel)), config.DB_CORE_NAME)
+		res, err, stts := services.InsertDocument(adminCred, models.StructToJson(menuModel), config.DB_CORE_NAME)
 		if err != "" {
 			services.ShowResponseJson(ctx, stts, err)
 		} else {
@@ -47,7 +47,7 @@ func AddAccess(adminCred string, ctx *fasthttp.RequestCtx) {
 
 	query := `{"selector":{"table":"access","idcompany":"` + accessModel.IdCompany + `","idrole":"` + accessModel.IdRole + `","idmenu":"` + accessModel.Idmenu + `"},"use_index":"_design/companydata","limit":1}`
 	print(query)
-	res, err, sts := services.FindDocument(config.GetCredCDBAdmin(), []byte(query), config.DB_CORE_NAME)
+	res, err, sts := services.FindDocument(config.GetCredCDBAdmin(), query, config.DB_CORE_NAME)
 	if err == "" {
 		if len(res.Docs) > 0 {
 			var accessRes models.AccessMenuUpdate
@@ -56,14 +56,14 @@ func AddAccess(adminCred string, ctx *fasthttp.RequestCtx) {
 			models.JsonToStruct(string(ctx.PostBody()), &accessTemp)
 			accessTemp.IdAccess = accessRes.IdAccess
 			accessTemp.Rev = accessRes.Rev
-			resBody, errRes, stscode := services.UpdateDocument(adminCred, accessRes.IdAccess, []byte(models.StructToJson(accessTemp)))
+			resBody, errRes, stscode := services.UpdateDocument(adminCred, accessRes.IdAccess, models.StructToJson(accessTemp))
 			if errRes != "" {
 				models.ShowResponseDefault(ctx, stscode, errRes)
 			} else {
 				services.ShowResponseJson(ctx, stscode, resBody)
 			}
 		} else {
-			resBody, errRes, stscode := services.InsertDocument(adminCred, []byte(models.StructToJson(accessModel)), "scm_core")
+			resBody, errRes, stscode := services.InsertDocument(adminCred, models.StructToJson(accessModel), "scm_core")
 			if errRes != "" {
 				models.ShowResponseDefault(ctx, stscode, errRes)
 			} else {
@@ -90,6 +90,8 @@ func AddUser(adminCred models.AdminCred, urlDB string, ctx *fasthttp.RequestCtx)
 		errC := 0
 		errM := ""
 		for i := 0; i < 2; i++ {
+			// findUserCoreDB := `{"selector":{"$or":[{"_id":"` + idcompany + `"},{"users":"` + username + `"}]}}`
+			// services.FindDocument()
 			resBody, errMsg, code := services.InsertDocumentAsComp(userModel.IdCompany, urlDB, []byte(models.StructToJson(userModel)))
 			log.Println(userModel)
 			if errMsg == "" {
