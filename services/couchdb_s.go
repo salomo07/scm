@@ -47,13 +47,13 @@ func InsertDocumentAsComp(dbName string, url string, body []byte) (resBody strin
 	urlDB := url + dbName
 	return ToCDBCompany(urlDB, "POST", body)
 }
-func FindDocumentAsComp(company models.Company, body []byte) (resBody string, errStr string, statuscode int) {
+func FindDocumentAsComp(company models.Company, body string) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany + "/_find"
-	return ToCDBCompany(urlDB, "POST", body)
+	return ToCDBCompany(urlDB, "POST", []byte(body))
 }
-func UpdateDocumentAsComp(company models.Company, _iddoc string, data []byte) (resBody string, errStr string, statuscode int) {
+func UpdateDocumentAsComp(company models.Company, _iddoc string, data string) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany + "/" + _iddoc
-	return ToCDBCompany(urlDB, "PUT", data)
+	return ToCDBCompany(urlDB, "PUT", []byte(data))
 }
 func DeleteDocumentAsComp(company models.Company, _iddoc string, data []byte) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany + "/" + _iddoc

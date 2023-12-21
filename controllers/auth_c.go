@@ -71,7 +71,7 @@ func GetUserDataToCoreDB(ctx *fasthttp.RequestCtx, idcompany string, username st
 
 			// log.Println(adminDB)
 			findUserCoreDB = `{"selector":{"table":"user","_id":"` + username + `"},"use_index":"_design/companytable"}`
-			resBody, err, code := services.FindDocumentAsComp(adminDB, []byte(findUserCoreDB))
+			resBody, err, code := services.FindDocumentAsComp(adminDB, findUserCoreDB)
 
 			if err != "" {
 				services.ShowResponseDefault(ctx, code, err)

@@ -90,16 +90,20 @@ func AddUser(adminCred models.AdminCred, urlDB string, ctx *fasthttp.RequestCtx)
 		errC := 0
 		errM := ""
 		for i := 0; i < 2; i++ {
-			// findUserCoreDB := `{"selector":{"$or":[{"_id":"` + idcompany + `"},{"users":"` + username + `"}]}}`
-			// services.FindDocument()
-			resBody, errMsg, code := services.InsertDocumentAsComp(userModel.IdCompany, urlDB, []byte(models.StructToJson(userModel)))
-			log.Println(userModel)
-			if errMsg == "" {
-				services.ShowResponseJson(ctx, code, resBody)
-				break
-			}
-			errC = code
-			errM = errMsg
+			log.Println(adminCred)
+			// findUserCoreDB := `{"selector":{"username":"Salomo","idcompany":"c_1702276535981680"}}`
+			// findRes, errFind, codeFind := services.FindDocumentAsComp(models.Company{UserCDB: adminCred.UserCDB, PassCDB: adminCred.PassCDB}, findUserCoreDB)
+			// if errFind == "" {
+			// 	services.ShowResponseDefault(ctx, codeFind, findRes)
+			// }
+			// resBody, errMsg, code := services.InsertDocumentAsComp(userModel.IdCompany, urlDB, []byte(models.StructToJson(userModel)))
+			// log.Println(userModel)
+			// if errMsg == "" {
+			// 	services.ShowResponseJson(ctx, code, resBody)
+			// 	break
+			// }
+			errC = 1
+			errM = ""
 		}
 		if errC != 0 {
 			services.ShowResponseJson(ctx, errC, errM)
