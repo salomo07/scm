@@ -80,7 +80,7 @@ func AddUser(adminCred models.AdminCred, urlDB string, ctx *fasthttp.RequestCtx)
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
 		return
 	}
-	var userModel models.User
+	var userModel models.UserInsert
 	models.JsonToStruct(string(ctx.PostBody()), &userModel)
 	err := models.ValidateStruct(userModel, ctx)
 	if err == "" {

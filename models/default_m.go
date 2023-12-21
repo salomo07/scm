@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/valyala/fasthttp"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 type DefaultResponse struct {
@@ -29,12 +29,12 @@ type AdminCred struct {
 }
 
 type LoginResponse struct {
-	AppId     string `json:"appid"`
-	UserData  User   `json:"userdata"`
-	IdCompany string `json:"idcompany"`
-	PassCDB   string `json:"passcdb"`
-	UserApp   string `json:"userapp"`
-	PassApp   string `json:"passapp"`
+	AppId     string     `json:"appid"`
+	UserData  UserInsert `json:"userdata"`
+	IdCompany string     `json:"idcompany"`
+	PassCDB   string     `json:"passcdb"`
+	UserApp   string     `json:"userapp"`
+	PassApp   string     `json:"passapp"`
 }
 
 func JsonToStruct(jsonStr string, dynamic any) interface{} {
@@ -50,11 +50,23 @@ func StructToJson(v any) string {
 }
 func ValidateStruct(myStruct any, ctx *fasthttp.RequestCtx) (err string) {
 	validate := validator.New()
-	if err := validate.Struct(myStruct); err != nil {
-		ShowResponseDefault(ctx, fasthttp.StatusBadRequest, err.Error())
-		return err.Error()
+	errMsg := validate.Struct(myStruct)
+	if errMsg != nil {
+		// Handle kesalahan validasi
+		validationErrors := errMsg.(validator.ValidationErrors)
+		for i, e := range validationErrors {
+			err = err + e.Namespace() + " is " + e.Tag()
+			if i < len(validationErrors)-1 {
+				err = err + ", "
+			}
+			if i == len(validationErrors)-1 {
+				err = err + "."
+			}
+		}
+		ShowResponseDefault(ctx, fasthttp.StatusBadRequest, err)
+		return err
 	}
-	return ""
+	return err
 }
 func ShowResponseDefault(ctx *fasthttp.RequestCtx, statuscode int, msg string) {
 	ctx.Response.SetStatusCode(statuscode)
