@@ -10,10 +10,10 @@ import (
 
 type ChannelObj struct {
 	NamaChannel string
-	Channel     *redis.PubSub
+	PubSub      *redis.PubSub
 }
 
-var Channels ChannelObj
+var channelsMap = make(map[string]*redis.PubSub)
 
 func SaveValueRedis(key string, value string) {
 	var ctx = context.Background()
@@ -49,9 +49,7 @@ func SubscribeRedis(channelname string) {
 		}
 	}()
 	println("Redis channel " + channelname + " is active")
-
-	Channels.NamaChannel = channelname
-	Channels.Channel = pubsub
+	channelsMap[channelname] = pubsub
 }
 func Publish(channelName string, data any) {
 	opt, _ := redis.ParseURL(config.GetCredRedis())
@@ -60,11 +58,10 @@ func Publish(channelName string, data any) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	Unsubscribe(channelName)
 }
 func Unsubscribe(channelName string) {
-	opt, _ := redis.ParseURL(config.GetCredRedis())
-	client := redis.NewClient(opt)
-	pubsub := client.Subscribe(context.Background(), channelName)
+	pubsub := channelsMap[channelName]
 	err := pubsub.Unsubscribe(context.Background(), channelName)
 	if err != nil {
 		log.Fatal(err)
@@ -73,4 +70,5 @@ func Unsubscribe(channelName string) {
 	if errClose != nil {
 		log.Fatal(errClose)
 	}
+	println("\nUnsubscribe channel " + channelName + "\n")
 }
