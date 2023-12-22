@@ -12,7 +12,9 @@ import (
 func AddCompany() {
 
 }
+func TestDuplicate(adminCred string, ctx *fasthttp.RequestCtx) {
 
+}
 func AddMenu(adminCred string, ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Body()) == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
@@ -87,26 +89,27 @@ func AddUser(adminCred models.AdminCred, urlDB string, ctx *fasthttp.RequestCtx)
 		encryptedPass := config.EncodingBcrypt(userModel.Password)
 		userModel.Password = encryptedPass
 		userModel.Table = "user"
-		errC := 0
-		errM := ""
-		for i := 0; i < 2; i++ {
-			log.Println(adminCred)
-			// findUserCoreDB := `{"selector":{"username":"Salomo","idcompany":"c_1702276535981680"}}`
-			// findRes, errFind, codeFind := services.FindDocumentAsComp(models.Company{UserCDB: adminCred.UserCDB, PassCDB: adminCred.PassCDB}, findUserCoreDB)
-			// if errFind == "" {
-			// 	services.ShowResponseDefault(ctx, codeFind, findRes)
-			// }
-			// resBody, errMsg, code := services.InsertDocumentAsComp(userModel.IdCompany, urlDB, []byte(models.StructToJson(userModel)))
-			// log.Println(userModel)
-			// if errMsg == "" {
-			// 	services.ShowResponseJson(ctx, code, resBody)
-			// 	break
-			// }
-			errC = 1
-			errM = ""
-		}
-		if errC != 0 {
-			services.ShowResponseJson(ctx, errC, errM)
+
+		findUserCoreDB := `{"selector":{"username":"` + userModel.Username + `","table":"user"}}`
+		log.Println("\n" + adminCred.UserCDB + "\n")
+		resFind, errFind, codeFind := services.FindDocumentAsComp(models.Company{UserCDB: adminCred.UserCDB, PassCDB: adminCred.PassCDB}, findUserCoreDB)
+		if errFind == "" {
+			services.ShowResponseDefault(ctx, codeFind, errFind)
+		} else {
+			if len(resFind.Docs) > 0 {
+				models.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Username sudah digunakan (Username harus unik)")
+			} else {
+				InsertUser(urlDB)
+				resIns, errIns, codeIns := services.InsertDocumentAsComp(models.Company{UserCDB: adminCred.UserCDB, PassCDB: adminCred.PassCDB}, models.StructToJson(userModel))
+				if errIns == "" {
+					services.ShowResponseJson(ctx, codeIns, resIns)
+				} else {
+					models.ShowResponseDefault(ctx, fasthttp.StatusInternalServerError, "Gagal melakukan Insert")
+				}
+			}
 		}
 	}
+}
+func InsertUser(urlDB string) {
+	print(urlDB)
 }

@@ -43,13 +43,16 @@ func UpdateDocument(adminCred string, _id string, data string) (resBody string, 
 }
 
 // As Company
-func InsertDocumentAsComp(dbName string, url string, body []byte) (resBody string, errStr string, statuscode int) {
-	urlDB := url + dbName
-	return ToCDBCompany(urlDB, "POST", body)
-}
-func FindDocumentAsComp(company models.Company, body string) (resBody string, errStr string, statuscode int) {
-	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany + "/_find"
+func InsertDocumentAsComp(company models.Company, body string) (resBody string, errStr string, statuscode int) {
+	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany
 	return ToCDBCompany(urlDB, "POST", []byte(body))
+}
+func FindDocumentAsComp(company models.Company, body string) (findRes models.FindResponse, errStr string, statuscode int) {
+	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany + "/_find"
+
+	resBody, err, code := ToCDBCompany(urlDB, "POST", []byte(body))
+	JsonToStruct(resBody, &findRes)
+	return findRes, err, code
 }
 func UpdateDocumentAsComp(company models.Company, _iddoc string, data string) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany + "/" + _iddoc

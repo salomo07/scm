@@ -77,10 +77,8 @@ func GetUserDataToCoreDB(ctx *fasthttp.RequestCtx, idcompany string, username st
 				services.ShowResponseDefault(ctx, code, err)
 			} else {
 				var userData models.UserInsert
-				var fr models.FindResponse
-				models.JsonToStruct(resBody, &fr)
-				if len(fr.Docs) > 0 {
-					jsonStr := models.StructToJson(fr.Docs[0])
+				if len(resBody.Docs) > 0 {
+					jsonStr := models.StructToJson(resBody.Docs[0])
 					models.JsonToStruct(jsonStr, &userData)
 					log.Println(userData)
 				}
