@@ -21,11 +21,12 @@ type SessionData struct {
 	PassCDB   string `json:"pcdb" validate:"required"`
 }
 type AdminCred struct {
-	AppId     string `json:"appid"`
-	IdCompany string `json:"idcompany"`
-	UserCDB   string `json:"usercdb"`
-	PassCDB   string `json:"passcdb"`
-	AdminKey  string `json:"adminkey"`
+	AppId     string  `json:"appid"`
+	IdCompany string  `json:"idcompany"`
+	UserCDB   string  `json:"usercdb"`
+	PassCDB   string  `json:"passcdb"`
+	AdminKey  string  `json:"adminkey"`
+	Company   Company `json:"company"`
 }
 
 type LoginResponse struct {

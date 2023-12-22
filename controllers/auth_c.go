@@ -136,11 +136,12 @@ func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminCred, string, string) {
 				services.JsonToStruct(string(data), &adminCred)
 				API_KEY_ADMIN := os.Getenv("API_KEY_ADMIN")
 				if adminCred.IdCompany != "" {
-					print("--You're Admin Company--\n" + config.GetCredCDBCompany(adminCred.UserCDB, adminCred.PassCDB))
+					print("--You're Admin Company--\n")
 					return models.AdminCred{}, config.GetCredCDBCompany(adminCred.UserCDB, adminCred.PassCDB), ""
 				} else if adminCred.AdminKey != "" && adminCred.AdminKey == API_KEY_ADMIN {
 					urlDB := config.GetCredCDBAdmin()
 					print("--You're SuperAdmin--\n" + urlDB + adminCred.IdCompany)
+
 					return models.AdminCred{UserCDB: os.Getenv("COUCHDB_USER_IBM"), PassCDB: os.Getenv("COUCHDB_PASSWORD_IBM"), IdCompany: adminCred.IdCompany}, urlDB, ""
 				}
 				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Token is invalid")

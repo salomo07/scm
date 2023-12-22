@@ -65,3 +65,8 @@ type Submenu struct {
 	Icon      string `json:"icon"`
 	Desc      string `json:"desc"`
 }
+
+type PublishRedis struct {
+	IdCompany string `json:"idcompany" validate:"required"`
+	Data      any    `json:"data" validate:"required"`
+}

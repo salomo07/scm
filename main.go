@@ -22,7 +22,7 @@ func main() {
 	// API_KEY_ADMIN := os.Getenv("API_KEY_ADMIN")
 
 	// go controllers.GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", AdminKey: API_KEY_ADMIN})), expTime)
-
+	services.SubscribeRedis("c_1702276535981680")
 	router := fasthttprouter.New()
 	router.GET("/", func(ctx *fasthttp.RequestCtx) {
 		services.ShowResponseDefault(ctx, 200, "Welcome to SCM API")
