@@ -9,27 +9,23 @@ import (
 
 func CompanyRouters(router *fasthttprouter.Router) {
 	router.POST("/api/v1/admin/company/create/", func(ctx *fasthttp.RequestCtx) {
-		if controllers.CheckSession(ctx) != "" {
-			controllers.RegisterCompany(ctx)
-		}
-		ctx.Response.Header.Set("Content-Type", "application/json")
-	})
-	router.POST("/api/v1/admin/company/adduser/", func(ctx *fasthttp.RequestCtx) {
-		if controllers.CheckSession(ctx) != "" {
-			controllers.AddUser(ctx)
+		//	Endpoint ini hanya bisa diakses oleh SuperAdmin
+		_, dbCred, errMsg := controllers.CheckSession(ctx)
+		if errMsg == "" {
+			controllers.RegisterCompany(dbCred, ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 	router.POST("/api/v1/admin/company/role/addrole", func(ctx *fasthttp.RequestCtx) {
-		if controllers.CheckSession(ctx) != "" {
-			controllers.AddRole(ctx)
+		_, dbCred, errMsg := controllers.CheckSession(ctx)
+		if errMsg == "" {
+			controllers.AddRole(dbCred, ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 	router.POST("/api/v1/admin/company/copyinitiatedata", func(ctx *fasthttp.RequestCtx) {
-		if controllers.CheckSession(ctx) != "" {
-			// controllers.CopyInitiateData(ctx)
-		}
+		// controllers.CopyInitiateData(adminCred, ctx)
+
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 }

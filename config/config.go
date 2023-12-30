@@ -1,7 +1,12 @@
 package config
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
 	"encoding/base64"
+	"fmt"
+	"io"
 	"log"
 	"os"
 
@@ -10,14 +15,16 @@ import (
 )
 
 var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
-var usingIBM = false
+var usingIBM = true
 
 var DB_CORE_NAME = "scm_core"
 var CDB_USER_ADMIN = ""
 var CDB_PASS_ADMIN = ""
-var CDB_HOST_ADMIN = ""
-var CDB_CRED_ADMIN = ""
 
+// var CDB_HOST_ADMIN = ""
+var CDB_CRED_ADMIN = ""
+var CDB_HOST = "192.168.0.102"
+var API_KEY_ADMIN = ""
 var REDIS_CRED_ADMIN = ""
 
 func init() {
@@ -27,7 +34,7 @@ func init() {
 	}
 	GetCredCDBAdmin()
 }
-func CompareHashAndPassword(oripass string, hashedPassword string) string {
+func CompareHashAndPasswordx(oripass string, hashedPassword string) string {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(oripass))
 	if err == nil {
 		log.Println("Password is correct!")
@@ -49,14 +56,6 @@ func EncodingBcrypt(p string) string {
 	return string(bytes)
 }
 
-func DecodedCredtial(encoded string) (string, string) {
-	decodedText, err := base64.StdEncoding.DecodeString(encoded)
-	if err != nil {
-		panic(err)
-	}
-	return string(decodedText), ""
-}
-
 func GetCredCDBAdmin() string {
 	if CDB_CRED_ADMIN != "" {
 		return CDB_CRED_ADMIN
@@ -68,6 +67,8 @@ func GetCredCDBAdmin() string {
 	pass := os.Getenv("COUCHDB_PASSWORD")
 	host := os.Getenv("COUCHDB_HOST")
 
+	CDB_HOST = os.Getenv("COUCHDB_HOST")
+
 	if usingIBM {
 		CDB_CRED_ADMIN = "https://" + userIBM + ":" + passIBM + "@" + hostIBM
 	} else {
@@ -76,13 +77,70 @@ func GetCredCDBAdmin() string {
 	print(CDB_CRED_ADMIN + "\n")
 	return CDB_CRED_ADMIN
 }
-func GetCredCDBCompany() string {
-	if CDB_CRED_ADMIN != "" {
-		return CDB_CRED_ADMIN
+func GetCredCDBCompany(user string, pass string) string {
+	user, errUser := DecryptAES(user)
+	if errUser != nil {
+		log.Println(errUser.Error() + "\n")
 	}
-	CDB_CRED_ADMIN = "http://" + CDB_USER_ADMIN + ":" + CDB_PASS_ADMIN + "@" + CDB_HOST_ADMIN + "/"
-	return CDB_CRED_ADMIN
+	pass, errPass := DecryptAES(user)
+	if errPass != nil {
+		log.Println(errPass.Error() + "\n")
+	}
+	if usingIBM {
+		return "https://" + user + ":" + pass + "@" + CDB_HOST
+	}
+	return "http://" + user + ":" + pass + "@" + CDB_HOST + ":5984/"
 }
 func GetCredRedis() string {
 	return os.Getenv("REDIS_CRED_ADMIN")
+}
+
+func EncryptAES(plaintext string) (string, error) {
+	key := []byte(os.Getenv("KeyEncryptDecrypt"))[:32]
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		log.Printf(err.Error())
+		return "", err
+	}
+
+	aesGCM, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", err
+	}
+
+	nonce := make([]byte, aesGCM.NonceSize())
+	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		return "", err
+	}
+	ciphertext := aesGCM.Seal(nil, nonce, []byte(plaintext), nil)
+	return base64.StdEncoding.EncodeToString(append(nonce, ciphertext...)), nil
+}
+func DecryptAES(ciphertext string) (string, error) {
+	data, err := base64.StdEncoding.DecodeString(ciphertext)
+	if err != nil {
+		return "", err
+	}
+
+	block, err := aes.NewCipher([]byte(os.Getenv("KeyEncryptDecrypt")))
+	if err != nil {
+		return "", err
+	}
+
+	aesGCM, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", err
+	}
+
+	nonceSize := aesGCM.NonceSize()
+	if len(data) < nonceSize {
+		return "", fmt.Errorf("ciphertext too short")
+	}
+
+	nonce, ciphertext := data[:nonceSize], string(data[nonceSize:])
+	plaintext, err := aesGCM.Open(nil, nonce, []byte(ciphertext), nil)
+	if err != nil {
+		return "", err
+	}
+
+	return string(plaintext), nil
 }

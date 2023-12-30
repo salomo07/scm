@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"scm/config"
 	"scm/models"
 	"scm/services"
@@ -11,8 +12,10 @@ import (
 func AddCompany() {
 
 }
+func TestDuplicate(adminCred string, ctx *fasthttp.RequestCtx) {
 
-func AddMenu(ctx *fasthttp.RequestCtx) {
+}
+func AddMenu(adminCred string, ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Body()) == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
 		return
@@ -27,7 +30,7 @@ func AddMenu(ctx *fasthttp.RequestCtx) {
 				menuModel.Submenu[i].IdSubmenu = i + 1
 			}
 		}
-		res, err, stts := services.InsertDocument([]byte(models.StructToJson(menuModel)), config.DB_CORE_NAME)
+		res, err, stts := services.InsertDocument(adminCred, models.StructToJson(menuModel), config.DB_CORE_NAME)
 		if err != "" {
 			services.ShowResponseJson(ctx, stts, err)
 		} else {
@@ -35,7 +38,7 @@ func AddMenu(ctx *fasthttp.RequestCtx) {
 		}
 	}
 }
-func AddAccess(ctx *fasthttp.RequestCtx) {
+func AddAccess(adminCred string, ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Body()) == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
 		return
@@ -46,7 +49,7 @@ func AddAccess(ctx *fasthttp.RequestCtx) {
 
 	query := `{"selector":{"table":"access","idcompany":"` + accessModel.IdCompany + `","idrole":"` + accessModel.IdRole + `","idmenu":"` + accessModel.Idmenu + `"},"use_index":"_design/companydata","limit":1}`
 	print(query)
-	res, err, sts := services.FindDocument([]byte(query), config.DB_CORE_NAME)
+	res, err, sts := services.FindDocument(config.GetCredCDBAdmin(), query, config.DB_CORE_NAME)
 	if err == "" {
 		if len(res.Docs) > 0 {
 			var accessRes models.AccessMenuUpdate
@@ -55,14 +58,14 @@ func AddAccess(ctx *fasthttp.RequestCtx) {
 			models.JsonToStruct(string(ctx.PostBody()), &accessTemp)
 			accessTemp.IdAccess = accessRes.IdAccess
 			accessTemp.Rev = accessRes.Rev
-			resBody, errRes, stscode := services.UpdateDocument(accessRes.IdAccess, []byte(models.StructToJson(accessTemp)))
+			resBody, errRes, stscode := services.UpdateDocument(adminCred, accessRes.IdAccess, models.StructToJson(accessTemp))
 			if errRes != "" {
 				models.ShowResponseDefault(ctx, stscode, errRes)
 			} else {
 				services.ShowResponseJson(ctx, stscode, resBody)
 			}
 		} else {
-			resBody, errRes, stscode := services.InsertDocument([]byte(models.StructToJson(accessModel)), "scm_core")
+			resBody, errRes, stscode := services.InsertDocument(adminCred, models.StructToJson(accessModel), "scm_core")
 			if errRes != "" {
 				models.ShowResponseDefault(ctx, stscode, errRes)
 			} else {
@@ -73,4 +76,40 @@ func AddAccess(ctx *fasthttp.RequestCtx) {
 	} else {
 		models.ShowResponseDefault(ctx, sts, err)
 	}
+}
+func AddUser(adminCred models.AdminDB, urlDB string, ctx *fasthttp.RequestCtx) {
+	if string(ctx.Request.Body()) == "" {
+		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
+		return
+	}
+	var userModel models.UserInsert
+	models.JsonToStruct(string(ctx.PostBody()), &userModel)
+	err := models.ValidateStruct(userModel, ctx)
+	if err == "" {
+		encryptedPass := config.EncodingBcrypt(userModel.Password)
+		userModel.Password = encryptedPass
+		userModel.Table = "user"
+
+		findUserCoreDB := `{"selector":{"username":"` + userModel.Username + `","table":"user"}}`
+		log.Println("\n" + adminCred.UserCDB + "\n")
+		resFind, errFind, codeFind := services.FindDocumentAsComp(models.Company{UserCDB: adminCred.UserCDB, PassCDB: adminCred.PassCDB}, findUserCoreDB)
+		if errFind == "" {
+			services.ShowResponseDefault(ctx, codeFind, errFind)
+		} else {
+			if len(resFind.Docs) > 0 {
+				models.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Username sudah digunakan (Username harus unik)")
+			} else {
+				InsertUser(urlDB)
+				resIns, errIns, codeIns := services.InsertDocumentAsComp(models.Company{UserCDB: adminCred.UserCDB, PassCDB: adminCred.PassCDB}, models.StructToJson(userModel))
+				if errIns == "" {
+					services.ShowResponseJson(ctx, codeIns, resIns)
+				} else {
+					models.ShowResponseDefault(ctx, fasthttp.StatusInternalServerError, "Gagal melakukan Insert")
+				}
+			}
+		}
+	}
+}
+func InsertUser(urlDB string) {
+	print(urlDB)
 }

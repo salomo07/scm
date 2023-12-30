@@ -9,26 +9,30 @@ import (
 
 func UserRouters(router *fasthttprouter.Router) {
 	router.POST("/api/v1/admin/user/create", func(ctx *fasthttp.RequestCtx) {
-		if controllers.CheckSession(ctx) != "" {
-			controllers.AddUser(ctx)
+		adminCred, urlDB, errMsg := controllers.CheckSession(ctx)
+		if errMsg == "" {
+			controllers.AddUser(adminCred, urlDB, ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 	router.POST("/api/v1/admin/role/create", func(ctx *fasthttp.RequestCtx) {
-		if controllers.CheckSession(ctx) != "" {
-			controllers.AddRole(ctx)
+		_, dbStringCred, errMsg := controllers.CheckSession(ctx)
+		if errMsg == "" {
+			controllers.AddRole(dbStringCred, ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 	router.POST("/api/v1/admin/role/createbulk", func(ctx *fasthttp.RequestCtx) {
-		if controllers.CheckSession(ctx) != "" {
-			controllers.AddRoleBulk(ctx)
+		_, dbStringCred, errMsg := controllers.CheckSession(ctx)
+		if errMsg == "" {
+			controllers.AddRoleBulk(dbStringCred, ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 	router.POST("/api/v1/admin/user/createbulk", func(ctx *fasthttp.RequestCtx) {
-		if controllers.CheckSession(ctx) != "" {
-			controllers.AddUser(ctx)
+		adminCred, urlDB, errMsg := controllers.CheckSession(ctx)
+		if errMsg == "" {
+			controllers.AddUser(adminCred, urlDB, ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})

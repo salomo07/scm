@@ -1,16 +1,15 @@
 package models
 
-type User struct {
-	IdUser     string       `json:"_id"`
-	Nik        string       `json:"nik" validate:"required"`
-	Name       string       `json:"name" validate:"required"`
-	Nickname   string       `json:"nickname"`
-	Username   string       `json:"username" validate:"required"`
-	Password   string       `json:"password" validate:"required"`
-	Table      string       `json:"table"`
-	IdCompany  string       `json:"idcompany"`
-	IdRole     string       `json:"idrole" validate:"required"`
-	AccessMenu []AccessMenu `json:"accessmenu"`
+type UserInsert struct {
+	Nik        string   `json:"nik" validate:"required"`
+	Name       string   `json:"name" validate:"required"`
+	Nickname   string   `json:"nickname"`
+	Username   string   `json:"username" validate:"required"`
+	Password   string   `json:"password" validate:"required"`
+	Table      string   `json:"table"`
+	IdCompany  string   `json:"idcompany"`
+	IdRole     string   `json:"idrole" validate:"required"`
+	AccessMenu []string `json:"accessmenu"`
 }
 type Role struct {
 	Table     string `json:"table"`
@@ -65,4 +64,9 @@ type Submenu struct {
 	Url       string `json:"url"`
 	Icon      string `json:"icon"`
 	Desc      string `json:"desc"`
+}
+
+type PublishRedis struct {
+	IdCompany string `json:"idcompany" validate:"required"`
+	Data      any    `json:"data" validate:"required"`
 }
