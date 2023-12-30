@@ -28,7 +28,7 @@ func main() {
 	pass, _ := config.EncryptAES("7bf9966dec65b5b7a5127e06555dd954")
 	print(user + "\n")
 	print(pass + "\n")
-	dec, _ := config.DecryptAES("szNSTtlUnFJxy/bYaA+OwBIT86HwGYfxNAXyMi32jmUY92/PAqDiChQ7049rk/d4ZfUCrIUdQhq5R0tIiz/NtluKT7tFGQKT/YQvzRnNh2Qygg==")
+	dec, _ := config.DecryptAES()
 	print("\nDec :" + dec)
 	go controllers.GenerateJWT(services.StructToJson(models.SessionToken{KeyRedis: "scm*c_1702276535981680*u_34345345", AppId: "scm", IdCompany: "c_1702276535981680"}), expTime)
 	// services.SubscribeRedis("c_1702276535981680")
