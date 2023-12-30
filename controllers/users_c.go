@@ -77,7 +77,7 @@ func AddAccess(adminCred string, ctx *fasthttp.RequestCtx) {
 		models.ShowResponseDefault(ctx, sts, err)
 	}
 }
-func AddUser(adminCred models.AdminCred, urlDB string, ctx *fasthttp.RequestCtx) {
+func AddUser(adminCred models.AdminDB, urlDB string, ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Body()) == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
 		return

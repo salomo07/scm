@@ -88,19 +88,19 @@ func GetUserDataToCoreDB(ctx *fasthttp.RequestCtx, idcompany string, username st
 	}
 	return res
 }
-func GenerateJWT(json []byte, expiredtime int64) string {
+func GenerateJWT(json string, expiredtime int64) string {
 	mySigningKey := []byte(config.TOKEN_SALT)
 	type Claims struct {
 		Json string `json:"data"`
 		jwt.StandardClaims
 	}
-	claims := Claims{string(json), jwt.StandardClaims{ExpiresAt: expiredtime}}
+	claims := Claims{json, jwt.StandardClaims{ExpiresAt: expiredtime}}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString(mySigningKey)
 	if err != nil {
 		log.Println(services.StructToJson(models.DefaultResponse{Status: fasthttp.StatusBadRequest, Messege: "GenerateJWT : " + err.Error()}))
 	}
-	log.Println(ss)
+	log.Println(ss + "\n")
 	return ss
 }
 func CheckAdminKey(key string) string {
@@ -112,12 +112,12 @@ func CheckAdminKey(key string) string {
 		return val
 	}
 }
-func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminCred, string, string) {
+func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminDB, string, string) {
 	authHeader := ctx.Request.Header.Peek("Authorization")
 	tokenString, err := extractBearerToken(authHeader)
 	if err != nil {
 		services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, err.Error())
-		return models.AdminCred{}, "", err.Error()
+		return models.AdminDB{}, "", err.Error()
 	} else {
 		token, errToken := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return []byte(config.TOKEN_SALT), nil
@@ -125,31 +125,51 @@ func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminCred, string, string) {
 
 		if errToken != nil {
 			services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, errToken.Error())
-			return models.AdminCred{}, "", err.Error()
+			return models.AdminDB{}, "", err.Error()
 		} else {
 			if token.Valid {
 				ctx.Response.SetStatusCode(fasthttp.StatusOK)
 
-				var adminCred models.AdminCred
+				var sessionToken models.SessionToken
 				claims := token.Claims.(jwt.MapClaims)
 				data := claims["data"].(string)
-				services.JsonToStruct(string(data), &adminCred)
-				API_KEY_ADMIN := os.Getenv("API_KEY_ADMIN")
-				if adminCred.IdCompany != "" {
-					print("--You're Admin Company--\n")
-					return models.AdminCred{}, config.GetCredCDBCompany(adminCred.UserCDB, adminCred.PassCDB), ""
-				} else if adminCred.AdminKey != "" && adminCred.AdminKey == API_KEY_ADMIN {
+				services.JsonToStruct(string(data), &sessionToken)
+				if sessionToken.AdminKey == "" && sessionToken.AdminKey == os.Getenv("API_KEY_ADMIN") {
 					urlDB := config.GetCredCDBAdmin()
-					print("--You're SuperAdmin--\n" + urlDB + adminCred.IdCompany)
+					print("--You're SuperAdmin--\n" + urlDB)
+				} else {
+					resRedis, errRedis := services.GetValueRedis(sessionToken.KeyRedis)
+					if errRedis != "" {
+						models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "You must login")
+					} else {
+						var sessionFromRedis models.SessionToken
+						services.JsonToStruct(resRedis, &sessionFromRedis)
+						if sessionFromRedis.IdUser == sessionToken.IdUser {
 
-					return models.AdminCred{UserCDB: os.Getenv("COUCHDB_USER_IBM"), PassCDB: os.Getenv("COUCHDB_PASSWORD_IBM"), IdCompany: adminCred.IdCompany}, urlDB, ""
+						} else if errRedis != "" {
+							log.Println("Error when get redis val")
+							models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "You must login")
+						} else {
+
+						}
+					}
+					print("--You're Company Admin--\n")
 				}
+				// if adminCred.IdCompany != "" {
+				// 	print("--You're Admin Company--\n")
+				// 	return models.AdminCred{}, config.GetCredCDBCompany(adminCred.UserCDB, adminCred.PassCDB), ""
+				// } else if adminCred.AdminKey != "" && adminCred.AdminKey == API_KEY_ADMIN {
+				// 	urlDB := config.GetCredCDBAdmin()
+				// 	print("--You're SuperAdmin--\n" + urlDB + adminCred.IdCompany)
+
+				// 	return models.AdminCred{UserCDB: os.Getenv("COUCHDB_USER_IBM"), PassCDB: os.Getenv("COUCHDB_PASSWORD_IBM"), IdCompany: adminCred.IdCompany}, urlDB, ""
+				// }
 				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Token is invalid")
-				return models.AdminCred{}, "", "Token is invalid"
+				return models.AdminDB{}, "", "Token is invalid"
 			} else {
 				print("\n" + "Token is invalid" + "\n")
 				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Token is invalid")
-				return models.AdminCred{}, "", "Token is invalid"
+				return models.AdminDB{}, "", "Token is invalid"
 			}
 		}
 	}
@@ -166,9 +186,10 @@ func extractBearerToken(authHeader []byte) (string, error) {
 
 	return token, nil
 }
-func claimJWT(token *jwt.Token) (session models.SessionData) {
-	claims := token.Claims.(jwt.MapClaims)
-	data := claims["data"].(string)
-	services.JsonToStruct(string(data), &session)
-	return session
-}
+
+// func claimJWTx(token *jwt.Token) (session models.SessionData) {
+// 	claims := token.Claims.(jwt.MapClaims)
+// 	data := claims["data"].(string)
+// 	services.JsonToStruct(string(data), &session)
+// 	return session
+// }

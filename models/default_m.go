@@ -13,20 +13,17 @@ type DefaultResponse struct {
 	Messege string `json:"messege"`
 }
 
-type SessionData struct {
-	IdCompany string `json:"idcompany" validate:"required"`
-	IdUser    string `json:"iduser" validate:"required"`
-	AppId     string `json:"appid" validate:"required"`
-	UserCDB   string `json:"ucdb" validate:"required"`
-	PassCDB   string `json:"pcdb" validate:"required"`
+type SessionToken struct {
+	//contoh format IdAppCompanyUser scm*c_1324353452345*u_34345345
+	KeyRedis  string `json:"keyredis" validate:"required"`
+	AdminKey  string `json:"adminkey"`
+	AppId     string `json:"appid"`
+	IdCompany string `json:"idcompany"`
+	IdUser    string `json:"iduser"`
 }
-type AdminCred struct {
-	AppId     string  `json:"appid"`
-	IdCompany string  `json:"idcompany"`
-	UserCDB   string  `json:"usercdb"`
-	PassCDB   string  `json:"passcdb"`
-	AdminKey  string  `json:"adminkey"`
-	Company   Company `json:"company"`
+type AdminDB struct {
+	UserCDB string `json:"usercdb"`
+	PassCDB string `json:"passcdb"`
 }
 
 type LoginResponse struct {

@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 	"log"
+	"scm/config"
+	"scm/controllers"
 	"scm/models"
 	"scm/routers"
 	"scm/services"
+	"time"
 
 	"github.com/buaazp/fasthttprouter"
 	"github.com/valyala/fasthttp"
@@ -14,15 +17,21 @@ import (
 var port = "8080"
 
 func main() {
-	// print(config.HashingBcrypt("http://admin:123@10.180.70.75:5984/"))
-	// expTime := time.Now().Local().Add(time.Hour*24*30).UnixNano() / 1000
+	// z, _ := config.EncryptAES("Salomo07")
+	// print("\n " + z)
+	// hasil, _ := config.DecryptAES("MBJO1avtjKjpc/L6i4FtodEN+FubqVSQnGdqLVvXJS3Fq8m9")
+	// print(hasil)
+	expTime := time.Now().Local().Add(time.Hour*24*30).UnixNano() / 1000
 
-	// go controllers.GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", IdCompany: "c_1702549958278240", UserCDB: "WVhCcGEyVjVMWFl5TFRNeWQyNDBOelpwZFRRelp6aHNkbXRuYlhBM2QzZGpjM016YTJkM2RERTRPREkxWlRRMGJYWTFjelYy", PassCDB: "TjJKbU9UazJObVJsWXpZMVlqVmlOMkUxTVRJM1pUQTJOVFUxWkdRNU5UUT0="})), expTime)
-
-	// API_KEY_ADMIN := os.Getenv("API_KEY_ADMIN")
-
-	// go controllers.GenerateJWT([]byte(services.StructToJson(models.AdminCred{AppId: "scm", AdminKey: API_KEY_ADMIN})), expTime)
-	services.SubscribeRedis("c_1702276535981680")
+	// go controllers.GenerateJWT([]byte(services.StructToJson(models.SessionToken{IdAppCompanyUser: "scm*c_1702276535981680*u_1702276535981680", AppId: "scm", IdCompany: "c_1702276535981680"})), expTime)
+	user, _ := config.EncryptAES("apikey-v2-32wn476iu43g8lvkgmp7wwcss3kgwt18825e44mv5s5v")
+	pass, _ := config.EncryptAES("7bf9966dec65b5b7a5127e06555dd954")
+	print(user + "\n")
+	print(pass + "\n")
+	dec, _ := config.DecryptAES("szNSTtlUnFJxy/bYaA+OwBIT86HwGYfxNAXyMi32jmUY92/PAqDiChQ7049rk/d4ZfUCrIUdQhq5R0tIiz/NtluKT7tFGQKT/YQvzRnNh2Qygg==")
+	print("\nDec :" + dec)
+	go controllers.GenerateJWT(services.StructToJson(models.SessionToken{KeyRedis: "scm*c_1702276535981680*u_34345345", AppId: "scm", IdCompany: "c_1702276535981680"}), expTime)
+	// services.SubscribeRedis("c_1702276535981680")
 	router := fasthttprouter.New()
 	router.GET("/", func(ctx *fasthttp.RequestCtx) {
 		services.ShowResponseDefault(ctx, 200, "Welcome to SCM API")
