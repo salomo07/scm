@@ -139,33 +139,24 @@ func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminDB, string, string) {
 					print("--You're SuperAdmin--\n" + urlDB)
 				} else {
 					resRedis, errRedis := services.GetValueRedis(sessionToken.KeyRedis)
+
 					if errRedis != "" {
-						models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "You must login")
+						models.ShowResponseDefault(ctx, fasthttp.StatusServiceUnavailable, "Error when getting user session, please contact administration")
+					}
+					if resRedis == "" {
+						models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "User session is not found, please re-login")
 					} else {
-						var sessionFromRedis models.SessionToken
-						services.JsonToStruct(resRedis, &sessionFromRedis)
-						if sessionFromRedis.IdUser == sessionToken.IdUser {
-
-						} else if errRedis != "" {
-							log.Println("Error when get redis val")
-							models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "You must login")
-						} else {
-
-						}
+						var sessionFull models.SessionFull
+						services.JsonToStruct(resRedis, &sessionFull)
+						log.Println(resRedis)
+						log.Print("DB URL : ", config.GetCredCDBCompany(sessionFull.AdminDB.UserCDB, sessionFull.AdminDB.PassCDB))
+						return sessionFull.AdminDB, config.GetCredCDBCompany(sessionFull.AdminDB.UserCDB, sessionFull.AdminDB.PassCDB), "Login success"
 					}
 					print("--You're Company Admin--\n")
 				}
-				// if adminCred.IdCompany != "" {
-				// 	print("--You're Admin Company--\n")
-				// 	return models.AdminCred{}, config.GetCredCDBCompany(adminCred.UserCDB, adminCred.PassCDB), ""
-				// } else if adminCred.AdminKey != "" && adminCred.AdminKey == API_KEY_ADMIN {
-				// 	urlDB := config.GetCredCDBAdmin()
-				// 	print("--You're SuperAdmin--\n" + urlDB + adminCred.IdCompany)
 
-				// 	return models.AdminCred{UserCDB: os.Getenv("COUCHDB_USER_IBM"), PassCDB: os.Getenv("COUCHDB_PASSWORD_IBM"), IdCompany: adminCred.IdCompany}, urlDB, ""
-				// }
-				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Token is invalid")
 				return models.AdminDB{}, "", "Token is invalid"
+
 			} else {
 				print("\n" + "Token is invalid" + "\n")
 				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Token is invalid")

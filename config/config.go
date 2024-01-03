@@ -78,14 +78,6 @@ func GetCredCDBAdmin() string {
 	return CDB_CRED_ADMIN
 }
 func GetCredCDBCompany(user string, pass string) string {
-	user, errUser := DecryptAES(user)
-	if errUser != nil {
-		log.Println(errUser.Error() + "\n")
-	}
-	pass, errPass := DecryptAES(user)
-	if errPass != nil {
-		log.Println(errPass.Error() + "\n")
-	}
 	if usingIBM {
 		return "https://" + user + ":" + pass + "@" + CDB_HOST
 	}

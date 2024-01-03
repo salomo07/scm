@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"scm/config"
 	"scm/controllers"
 	"scm/models"
 	"scm/routers"
@@ -17,20 +16,17 @@ import (
 var port = "8080"
 
 func main() {
-	// z, _ := config.EncryptAES("Salomo07")
-	// print("\n " + z)
-	// hasil, _ := config.DecryptAES("MBJO1avtjKjpc/L6i4FtodEN+FubqVSQnGdqLVvXJS3Fq8m9")
-	// print(hasil)
+
 	expTime := time.Now().Local().Add(time.Hour*24*30).UnixNano() / 1000
 
 	// go controllers.GenerateJWT([]byte(services.StructToJson(models.SessionToken{IdAppCompanyUser: "scm*c_1702276535981680*u_1702276535981680", AppId: "scm", IdCompany: "c_1702276535981680"})), expTime)
-	user, _ := config.EncryptAES("apikey-v2-32wn476iu43g8lvkgmp7wwcss3kgwt18825e44mv5s5v")
-	pass, _ := config.EncryptAES("7bf9966dec65b5b7a5127e06555dd954")
-	print(user + "\n")
-	print(pass + "\n")
-	dec, _ := config.DecryptAES()
-	print("\nDec :" + dec)
-	go controllers.GenerateJWT(services.StructToJson(models.SessionToken{KeyRedis: "scm*c_1702276535981680*u_34345345", AppId: "scm", IdCompany: "c_1702276535981680"}), expTime)
+	// user, _ := config.EncryptAES("apikey-v2-32wn476iu43g8lvkgmp7wwcss3kgwt18825e44mv5s5v")
+	// pass, _ := config.EncryptAES("7bf9966dec65b5b7a5127e06555dd954")
+	// print(user + "\n")
+	// print(pass + "\n")
+	// dec, _ := config.DecryptAES()
+	// print("\nDec :" + dec)
+	go controllers.GenerateJWT(services.StructToJson(models.SessionToken{KeyRedis: "scm*c_1702276535981680*7a31b1142ea980c599b29c213e77c196", AppId: "scm", IdCompany: "c_1702276535981680"}), expTime)
 	// services.SubscribeRedis("c_1702276535981680")
 	router := fasthttprouter.New()
 	router.GET("/", func(ctx *fasthttp.RequestCtx) {
