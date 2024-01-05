@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"scm/config"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -15,13 +16,20 @@ type ChannelObj struct {
 
 var channelsMap = make(map[string]*redis.PubSub)
 
-func SaveValueRedis(key string, value string) {
+// key string, value string, expired time.Duration
+func SaveValueRedis(data ...string) {
 	var ctx = context.Background()
 	opt, _ := redis.ParseURL(config.GetCredRedis())
 	client := redis.NewClient(opt)
-
-	client.Set(ctx, key, value, 0)
-	print(key + " is saved")
+	duration := time.Second * 3600 * 8
+	if data[2] != "" {
+		dur, _ := time.ParseDuration(data[2])
+		duration = dur
+	}
+	print("\n")
+	print(duration)
+	client.Set(ctx, string(data[0]), data[1], duration)
+	print(data[0] + " is saved")
 }
 
 func GetValueRedis(key string) (val string, err string) {
