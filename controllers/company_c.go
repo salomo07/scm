@@ -41,7 +41,8 @@ func RegisterCompany(adminCred string, ctx *fasthttp.RequestCtx) {
 			services.ShowResponseDefault(ctx, statuscode, errInsert)
 		} else {
 			createCompanyDB(adminCred, ctx, companyModel.IdCompany, companyInsertRes, models.StructToJson(companyModel))
-			go saveCompanyCredToRedis(companyModel)
+
+			go services.SaveValueRedis(companyModel.IdCompany, services.StructToJson(companyModel), (time.Hour * 8).String())
 		}
 	}
 }
@@ -86,10 +87,6 @@ func createCompanyDB(adminCred string, ctx *fasthttp.RequestCtx, dbName string, 
 			}
 		}
 	}
-}
-func saveCompanyCredToRedis(companyModel models.Company) {
-	print("\nSaveCompanyCredToRedis " + companyModel.IdCompany + "\n")
-	services.SaveValueRedis(companyModel.IdCompany, services.StructToJson(companyModel), string(time.Second*10))
 }
 func CopyInitiateData(adminCred string, ctx *fasthttp.RequestCtx, idcompany string) {
 	query := consts.QueryInit

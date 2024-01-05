@@ -21,13 +21,11 @@ func SaveValueRedis(data ...string) {
 	var ctx = context.Background()
 	opt, _ := redis.ParseURL(config.GetCredRedis())
 	client := redis.NewClient(opt)
-	duration := time.Second * 3600 * 8
+	duration := time.Hour * 1
 	if data[2] != "" {
 		dur, _ := time.ParseDuration(data[2])
 		duration = dur
 	}
-	print("\n")
-	print(duration)
 	client.Set(ctx, string(data[0]), data[1], duration)
 	print(data[0] + " is saved")
 }
