@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"log"
 	"scm/config"
 	"scm/consts"
 	"scm/models"
@@ -33,15 +32,14 @@ func RegisterCompany(adminCred string, ctx *fasthttp.RequestCtx) {
 		if companyModel.LevelMembership == "" {
 			companyModel.LevelMembership = "default"
 		}
-		print("Ini contohhh\n")
-		log.Println(companyModel)
-		print("\n")
+
 		companyInsertRes, errInsert, statuscode := services.InsertDocument(adminCred, models.StructToJson(companyModel), config.DB_CORE_NAME)
 		if errInsert != "" {
 			services.ShowResponseDefault(ctx, statuscode, errInsert)
 		} else {
 			createCompanyDB(adminCred, ctx, companyModel.IdCompany, companyInsertRes, models.StructToJson(companyModel))
 
+			//Save temporary company data on Redis
 			go services.SaveValueRedis(companyModel.IdCompany, services.StructToJson(companyModel), (time.Hour * 8).String())
 		}
 	}
