@@ -33,12 +33,16 @@ func RegisterCompany(adminCred string, ctx *fasthttp.RequestCtx) {
 		if companyModel.LevelMembership == "" {
 			companyModel.LevelMembership = "default"
 		}
+		print("Ini contohhh\n")
 		log.Println(companyModel)
+		print("\n")
 		companyInsertRes, errInsert, statuscode := services.InsertDocument(adminCred, models.StructToJson(companyModel), config.DB_CORE_NAME)
 		if errInsert != "" {
 			services.ShowResponseDefault(ctx, statuscode, errInsert)
 		} else {
 			createCompanyDB(adminCred, ctx, companyModel.IdCompany, companyInsertRes, models.StructToJson(companyModel))
+
+			go services.SaveValueRedis(companyModel.IdCompany, services.StructToJson(companyModel), (time.Hour * 8).String())
 		}
 	}
 }
@@ -84,7 +88,6 @@ func createCompanyDB(adminCred string, ctx *fasthttp.RequestCtx, dbName string, 
 		}
 	}
 }
-
 func CopyInitiateData(adminCred string, ctx *fasthttp.RequestCtx, idcompany string) {
 	query := consts.QueryInit
 	res, err, code := services.FindDocument(config.GetCredCDBAdmin(), query, config.DB_CORE_NAME)
@@ -106,10 +109,7 @@ func CopyInitiateData(adminCred string, ctx *fasthttp.RequestCtx, idcompany stri
 				if ctx != nil {
 					services.ShowResponseJson(ctx, codeInsert, resInsert)
 				}
-
 			}
-
 		}
-
 	}
 }

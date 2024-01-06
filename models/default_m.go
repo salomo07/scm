@@ -20,6 +20,12 @@ type SessionToken struct {
 	AppId     string `json:"appid"`
 	IdCompany string `json:"idcompany"`
 	IdUser    string `json:"iduser"`
+	UserAgent string `json:"useragent"`
+	IpClient  string `json:"ipclient"`
+}
+type SessionFull struct {
+	AdminDB AdminDB    `json:"admindb"`
+	User    UserInsert `json:"user"`
 }
 type AdminDB struct {
 	UserCDB string `json:"usercdb"`

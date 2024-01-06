@@ -2,6 +2,7 @@ package routers
 
 import (
 	"scm/controllers"
+	"scm/services"
 
 	"github.com/buaazp/fasthttprouter"
 	"github.com/valyala/fasthttp"
@@ -9,10 +10,14 @@ import (
 
 func CompanyRouters(router *fasthttprouter.Router) {
 	router.POST("/api/v1/admin/company/create/", func(ctx *fasthttp.RequestCtx) {
-		//	Endpoint ini hanya bisa diakses oleh SuperAdmin
-		_, dbCred, errMsg := controllers.CheckSession(ctx)
-		if errMsg == "" {
+		adminDB, dbCred, errMsg := controllers.CheckSession(ctx)
+
+		//Endpoint ini hanya bisa diakses oleh SuperAdmin (bukan company)
+		print(errMsg)
+		if errMsg == "" && adminDB.UserCDB == "" {
 			controllers.RegisterCompany(dbCred, ctx)
+		} else {
+			services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "You have not access to this endpoint.")
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
