@@ -15,15 +15,16 @@ import (
 )
 
 var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
-var usingIBM = true
+var usingIBM = false
 
 var DB_CORE_NAME = "scm_core"
+var DB_CRED_NAME = "scm_cred"
 var CDB_USER_ADMIN = ""
 var CDB_PASS_ADMIN = ""
 
 // var CDB_HOST_ADMIN = ""
 var CDB_CRED_ADMIN = ""
-var CDB_HOST = "192.168.0.102"
+var CDB_HOST = "192.168.0.101"
 var API_KEY_ADMIN = ""
 var REDIS_CRED_ADMIN = ""
 
