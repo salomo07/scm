@@ -18,7 +18,7 @@ func Login(ctx *fasthttp.RequestCtx) string {
 	var loginInput models.LoginInput
 	models.JsonToStruct(string(rawJSON), &loginInput)
 	log.Println(loginInput)
-	if loginInput.IdCompany == "" || loginInput.Username == "" || loginInput.Password == "" {
+	if loginInput.IdCompany == "" || loginInput.Username == "" || loginInput.Password == "" || loginInput.AppId == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Format input login tidak sesuai")
 	} else {
 		credCompany, err := services.GetValueRedis(loginInput.IdCompany)
@@ -31,38 +31,6 @@ func Login(ctx *fasthttp.RequestCtx) string {
 		}
 
 	}
-	// if err == nil {
-	// 	log.Println(loginInput)
-	// 	jsonResponse, errResponse := services.GetValueRedis(loginInput.IdCompany)
-	// 	if errResponse == "" {
-	// 		// print(services.GetValueRedis("Salomo07"))
-	// 		if jsonResponse != "" {
-	// 			token, errToken := jwt.Parse(jsonResponse, func(token *jwt.Token) (interface{}, error) {
-	// 				return []byte(config.TOKEN_SALT), nil
-	// 			})
-	// 			if errToken != nil {
-	// 				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, errToken.Error())
-	// 				return ""
-	// 			} else {
-	// 				if token.Valid {
-	// 					print("Token valid, checkingpassword")
-	// 				} else {
-	// 					findRes := GetUserDataToCoreDB(ctx, loginInput.IdCompany, loginInput.Username)
-	// 					if len(findRes.Docs) > 0 {
-
-	// 					}
-	// 				}
-	// 			}
-	// 		} else {
-	// 			print("Gak nemu di redis")
-	// 			docs := GetUserDataToCoreDB(ctx, loginInput.IdCompany, loginInput.Username)
-	// 			log.Println(docs)
-	// 		}
-	// 	} else {
-	// 		services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, errResponse)
-	// 	}
-	// 	print("\n")
-	// }
 
 	return ""
 }
@@ -161,28 +129,38 @@ func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminDB, string, string) {
 						return models.AdminDB{}, config.GetCredCDBCompany(os.Getenv("COUCHDB_USER"), os.Getenv("COUCHDB_PASSWORD")), "Error when getting user session, please contact administration"
 					}
 					if resRedis == "" {
-						models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "User session is not found, please re-login")
+						saveCompanyCredToRedis(sessionToken.IdCompany)
+						// models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "User session is not found, please re-login")
+						print("\n")
 						return models.AdminDB{}, "", "User session is not found, please re-login"
 					} else {
 						print("--You're Company Admin--\n")
 
 						var sessionFull models.SessionFull
 						services.JsonToStruct(resRedis, &sessionFull)
-						log.Println(resRedis)
-						log.Print("DB URL : ", config.GetCredCDBCompany(sessionFull.AdminDB.UserCDB, sessionFull.AdminDB.PassCDB))
+						// log.Println(resRedis)
+						// log.Print("DB URL : ", config.GetCredCDBCompany(sessionFull.AdminDB.UserCDB, sessionFull.AdminDB.PassCDB))
 						return sessionFull.AdminDB, config.GetCredCDBCompany(sessionFull.AdminDB.UserCDB, sessionFull.AdminDB.PassCDB), ""
 					}
 				}
 
 			} else {
-				print("\n" + "Token is invalid" + "\n")
 				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Token is invalid")
 				return models.AdminDB{}, "", "Token is invalid"
 			}
 		}
 	}
 }
+func saveCompanyCredToRedis(idcompany string) {
+	findCredCompanyDB := `{"selector":{"_id":` + idcompany + `}}`
+	res, err, code := services.FindDocument(config.GetCredCDBAdmin(), findCredCompanyDB, config.DB_CRED_NAME)
+	if err == "" {
+		if len(res.Docs) > 0 {
 
+		}
+		print(res.Docs, code)
+	}
+}
 func extractBearerToken(authHeader []byte) (string, error) {
 	// Check if the Authorization header starts with "Bearer "
 	if !strings.HasPrefix(string(authHeader), "Bearer ") {

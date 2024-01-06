@@ -32,14 +32,12 @@ func ShowResponseJson(ctx *fasthttp.RequestCtx, statuscode int, jsonString strin
 	fmt.Fprintf(ctx, jsonString)
 }
 
-//<----
-
 func SendToNextServer(url string, method string, body string) (resBody string, errStr string, statuscode int) {
 	client := &fasthttp.Client{
 		MaxIdleConnDuration: 5 * time.Second,
 	}
 	forwardedRequest := fasthttp.AcquireRequest()
-	// print("\n\nReq to : " + method + " --> " + url)
+	// print("\n\nReq to : " + method + " --> " + url + "\n" + body)
 	forwardedRequest.SetRequestURI(url)
 	forwardedRequest.SetBody([]byte(body))
 	forwardedRequest.Header.SetMethod(string(method))

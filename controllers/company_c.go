@@ -37,10 +37,14 @@ func RegisterCompany(adminCred string, ctx *fasthttp.RequestCtx) {
 		if errInsert != "" {
 			services.ShowResponseDefault(ctx, statuscode, errInsert)
 		} else {
-			createCompanyDB(adminCred, ctx, companyModel.IdCompany, companyInsertRes, models.StructToJson(companyModel))
+			companyJson := models.StructToJson(companyModel)
+			createCompanyDB(adminCred, ctx, companyModel.IdCompany, companyInsertRes, companyJson)
 
 			//Save temporary company data on Redis
-			go services.SaveValueRedis(companyModel.IdCompany, services.StructToJson(companyModel), (time.Hour * 8).String())
+			go services.SaveValueRedis(companyModel.IdCompany, companyJson, (time.Hour * 8).String())
+
+			//Save cred company DB on DB_CRED_NAME
+			services.InsertDocument(adminCred, companyJson, config.DB_CRED_NAME)
 		}
 	}
 }
@@ -97,8 +101,8 @@ func CopyInitiateData(adminCred string, ctx *fasthttp.RequestCtx, idcompany stri
 			services.ShowResponseDefault(ctx, fasthttp.StatusNotFound, "Data default tidak ditemukan")
 		} else {
 			for _, value := range res.Docs {
-				xxx := models.RemoveField(value, "_rev")
-				tempData = append(tempData, xxx)
+				row := models.RemoveField(value, "_rev")
+				tempData = append(tempData, row)
 			}
 			resInsert, errInsert, codeInsert := services.InsertBulkDocument(adminCred, models.StructToJson(tempData), idcompany)
 			if errInsert != "" {
