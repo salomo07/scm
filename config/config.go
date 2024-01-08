@@ -15,14 +15,14 @@ import (
 )
 
 var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
-var usingIBM = false
+var usingIBM = true
 
 var DB_CORE_NAME = "scm_core"
-var DB_CRED_NAME = "scm_cred"
+
+// var DB_CRED_NAME = "scm_cred"
 var CDB_USER_ADMIN = ""
 var CDB_PASS_ADMIN = ""
 
-// var CDB_HOST_ADMIN = ""
 var CDB_CRED_ADMIN = ""
 var CDB_HOST = "192.168.0.101"
 var API_KEY_ADMIN = ""
@@ -35,7 +35,7 @@ func init() {
 	}
 	GetCredCDBAdmin()
 }
-func CompareHashAndPasswordx(oripass string, hashedPassword string) string {
+func CompareHashAndPasswordBcrypt(oripass string, hashedPassword string) string {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(oripass))
 	if err == nil {
 		log.Println("Password is correct!")

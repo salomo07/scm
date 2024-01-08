@@ -29,23 +29,54 @@ func Login(ctx *fasthttp.RequestCtx) string {
 		if err != "" {
 			services.ShowResponseJson(ctx, fasthttp.StatusInternalServerError, err)
 		} else if companyData == "" {
-			// services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Company tidak ditemukan")
-			queryFindCred := `{"selectorx":{"_id":"` + loginInput.IdCompany + `","appid":"` + loginInput.AppId + `"}}`
-			res, err, code := services.FindDocument(config.GetCredCDBAdmin(), queryFindCred, config.DB_CRED_NAME)
+			print("Company tidak ditemukan di Redis\n")
+			queryFindCred := `{"selector":{"_id":"` + loginInput.IdCompany + `","appid":"` + loginInput.AppId + `"}}`
+			res, err, code := services.FindDocument(config.GetCredCDBAdmin(), queryFindCred, config.DB_CORE_NAME)
 			if err != "" {
 				models.ShowResponseDefault(ctx, fasthttp.StatusInternalServerError, err+"Error code : "+strconv.Itoa(code))
 			} else {
 				if len(res.Docs) == 0 {
 					services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Company tidak terdaftar")
 				} else {
-					log.Println(res.Docs[0])
-					// models.JsonToStruct(string(res.Docs[0]), &company)
+					print("Companynya :\n")
+					json := models.StructToJson(res.Docs[0])
+
+					log.Println(json)
+					models.JsonToStruct(json, &company)
+					// Jika di Redis belum ada data company, maka data yang didapat dari DB
+					go services.SaveValueRedis(company.IdCompany)
+					FindUserOnCoreDB(ctx, loginInput)
 				}
 			}
+		} else {
+			print("Ini Hasil dari Redis\n")
+			//Data Company berhasil ditemukan di Redis
+			print(companyData)
+			FindUserOnCoreDB(ctx, loginInput)
+			// GenerateJWT()
 		}
-		log.Println(company)
+		// log.Println(company)
 	}
 	return ""
+}
+func FindUserOnCoreDB(ctx *fasthttp.RequestCtx, loginInput models.LoginInput) {
+	query := `{"selector":{"$or": [{"username":"` + loginInput.Username + `","idcompany":"` + loginInput.IdCompany + `","table":"user"},{"email":"` + loginInput.Username + `","idcompany":"` + loginInput.IdCompany + `","table":"user"}]}}`
+	findRes, err, code := services.FindDocument(config.GetCredCDBAdmin(), query, config.DB_CORE_NAME)
+	if err != "" {
+		models.ShowResponseDefault(ctx, fasthttp.StatusInternalServerError, "An error occurred (Error : "+strconv.Itoa(code)+" - "+err+")")
+	} else {
+		if len(findRes.Docs) == 0 {
+			services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Username or Email is not found")
+		} else {
+			//Decrypt Pass
+			for _, val := range findRes.Docs {
+				var userData models.UserInsert
+				json := models.StructToJson(val)
+				models.JsonToStruct(json, &userData)
+				print("Ini hasil decrypt Bcrypt: " + config.CompareHashAndPasswordBcrypt(loginInput.Password, userData.Password))
+			}
+		}
+	}
 }
 func GetUserDataToCoreDB(ctx *fasthttp.RequestCtx, idcompany string, username string) models.FindResponse {
 	findUserCoreDB := `{"selector":{"$or":[{"_id":"` + idcompany + `"},{"users":"` + username + `"}]}}`
@@ -142,8 +173,6 @@ func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminDB, string, string) {
 						return models.AdminDB{}, config.GetCredCDBCompany(os.Getenv("COUCHDB_USER"), os.Getenv("COUCHDB_PASSWORD")), "Error when getting user session, please contact administration"
 					}
 					if resRedis == "" {
-						saveCompanyCredToRedis(sessionToken.IdCompany)
-						// models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "User session is not found, please re-login")
 						print("\n")
 						return models.AdminDB{}, "", "User session is not found, please re-login"
 					} else {
@@ -164,16 +193,17 @@ func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminDB, string, string) {
 		}
 	}
 }
-func saveCompanyCredToRedis(idcompany string) {
-	findCredCompanyDB := `{"selector":{"_id":"` + idcompany + `"}}`
-	res, err, code := services.FindDocument(config.GetCredCDBAdmin(), findCredCompanyDB, config.DB_CRED_NAME)
-	if err == "" {
-		if len(res.Docs) > 0 {
 
-		}
-		print(res.Docs, code)
-	}
-}
+// func saveCompanyCredToRedis(idcompany string) {
+// 	findCredCompanyDB := `{"selector":{"_id":"` + idcompany + `"}}`
+// 	res, err, code := services.FindDocument(config.GetCredCDBAdmin(), findCredCompanyDB, config.DB_CRED_NAME)
+// 	if err == "" {
+// 		if len(res.Docs) > 0 {
+
+//			}
+//			print(res.Docs, code)
+//		}
+//	}
 func extractBearerToken(authHeader []byte) (string, error) {
 	// Check if the Authorization header starts with "Bearer "
 	if !strings.HasPrefix(string(authHeader), "Bearer ") {

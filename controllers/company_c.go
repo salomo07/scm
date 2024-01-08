@@ -42,9 +42,6 @@ func RegisterCompany(adminCred string, ctx *fasthttp.RequestCtx) {
 
 			//Save temporary company data on Redis
 			go services.SaveValueRedis(companyModel.IdCompany, companyJson, (time.Hour * 8).String())
-
-			//Save cred company DB on DB_CRED_NAME
-			services.InsertDocument(adminCred, companyJson, config.DB_CRED_NAME)
 		}
 	}
 }

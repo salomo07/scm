@@ -51,20 +51,20 @@ func UpdateDocument(adminCred string, _id string, data string) (resBody string, 
 // As Company
 func InsertDocumentAsComp(company models.Company, body string) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany
-	return ToCDBCompany(urlDB, "POST", []byte(body))
+	return ToCDBCompany(urlDB, "POST", body)
 }
-func FindDocumentAsComp(company models.Company, body string) (findRes models.FindResponse, errStr string, statuscode int) {
+func FindDocumentAsComp(company models.Company, query string) (findRes models.FindResponse, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany + "/_find"
 
-	resBody, err, code := ToCDBCompany(urlDB, "POST", []byte(body))
+	resBody, err, code := ToCDBCompany(urlDB, "POST", query)
 	JsonToStruct(resBody, &findRes)
 	return findRes, err, code
 }
 func UpdateDocumentAsComp(company models.Company, _iddoc string, data string) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany + "/" + _iddoc
-	return ToCDBCompany(urlDB, "PUT", []byte(data))
+	return ToCDBCompany(urlDB, "PUT", data)
 }
-func DeleteDocumentAsComp(company models.Company, _iddoc string, data []byte) (resBody string, errStr string, statuscode int) {
+func DeleteDocumentAsComp(company models.Company, _iddoc string, data string) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany + "/" + _iddoc
 	return ToCDBCompany(urlDB, "DELETE", data)
 }

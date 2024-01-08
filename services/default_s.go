@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"scm/models"
 	"strconv"
 	"time"
@@ -55,13 +56,14 @@ func SendToNextServer(url string, method string, body string) (resBody string, e
 	return string(forwardedResponse.Body()), "", forwardedResponse.StatusCode()
 }
 
-func ToCDBCompany(url string, method string, body []byte) (resBody string, errStr string, statuscode int) {
+func ToCDBCompany(url string, method string, body string) (resBody string, errStr string, statuscode int) {
 	client := &fasthttp.Client{
 		MaxIdleConnDuration: 5 * time.Second,
 	}
+	log.Println(url, method, body)
 	forwardedRequest := fasthttp.AcquireRequest()
 	forwardedRequest.SetRequestURI(url)
-	forwardedRequest.SetBody(body)
+	forwardedRequest.SetBody([]byte(body))
 	forwardedRequest.Header.SetMethod(string(method))
 	forwardedRequest.Header.SetContentType("application/json")
 

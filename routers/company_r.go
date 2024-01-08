@@ -13,7 +13,6 @@ func CompanyRouters(router *fasthttprouter.Router) {
 		adminDB, dbCred, errMsg := controllers.CheckSession(ctx)
 
 		//Endpoint ini hanya bisa diakses oleh SuperAdmin (bukan company)
-		print(errMsg)
 		if errMsg == "" && adminDB.UserCDB == "" {
 			controllers.RegisterCompany(dbCred, ctx)
 		} else {
