@@ -1,6 +1,7 @@
 package services
 
 import (
+	"log"
 	"scm/config"
 	"scm/models"
 )
@@ -16,6 +17,7 @@ func CreateIndexPerCompany(dbname string) (resBody string, errStr string, status
 }
 func FindDocument(adminCred string, query string, dbname string) (findRes models.FindResponse, errStr string, statuscode int) {
 	urlDB := adminCred + dbname + "/_find"
+	log.Println(urlDB, "POST", query)
 	res, err, code := SendToNextServer(urlDB, "POST", query)
 	JsonToStruct(res, &findRes)
 	return findRes, err, code

@@ -2,6 +2,7 @@ package models
 
 type Company struct {
 	IdCompany       string    `json:"_id" validate:"required"`
+	AppId           string    `json:"appid" validate:"required"`
 	Name            string    `json:"name" validate:"required"`
 	Alias           string    `json:"alias" validate:"required"`
 	LevelMembership string    `json:"levelmembership" validate:"required"`

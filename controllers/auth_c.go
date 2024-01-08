@@ -7,6 +7,7 @@ import (
 	"scm/config"
 	"scm/models"
 	"scm/services"
+	"strconv"
 	"strings"
 
 	"github.com/golang-jwt/jwt"
@@ -21,17 +22,29 @@ func Login(ctx *fasthttp.RequestCtx) string {
 	if loginInput.IdCompany == "" || loginInput.Username == "" || loginInput.Password == "" || loginInput.AppId == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Format input login tidak sesuai")
 	} else {
-		credCompany, err := services.GetValueRedis(loginInput.IdCompany)
-		if credCompany == "" {
-			services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Company tidak ditemukan")
-		} else if err != "" {
+		companyData, err := services.GetValueRedis(loginInput.IdCompany)
+		var company models.Company
+		services.JsonToStruct(companyData, &company)
+		// Jika cred tidak ditemukan di Redis, maka ambil credential dari DB SCM_CRED
+		if err != "" {
 			services.ShowResponseJson(ctx, fasthttp.StatusInternalServerError, err)
-		} else {
-
+		} else if companyData == "" {
+			// services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Company tidak ditemukan")
+			queryFindCred := `{"selectorx":{"_id":"` + loginInput.IdCompany + `","appid":"` + loginInput.AppId + `"}}`
+			res, err, code := services.FindDocument(config.GetCredCDBAdmin(), queryFindCred, config.DB_CRED_NAME)
+			if err != "" {
+				models.ShowResponseDefault(ctx, fasthttp.StatusInternalServerError, err+"Error code : "+strconv.Itoa(code))
+			} else {
+				if len(res.Docs) == 0 {
+					services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Company tidak terdaftar")
+				} else {
+					log.Println(res.Docs[0])
+					// models.JsonToStruct(string(res.Docs[0]), &company)
+				}
+			}
 		}
-
+		log.Println(company)
 	}
-
 	return ""
 }
 func GetUserDataToCoreDB(ctx *fasthttp.RequestCtx, idcompany string, username string) models.FindResponse {
@@ -152,7 +165,7 @@ func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminDB, string, string) {
 	}
 }
 func saveCompanyCredToRedis(idcompany string) {
-	findCredCompanyDB := `{"selector":{"_id":` + idcompany + `}}`
+	findCredCompanyDB := `{"selector":{"_id":"` + idcompany + `"}}`
 	res, err, code := services.FindDocument(config.GetCredCDBAdmin(), findCredCompanyDB, config.DB_CRED_NAME)
 	if err == "" {
 		if len(res.Docs) > 0 {
@@ -172,10 +185,3 @@ func extractBearerToken(authHeader []byte) (string, error) {
 
 	return token, nil
 }
-
-// func claimJWTx(token *jwt.Token) (session models.SessionData) {
-// 	claims := token.Claims.(jwt.MapClaims)
-// 	data := claims["data"].(string)
-// 	services.JsonToStruct(string(data), &session)
-// 	return session
-// }
