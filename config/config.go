@@ -15,7 +15,7 @@ import (
 )
 
 var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
-var usingIBM = true
+var usingIBM = false
 
 var DB_CORE_NAME = "scm_core"
 
@@ -24,7 +24,9 @@ var CDB_USER_ADMIN = ""
 var CDB_PASS_ADMIN = ""
 
 var CDB_CRED_ADMIN = ""
-var CDB_HOST = "192.168.0.101"
+
+// var CDB_HOST = "192.168.0.101"
+var CDB_HOST = "localhost"
 var API_KEY_ADMIN = ""
 var REDIS_CRED_ADMIN = ""
 
