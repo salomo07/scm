@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"log"
 	"scm/config"
 	"scm/models"
 	"scm/services"
@@ -91,7 +90,6 @@ func AddUser(adminCred models.AdminDB, urlDB string, ctx *fasthttp.RequestCtx) {
 		userModel.Table = "user"
 
 		findUserCoreDB := `{"selector":{"username":"` + userModel.Username + `","table":"user"}}`
-		log.Println("\n" + adminCred.UserCDB + "\n")
 		resFind, errFind, codeFind := services.FindDocumentAsComp(models.Company{UserCDB: adminCred.UserCDB, PassCDB: adminCred.PassCDB}, findUserCoreDB)
 		if errFind == "" {
 			services.ShowResponseDefault(ctx, codeFind, errFind)

@@ -55,7 +55,7 @@ func InsertDocumentAsComp(company models.Company, body string) (resBody string, 
 }
 func FindDocumentAsComp(company models.Company, query string) (findRes models.FindResponse, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany + "/_find"
-
+	print(urlDB + "xxxxx" + query)
 	resBody, err, code := ToCDBCompany(urlDB, "POST", query)
 	JsonToStruct(resBody, &findRes)
 	return findRes, err, code

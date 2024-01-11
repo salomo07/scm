@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"log"
 	"scm/controllers"
 
 	"github.com/buaazp/fasthttprouter"
@@ -10,6 +11,7 @@ import (
 func UserRouters(router *fasthttprouter.Router) {
 	router.POST("/api/v1/admin/user/create", func(ctx *fasthttp.RequestCtx) {
 		adminCred, urlDB, errMsg := controllers.CheckSession(ctx)
+		log.Println(adminCred, urlDB, errMsg)
 		if errMsg == "" {
 			controllers.AddUser(adminCred, urlDB, ctx)
 		}

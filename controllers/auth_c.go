@@ -151,7 +151,7 @@ func GenerateJWT(json string, expiredtime int64) string {
 	if err != nil {
 		log.Println(services.StructToJson(models.DefaultResponse{Status: fasthttp.StatusBadRequest, Messege: "GenerateJWT : " + err.Error()}))
 	}
-	// log.Println(ss + "\n")
+	log.Println(ss + "\n")
 	return ss
 }
 func CheckAdminKey(key string) string {
@@ -193,14 +193,25 @@ func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminDB, string, string) {
 					return models.AdminDB{}, config.GetCredCDBAdmin(), ""
 				} else {
 					resRedis, errRedis := services.GetValueRedis(sessionToken.KeyRedis)
-
+					var admCred models.AdminDB
 					if errRedis != "" {
 						models.ShowResponseDefault(ctx, fasthttp.StatusServiceUnavailable, "Error when getting user session, please contact administration")
 						return models.AdminDB{}, config.GetCredCDBCompany(os.Getenv("COUCHDB_USER"), os.Getenv("COUCHDB_PASSWORD")), "Error when getting user session, please contact administration"
-					}
-					if resRedis == "" {
+					} else if resRedis == "" {
 						print("\n")
-						return models.AdminDB{}, "", "User session is not found, please re-login"
+						//Jika token yng dimasukkn untuk akses Company, tapi token tersebut tidak ditemukan di Redis.
+						//Find credDB company berdasarkan Idcompany
+						query := `{"selector":{"_id":"` + sessionToken.IdCompany + `","table":"company"}}`
+						find, err, _ := services.FindDocument(config.GetCredCDBAdmin(), query, config.DB_CORE_NAME)
+						if err == "" {
+							if len(find.Docs) > 0 {
+								println(find.Docs[0])
+								json := models.StructToJson(find.Docs[0])
+								models.JsonToStruct(json, &admCred)
+							}
+						}
+						log.Println(find)
+						return admCred, config.GetCredCDBCompany(admCred.UserCDB, admCred.PassCDB), ""
 					} else {
 						print("--You're Company Admin--\n")
 
