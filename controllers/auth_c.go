@@ -72,7 +72,7 @@ func FindUserOnCoreDB(ctx *fasthttp.RequestCtx, loginInput models.LoginInput) {
 			//Decrypt Pass
 			jsonUserSuccess := ""
 			for _, val := range findRes.Docs {
-				var userData models.UserInsert
+				var userData models.User
 				json := models.StructToJson(val)
 				models.JsonToStruct(json, &userData)
 				if config.CompareHashAndPasswordBcrypt(loginInput.Password, userData.Password) != "" {
@@ -92,7 +92,7 @@ func FindUserOnCoreDB(ctx *fasthttp.RequestCtx, loginInput models.LoginInput) {
 					IdRole    string `json:"idrole" validate:"required"`
 				}
 				expTime := time.Now().Local().Add(time.Hour*4).UnixNano() / 1000
-				var userJWT models.UserInsert
+				var userJWT models.User
 				models.JsonToStruct(jsonUserSuccess, &userJWT)
 
 				jwt := GenerateJWT(models.StructToJson(userJWT), expTime)
@@ -127,7 +127,7 @@ func GetUserDataToCoreDB(ctx *fasthttp.RequestCtx, idcompany string, username st
 			if err != "" {
 				services.ShowResponseDefault(ctx, code, err)
 			} else {
-				var userData models.UserInsert
+				var userData models.User
 				if len(resBody.Docs) > 0 {
 					jsonStr := models.StructToJson(resBody.Docs[0])
 					models.JsonToStruct(jsonStr, &userData)
@@ -151,7 +151,7 @@ func GenerateJWT(json string, expiredtime int64) string {
 	if err != nil {
 		log.Println(services.StructToJson(models.DefaultResponse{Status: fasthttp.StatusBadRequest, Messege: "GenerateJWT : " + err.Error()}))
 	}
-	log.Println(ss + "\n")
+	// log.Println(ss + "\n")
 	return ss
 }
 func CheckAdminKey(key string) string {

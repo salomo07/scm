@@ -3,11 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
-	"scm/controllers"
 	"scm/models"
 	"scm/routers"
 	"scm/services"
-	"time"
 
 	"github.com/buaazp/fasthttprouter"
 	"github.com/valyala/fasthttp"
@@ -16,11 +14,11 @@ import (
 var port = "8080"
 
 func main() {
-	expTime := time.Now().Local().Add(time.Hour*24*30).UnixNano() / 1000
+	// expTime := time.Now().Local().Add(time.Hour*24*30).UnixNano() / 1000
 	// jsonToken := services.StructToJson(models.SessionToken{AppId: "scm", AdminKey: "$2a$10$vwNlnoWznZXUoW6r6zDGSOwB6H/.Z9WbUC51JYdVJ93BXsF50dHCG"})
 	// go controllers.GenerateJWT(jsonToken, expTime)
 
-	go controllers.GenerateJWT(services.StructToJson(models.SessionToken{KeyRedis: "scm*c_1704524165094449*7a31b1142ea980c599b29c213e77c196", AppId: "scm", IdCompany: "c_1704524165094449"}), expTime)
+	// go controllers.GenerateJWT(services.StructToJson(models.SessionToken{KeyRedis: "scm*c_1704524165094449*7a31b1142ea980c599b29c213e77c196", AppId: "scm", IdCompany: "c_1704524165094449"}), expTime)
 	// services.SubscribeRedis("c_1702276535981680")
 	router := fasthttprouter.New()
 	router.GET("/", func(ctx *fasthttp.RequestCtx) {

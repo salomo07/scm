@@ -1,6 +1,6 @@
 package models
 
-type UserInsert struct {
+type User struct {
 	Nik       string `json:"nik" validate:"required"`
 	Name      string `json:"name" validate:"required"`
 	Nickname  string `json:"nickname"`

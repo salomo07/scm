@@ -26,8 +26,8 @@ type SessionToken struct {
 	IpClient  string `json:"ipclient"`
 }
 type SessionFull struct {
-	AdminDB AdminDB    `json:"admindb"`
-	User    UserInsert `json:"user"`
+	AdminDB AdminDB `json:"admindb"`
+	User    User    `json:"user"`
 }
 type AdminDB struct {
 	UserCDB string `json:"usercdb"`
