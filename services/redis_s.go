@@ -22,11 +22,17 @@ func SaveValueRedis(data ...string) {
 	opt, _ := redis.ParseURL(config.GetCredRedis())
 	client := redis.NewClient(opt)
 	duration := time.Hour * 1
-	if data[2] != "" {
-		dur, _ := time.ParseDuration(data[2])
-		duration = dur
+	log.Println(data)
+	if len(data) == 3 {
+		if data[2] != "" {
+			dur, _ := time.ParseDuration(data[2])
+			duration = dur
+		}
+		client.Set(ctx, string(data[0]), data[1], duration)
+	} else {
+		client.Set(ctx, string(data[0]), data[1], duration)
 	}
-	client.Set(ctx, string(data[0]), data[1], duration)
+
 	print(data[0] + " is saved")
 }
 

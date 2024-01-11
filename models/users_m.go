@@ -1,16 +1,16 @@
 package models
 
 type UserInsert struct {
-	Nik        string   `json:"nik" validate:"required"`
-	Name       string   `json:"name" validate:"required"`
-	Nickname   string   `json:"nickname"`
-	Username   string   `json:"username" validate:"required"`
-	Password   string   `json:"password" validate:"required"`
-	Table      string   `json:"table"`
-	IdCompany  string   `json:"idcompany"`
-	IdRole     string   `json:"idrole" validate:"required"`
-	AccessMenu []string `json:"accessmenu"`
+	Nik       string `json:"nik" validate:"required"`
+	Name      string `json:"name" validate:"required"`
+	Nickname  string `json:"nickname"`
+	Username  string `json:"username" validate:"required"`
+	Password  string `json:"password" validate:"required"`
+	Table     string `json:"table"`
+	IdCompany string `json:"idcompany" validate:"required"`
+	IdRole    string `json:"idrole" validate:"required"`
 }
+
 type Role struct {
 	Table     string `json:"table"`
 	IdCompany string `json:"idcompany" validate:"required"`

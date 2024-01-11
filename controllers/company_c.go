@@ -18,30 +18,35 @@ func RegisterCompany(adminCred string, ctx *fasthttp.RequestCtx) {
 	}
 	var companyModel models.Company
 	models.JsonToStruct(string(ctx.PostBody()), &companyModel)
-	query := consts.QueryCompanyAlias(companyModel.Alias)
-	existCompany, errFind, statuscode := services.FindDocument(adminCred, query, config.DB_CORE_NAME)
-	if companyModel.Alias == "" {
-		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "alias is mandatory")
-	} else if errFind != "" {
-		services.ShowResponseDefault(ctx, statuscode, errFind)
-	} else if len(existCompany.Docs) > 0 {
-		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, `alias has already been used`)
-	} else {
-		// Insert document company
-		companyModel.IdCompany = "c_" + strconv.FormatInt(time.Now().UnixNano()/1000, 10)
-		if companyModel.LevelMembership == "" {
-			companyModel.LevelMembership = "default"
-		}
+	err := models.ValidateRequiredFields(companyModel, ctx)
+	if err == "" {
+		query := consts.QueryCompanyAlias(companyModel.Alias, companyModel.AppId)
 
-		companyInsertRes, errInsert, statuscode := services.InsertDocument(adminCred, models.StructToJson(companyModel), config.DB_CORE_NAME)
-		if errInsert != "" {
-			services.ShowResponseDefault(ctx, statuscode, errInsert)
+		existCompany, errFind, statuscode := services.FindDocument(adminCred, query, config.DB_CORE_NAME)
+		if errFind != "" {
+			services.ShowResponseDefault(ctx, statuscode, errFind)
+		} else if len(existCompany.Docs) > 0 {
+			services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, `'Alias' has already been used`)
 		} else {
-			companyJson := models.StructToJson(companyModel)
-			createCompanyDB(adminCred, ctx, companyModel.IdCompany, companyInsertRes, companyJson)
+			// Insert document company
+			companyModel.Table = "company"
+			companyModel.IdCompany = "c_" + strconv.FormatInt(time.Now().UnixNano()/1000, 10)
+			if companyModel.LevelMembership == "" {
+				companyModel.LevelMembership = "default"
+			}
 
-			//Save temporary company data on Redis
-			go services.SaveValueRedis(companyModel.IdCompany, companyJson, (time.Hour * 8).String())
+			companyInsertRes, errInsert, statuscode := services.InsertDocument(adminCred, models.StructToJson(companyModel), config.DB_CORE_NAME)
+			if errInsert != "" {
+				services.ShowResponseDefault(ctx, statuscode, errInsert)
+			} else {
+				companyJson := models.StructToJson(companyModel)
+				createCompanyDB(adminCred, ctx, companyModel.IdCompany, companyInsertRes, companyJson)
+
+				//Save temporary company data on Redis
+
+				// log.Println(companyModel.IdCompany, companyJson, (time.Hour * 8).String())
+				// go services.SaveValueRedis(companyModel.IdCompany, companyJson, (time.Hour * 8).String())
+			}
 		}
 	}
 }

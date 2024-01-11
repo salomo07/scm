@@ -22,7 +22,7 @@ func AddMenu(adminCred string, ctx *fasthttp.RequestCtx) {
 	}
 	var menuModel models.Menu
 	models.JsonToStruct(string(ctx.PostBody()), &menuModel)
-	err := models.ValidateStruct(menuModel, ctx)
+	err := models.ValidateRequiredFields(menuModel, ctx)
 	if err == "" {
 		menuModel.Table = "menu"
 		if len(menuModel.Submenu) > 0 {
@@ -84,7 +84,7 @@ func AddUser(adminCred models.AdminDB, urlDB string, ctx *fasthttp.RequestCtx) {
 	}
 	var userModel models.UserInsert
 	models.JsonToStruct(string(ctx.PostBody()), &userModel)
-	err := models.ValidateStruct(userModel, ctx)
+	err := models.ValidateRequiredFields(userModel, ctx)
 	if err == "" {
 		encryptedPass := config.EncodingBcrypt(userModel.Password)
 		userModel.Password = encryptedPass
@@ -97,7 +97,7 @@ func AddUser(adminCred models.AdminDB, urlDB string, ctx *fasthttp.RequestCtx) {
 			services.ShowResponseDefault(ctx, codeFind, errFind)
 		} else {
 			if len(resFind.Docs) > 0 {
-				models.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Username sudah digunakan (Username harus unik)")
+				models.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Username already taken")
 			} else {
 				InsertUser(urlDB)
 				resIns, errIns, codeIns := services.InsertDocumentAsComp(models.Company{UserCDB: adminCred.UserCDB, PassCDB: adminCred.PassCDB}, models.StructToJson(userModel))

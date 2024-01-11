@@ -15,7 +15,7 @@ func AddRole(adminCred string, ctx *fasthttp.RequestCtx) {
 	}
 	var roleModel models.Role
 	models.JsonToStruct(string(ctx.PostBody()), &roleModel)
-	err := models.ValidateStruct(roleModel, ctx)
+	err := models.ValidateRequiredFields(roleModel, ctx)
 	if err == "" {
 		roleModel.Table = "role"
 		resBody, errStr, statuscode := services.InsertDocument(adminCred, models.StructToJson(roleModel), config.DB_CORE_NAME)
@@ -35,7 +35,7 @@ func AddRoleBulk(adminCred string, ctx *fasthttp.RequestCtx) {
 	var roleModelTemp []models.Role
 	models.JsonToStruct(string(ctx.Request.Body()), &roleModel)
 	for _, value := range roleModel {
-		err := models.ValidateStruct(value, ctx)
+		err := models.ValidateRequiredFields(value, ctx)
 		if err == "" {
 			value.Table = "role"
 			roleModelTemp = append(roleModelTemp, value)

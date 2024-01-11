@@ -9,6 +9,7 @@ import (
 	"scm/services"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/valyala/fasthttp"
@@ -44,7 +45,7 @@ func Login(ctx *fasthttp.RequestCtx) string {
 					log.Println(json)
 					models.JsonToStruct(json, &company)
 					// Jika di Redis belum ada data company, maka data yang didapat dari DB
-					go services.SaveValueRedis(company.IdCompany)
+					go services.SaveValueRedis(company.IdCompany, models.StructToJson(company))
 					FindUserOnCoreDB(ctx, loginInput)
 				}
 			}
@@ -69,11 +70,36 @@ func FindUserOnCoreDB(ctx *fasthttp.RequestCtx, loginInput models.LoginInput) {
 			services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Username or Email is not found")
 		} else {
 			//Decrypt Pass
+			jsonUserSuccess := ""
 			for _, val := range findRes.Docs {
 				var userData models.UserInsert
 				json := models.StructToJson(val)
 				models.JsonToStruct(json, &userData)
-				print("Ini hasil decrypt Bcrypt: " + config.CompareHashAndPasswordBcrypt(loginInput.Password, userData.Password))
+				if config.CompareHashAndPasswordBcrypt(loginInput.Password, userData.Password) != "" {
+					user := models.RemoveField(val, "password")
+					jsonUserSuccess = models.StructToJson(user)
+				}
+			}
+			if jsonUserSuccess == "" {
+				models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Username, Email or Password is not match")
+			} else {
+				type UserLoginResult struct {
+					Nik       string `json:"nik" validate:"required"`
+					Name      string `json:"name" validate:"required"`
+					Nickname  string `json:"nickname"`
+					Username  string `json:"username" validate:"required"`
+					IdCompany string `json:"idcompany"`
+					IdRole    string `json:"idrole" validate:"required"`
+				}
+				expTime := time.Now().Local().Add(time.Hour*4).UnixNano() / 1000
+				var userJWT models.UserInsert
+				models.JsonToStruct(jsonUserSuccess, &userJWT)
+
+				jwt := GenerateJWT(models.StructToJson(userJWT), expTime)
+				services.SaveValueRedis(loginInput.AppId+"*"+userJWT.IdCompany+"*"+userJWT.Username, jwt, strconv.FormatInt(expTime, 10))
+
+				services.ShowResponseJson(ctx, fasthttp.StatusOK, models.StructToJson(&models.LoginResponse{AppId: loginInput.AppId, IdCompany: userJWT.IdCompany, Token: jwt, Expired: time.Unix(0, expTime*int64(time.Microsecond)).Format(time.RFC3339)}))
+
 			}
 		}
 	}

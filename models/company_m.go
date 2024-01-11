@@ -1,12 +1,12 @@
 package models
 
 type Company struct {
-	IdCompany       string    `json:"_id" validate:"required"`
+	IdCompany       string    `json:"_id"`
 	AppId           string    `json:"appid" validate:"required"`
 	Name            string    `json:"name" validate:"required"`
 	Alias           string    `json:"alias" validate:"required"`
 	LevelMembership string    `json:"levelmembership" validate:"required"`
-	Table           string    `json:"table" validate:"required"`
+	Table           string    `json:"table"`
 	UserCDB         string    `json:"usercdb"`
 	PassCDB         string    `json:"passcdb"`
 	Contact         []Contact `json:"contact"`
@@ -16,6 +16,7 @@ type Company struct {
 type CompanyEdit struct {
 	IdCompany       string    `json:"_id"`
 	Rev             string    `json:"_rev"`
+	AppId           string    `json:"appid"`
 	Name            string    `json:"name"`
 	Alias           string    `json:"alias"`
 	LevelMembership string    `json:"levelmembership"`

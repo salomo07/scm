@@ -3,6 +3,8 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/valyala/fasthttp"
@@ -33,12 +35,10 @@ type AdminDB struct {
 }
 
 type LoginResponse struct {
-	AppId     string     `json:"appid"`
-	UserData  UserInsert `json:"userdata"`
-	IdCompany string     `json:"idcompany"`
-	PassCDB   string     `json:"passcdb"`
-	UserApp   string     `json:"userapp"`
-	PassApp   string     `json:"passapp"`
+	AppId     string `json:"appid"`
+	IdCompany string `json:"idcompany"`
+	Token     string `json:"token"`
+	Expired   string `json:"expired"`
 }
 
 func JsonToStruct(jsonStr string, dynamic any) interface{} {
@@ -89,4 +89,37 @@ func RemoveField(original any, fieldName string) DynamicStruct {
 	}
 
 	return resultValue
+}
+func ValidateRequiredFields(data interface{}, ctx *fasthttp.RequestCtx) string {
+	value := reflect.ValueOf(data)
+	if value.Kind() != reflect.Struct {
+		return "Input is not a struct"
+	}
+
+	var missingFields []string
+
+	for i := 0; i < value.NumField(); i++ {
+		field := value.Field(i)
+		fieldName := value.Type().Field(i).Name
+		validateTag := value.Type().Field(i).Tag.Get("validate")
+
+		if validateTag == "required" {
+			fieldValue := field.Interface()
+			if fieldValue == "" {
+				missingFields = append(missingFields, "'"+fieldName+"'")
+			}
+		}
+	}
+
+	if len(missingFields) > 0 {
+		missingFieldsStr := strings.Join(missingFields, ", ")
+		if len(missingFields) > 1 {
+			ShowResponseDefault(ctx, fasthttp.StatusBadRequest, missingFieldsStr+" fields are required and cannot be empty")
+		} else {
+			ShowResponseDefault(ctx, fasthttp.StatusBadRequest, missingFieldsStr+" field is required and cannot be empty")
+		}
+		return missingFieldsStr
+	}
+
+	return ""
 }
