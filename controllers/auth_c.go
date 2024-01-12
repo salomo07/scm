@@ -182,7 +182,8 @@ func getCompanyDataOnRedisOrDB(ctx *fasthttp.RequestCtx, sessionToken models.Ses
 			return companyModel, "", err
 		}
 	} else {
-		println("Apa bisa lewat sini???")
+		println("\nApa bisa lewat sini???\n")
+		return companyModel, "", err
 	}
 }
 func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminDB, string, string) {
@@ -214,10 +215,10 @@ func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminDB, string, string) {
 					urlDB := config.GetCredCDBAdmin()
 					print("--You're SuperAdmin--\n" + urlDB)
 					log.Println(sessionModel)
-					company, url, err := getCompanyDataOnRedisOrDB(ctx, sessionModel)
+					// company, url, err := getCompanyDataOnRedisOrDB(ctx, sessionModel)
 				} else {
 					//Token sebagai Company
-					getCompanyDataOnRedisOrDB(ctx, sessionModel)
+					// getCompanyDataOnRedisOrDB(ctx, sessionModel)
 				}
 
 			} else {
@@ -226,6 +227,7 @@ func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminDB, string, string) {
 			}
 		}
 	}
+	return models.AdminDB{}, "", "Token is invalid"
 }
 
 // func saveCompanyCredToRedis(idcompany string) {
