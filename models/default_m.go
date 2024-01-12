@@ -15,16 +15,27 @@ type DefaultResponse struct {
 	Messege string `json:"messege"`
 }
 
-type SessionToken struct {
+type Session struct {
 	//contoh format IdAppCompanyUser scm*c_1324353452345*u_34345345
 	KeyRedis  string `json:"keyredis" validate:"required"`
 	AdminKey  string `json:"adminkey"`
 	AppId     string `json:"appid"`
-	IdCompany string `json:"idcompany"`
+	IdCompany string `json:"idcompany" validate:"required"`
 	IdUser    string `json:"iduser"`
 	UserAgent string `json:"useragent"`
 	IpClient  string `json:"ipclient"`
 }
+
+//	type SessionCompany struct {
+//		//contoh format IdAppCompanyUser scm*c_1324353452345*u_34345345
+//		KeyRedis  string `json:"keyredis"`
+//		AdminKey  string `json:"adminkey"`
+//		AppId     string `json:"appid"`
+//		IdCompany string `json:"idcompany" validate:"required"`
+//		IdUser    string `json:"iduser"`
+//		UserAgent string `json:"useragent"`
+//		IpClient  string `json:"ipclient"`
+//	}
 type SessionFull struct {
 	AdminDB AdminDB `json:"admindb"`
 	User    User    `json:"user"`

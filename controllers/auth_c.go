@@ -83,14 +83,7 @@ func FindUserOnCoreDB(ctx *fasthttp.RequestCtx, loginInput models.LoginInput) {
 			if jsonUserSuccess == "" {
 				models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Username, Email or Password is not match")
 			} else {
-				type UserLoginResult struct {
-					Nik       string `json:"nik" validate:"required"`
-					Name      string `json:"name" validate:"required"`
-					Nickname  string `json:"nickname"`
-					Username  string `json:"username" validate:"required"`
-					IdCompany string `json:"idcompany"`
-					IdRole    string `json:"idrole" validate:"required"`
-				}
+
 				expTime := time.Now().Local().Add(time.Hour*4).UnixNano() / 1000
 				var userJWT models.User
 				models.JsonToStruct(jsonUserSuccess, &userJWT)
@@ -163,6 +156,35 @@ func CheckAdminKey(key string) string {
 		return val
 	}
 }
+func getCompanyDataOnRedisOrDB(ctx *fasthttp.RequestCtx, sessionToken models.Session) (company models.Company, urlDB string, err string) {
+	resRedis, errRedis := services.GetValueRedis(sessionToken.KeyRedis)
+	var companyModel models.Company
+	if errRedis != "" {
+		models.ShowResponseDefault(ctx, fasthttp.StatusServiceUnavailable, "Error when getting user session, please contact administration")
+		return companyModel, "", "Error when getting user session, please contact administration"
+	} else if resRedis == "" {
+		print("\n")
+		//Jika token yng dimasukan untuk akses Company, tapi token tersebut tidak ditemukan di Redis.
+		//Find credDB company by Idcompany
+		query := `{"selector":{"_id":"` + sessionToken.IdCompany + `","table":"company"}}`
+		find, err, _ := services.FindDocument(config.GetCredCDBAdmin(), query, config.DB_CORE_NAME)
+		if err == "" {
+			if len(find.Docs) > 0 {
+				println(find.Docs[0])
+				json := models.StructToJson(find.Docs[0])
+				models.JsonToStruct(json, &companyModel)
+				return companyModel, config.GetCredCDBCompany(companyModel.UserCDB, companyModel.PassCDB), ""
+			} else {
+				models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Company is unregistered")
+				return companyModel, "", "Company is unregistered"
+			}
+		} else {
+			return companyModel, "", err
+		}
+	} else {
+		println("Apa bisa lewat sini???")
+	}
+}
 func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminDB, string, string) {
 	authHeader := ctx.Request.Header.Peek("Authorization")
 	tokenString, err := extractBearerToken(authHeader)
@@ -182,45 +204,20 @@ func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminDB, string, string) {
 			if token.Valid {
 				ctx.Response.SetStatusCode(fasthttp.StatusOK)
 
-				var sessionToken models.SessionToken
+				var sessionModel models.Session
 				claims := token.Claims.(jwt.MapClaims)
 				data := claims["data"].(string)
-				services.JsonToStruct(string(data), &sessionToken)
-				if sessionToken.AdminKey != "" && sessionToken.AdminKey == os.Getenv("API_KEY_ADMIN") {
+				services.JsonToStruct(string(data), &sessionModel)
+				if sessionModel.AdminKey != "" && sessionModel.AdminKey == os.Getenv("API_KEY_ADMIN") {
+					//Jika token yang diberikan token SuperAdmin
+					models.ValidateRequiredFields(sessionModel, ctx)
 					urlDB := config.GetCredCDBAdmin()
 					print("--You're SuperAdmin--\n" + urlDB)
-
-					return models.AdminDB{}, config.GetCredCDBAdmin(), ""
+					log.Println(sessionModel)
+					company, url, err := getCompanyDataOnRedisOrDB(ctx, sessionModel)
 				} else {
-					resRedis, errRedis := services.GetValueRedis(sessionToken.KeyRedis)
-					var admCred models.AdminDB
-					if errRedis != "" {
-						models.ShowResponseDefault(ctx, fasthttp.StatusServiceUnavailable, "Error when getting user session, please contact administration")
-						return models.AdminDB{}, config.GetCredCDBCompany(os.Getenv("COUCHDB_USER"), os.Getenv("COUCHDB_PASSWORD")), "Error when getting user session, please contact administration"
-					} else if resRedis == "" {
-						print("\n")
-						//Jika token yng dimasukkn untuk akses Company, tapi token tersebut tidak ditemukan di Redis.
-						//Find credDB company berdasarkan Idcompany
-						query := `{"selector":{"_id":"` + sessionToken.IdCompany + `","table":"company"}}`
-						find, err, _ := services.FindDocument(config.GetCredCDBAdmin(), query, config.DB_CORE_NAME)
-						if err == "" {
-							if len(find.Docs) > 0 {
-								println(find.Docs[0])
-								json := models.StructToJson(find.Docs[0])
-								models.JsonToStruct(json, &admCred)
-							}
-						}
-						log.Println(find)
-						return admCred, config.GetCredCDBCompany(admCred.UserCDB, admCred.PassCDB), ""
-					} else {
-						print("--You're Company Admin--\n")
-
-						var sessionFull models.SessionFull
-						services.JsonToStruct(resRedis, &sessionFull)
-						// log.Println(resRedis)
-						// log.Print("DB URL : ", config.GetCredCDBCompany(sessionFull.AdminDB.UserCDB, sessionFull.AdminDB.PassCDB))
-						return sessionFull.AdminDB, config.GetCredCDBCompany(sessionFull.AdminDB.UserCDB, sessionFull.AdminDB.PassCDB), ""
-					}
+					//Token sebagai Company
+					getCompanyDataOnRedisOrDB(ctx, sessionModel)
 				}
 
 			} else {

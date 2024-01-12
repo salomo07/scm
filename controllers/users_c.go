@@ -90,7 +90,7 @@ func AddUser(adminCred models.AdminDB, urlDB string, ctx *fasthttp.RequestCtx) {
 		userModel.Table = "user"
 
 		findUserCoreDB := `{"selector":{"username":"` + userModel.Username + `","table":"user"}}`
-		resFind, errFind, codeFind := services.FindDocumentAsComp(models.Company{UserCDB: adminCred.UserCDB, PassCDB: adminCred.PassCDB}, findUserCoreDB)
+		resFind, errFind, codeFind := services.FindDocumentAsComp(models.Company{UserCDB: adminCred.UserCDB, PassCDB: adminCred.PassCDB, IdCompany: adminCred.UserCDB}, findUserCoreDB)
 		if errFind == "" {
 			services.ShowResponseDefault(ctx, codeFind, errFind)
 		} else {

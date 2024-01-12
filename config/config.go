@@ -15,11 +15,9 @@ import (
 )
 
 var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
-var usingIBM = false
+var usingIBM = true
 
 var DB_CORE_NAME = "scm_core"
-
-// var DB_CRED_NAME = "scm_cred"
 var CDB_USER_ADMIN = ""
 var CDB_PASS_ADMIN = ""
 
@@ -77,7 +75,7 @@ func GetCredCDBAdmin() string {
 	} else {
 		CDB_CRED_ADMIN = "http://" + user + ":" + pass + "@" + host + ":5984/"
 	}
-	print(CDB_CRED_ADMIN + "\n")
+	print("Admin DB : " + CDB_CRED_ADMIN + "\n")
 	return CDB_CRED_ADMIN
 }
 func GetCredCDBCompany(user string, pass string) string {
