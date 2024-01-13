@@ -186,7 +186,7 @@ func getCompanyDataOnRedisOrDB(ctx *fasthttp.RequestCtx, sessionToken models.Ses
 		return companyModel, "", err
 	}
 }
-func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminDB, string, string) {
+func CheckSession(ctx *fasthttp.RequestCtx) (admReturn models.AdminDB, urldb string, errString string) {
 	authHeader := ctx.Request.Header.Peek("Authorization")
 	tokenString, err := extractBearerToken(authHeader)
 	if err != nil {
@@ -211,11 +211,15 @@ func CheckSession(ctx *fasthttp.RequestCtx) (models.AdminDB, string, string) {
 				services.JsonToStruct(string(data), &sessionModel)
 				if sessionModel.AdminKey != "" && sessionModel.AdminKey == os.Getenv("API_KEY_ADMIN") {
 					//Jika token yang diberikan token SuperAdmin
-					models.ValidateRequiredFields(sessionModel, ctx)
+					err := models.ValidateRequiredFields(sessionModel, ctx)
 					urlDB := config.GetCredCDBAdmin()
 					print("--You're SuperAdmin--\n" + urlDB)
-					log.Println(sessionModel)
-					// company, url, err := getCompanyDataOnRedisOrDB(ctx, sessionModel)
+					log.Println(err, sessionModel)
+					company, url, err := getCompanyDataOnRedisOrDB(ctx, sessionModel)
+					if err != "" {
+						return models.AdminDB{UserCDB: company.UserCDB, PassCDB: company.PassCDB}, config.GetCredCDBAdmin(), ""
+					}
+					print(url)
 				} else {
 					//Token sebagai Company
 					// getCompanyDataOnRedisOrDB(ctx, sessionModel)
