@@ -163,7 +163,7 @@ func getCompanyDataOnRedisOrDB(ctx *fasthttp.RequestCtx, sessionToken models.Ses
 		models.ShowResponseDefault(ctx, fasthttp.StatusServiceUnavailable, "Error when getting user session, please contact administration")
 		return companyModel, "", "Error when getting user session, please contact administration"
 	} else if resRedis == "" {
-		print("\n")
+		println("\nData diambil dari DB\n")
 		//Jika token yng dimasukan untuk akses Company, tapi token tersebut tidak ditemukan di Redis.
 		//Find credDB company by Idcompany
 		query := `{"selector":{"_id":"` + sessionToken.IdCompany + `","table":"company"}}`
@@ -182,11 +182,13 @@ func getCompanyDataOnRedisOrDB(ctx *fasthttp.RequestCtx, sessionToken models.Ses
 			return companyModel, "", err
 		}
 	} else {
-		println("\nApa bisa lewat sini???\n")
+
+		println("\nData diambil dari Redis\n")
 		return companyModel, "", err
 	}
 }
 func CheckSession(ctx *fasthttp.RequestCtx) (admReturn models.AdminDB, urldb string, errString string) {
+	var adminData models.AdminDB
 	authHeader := ctx.Request.Header.Peek("Authorization")
 	tokenString, err := extractBearerToken(authHeader)
 	if err != nil {
@@ -200,7 +202,7 @@ func CheckSession(ctx *fasthttp.RequestCtx) (admReturn models.AdminDB, urldb str
 		if errToken != nil {
 			println("\nError token")
 			services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, errToken.Error())
-			return models.AdminDB{}, "", err.Error()
+			return admReturn, "", err.Error()
 		} else {
 			if token.Valid {
 				ctx.Response.SetStatusCode(fasthttp.StatusOK)
@@ -214,24 +216,32 @@ func CheckSession(ctx *fasthttp.RequestCtx) (admReturn models.AdminDB, urldb str
 					err := models.ValidateRequiredFields(sessionModel, ctx)
 					urlDB := config.GetCredCDBAdmin()
 					print("--You're SuperAdmin--\n" + urlDB)
-					log.Println(err, sessionModel)
-					company, url, err := getCompanyDataOnRedisOrDB(ctx, sessionModel)
-					if err != "" {
-						return models.AdminDB{UserCDB: company.UserCDB, PassCDB: company.PassCDB}, config.GetCredCDBAdmin(), ""
-					}
-					print(url)
-				} else {
-					//Token sebagai Company
-					// getCompanyDataOnRedisOrDB(ctx, sessionModel)
-				}
+					print("sebagai admin \n")
 
+					company, _, err := getCompanyDataOnRedisOrDB(ctx, sessionModel)
+					if err == "" {
+						adminData = models.AdminDB{UserCDB: company.UserCDB, PassCDB: company.PassCDB}
+					} else {
+						log.Println(company)
+					}
+				} else {
+					print("sebagai company \n")
+					//Token sebagai Company
+					company, _, err := getCompanyDataOnRedisOrDB(ctx, sessionModel)
+					if err != "" {
+						adminData = models.AdminDB{UserCDB: company.UserCDB, PassCDB: company.PassCDB}
+						urldb = config.GetCredCDBCompany(company.UserCDB, company.PassCDB)
+					}
+				}
 			} else {
-				services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Token is invalid")
-				return models.AdminDB{}, "", "Token is invalid"
+				adminData = models.AdminDB{}
+				urldb = ""
+				errString = "Error token"
 			}
 		}
 	}
-	return models.AdminDB{}, "", "Token is invalid"
+	log.Println("\n", adminData, urldb, errString)
+	return adminData, urldb, errString
 }
 
 // func saveCompanyCredToRedis(idcompany string) {
