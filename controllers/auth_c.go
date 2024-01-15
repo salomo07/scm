@@ -19,7 +19,6 @@ func Login(ctx *fasthttp.RequestCtx) string {
 	rawJSON := ctx.Request.Body()
 	var loginInput models.LoginInput
 	models.JsonToStruct(string(rawJSON), &loginInput)
-	log.Println(loginInput)
 	if loginInput.IdCompany == "" || loginInput.Username == "" || loginInput.Password == "" || loginInput.AppId == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Format input login tidak sesuai")
 	} else {
@@ -42,7 +41,6 @@ func Login(ctx *fasthttp.RequestCtx) string {
 					print("Companynya :\n")
 					json := models.StructToJson(res.Docs[0])
 
-					log.Println(json)
 					models.JsonToStruct(json, &company)
 					// Jika di Redis belum ada data company, maka data yang didapat dari DB
 					go services.SaveValueRedis(company.IdCompany, models.StructToJson(company))
@@ -182,7 +180,6 @@ func getCompanyDataOnRedisOrDB(ctx *fasthttp.RequestCtx, sessionToken models.Ses
 			return companyModel, "", err
 		}
 	} else {
-
 		println("\nData diambil dari Redis\n")
 		return companyModel, "", err
 	}
@@ -216,7 +213,6 @@ func CheckSession(ctx *fasthttp.RequestCtx) (admReturn models.AdminDB, urldb str
 					err := models.ValidateRequiredFields(sessionModel, ctx)
 					urlDB := config.GetCredCDBAdmin()
 					print("--You're SuperAdmin--\n" + urlDB)
-					print("sebagai admin \n")
 
 					company, _, err := getCompanyDataOnRedisOrDB(ctx, sessionModel)
 					if err == "" {
@@ -228,12 +224,13 @@ func CheckSession(ctx *fasthttp.RequestCtx) (admReturn models.AdminDB, urldb str
 					print("sebagai company \n")
 					//Token sebagai Company
 					company, _, err := getCompanyDataOnRedisOrDB(ctx, sessionModel)
-					if err != "" {
+					if err == "" {
 						adminData = models.AdminDB{UserCDB: company.UserCDB, PassCDB: company.PassCDB}
 						urldb = config.GetCredCDBCompany(company.UserCDB, company.PassCDB)
 					}
 				}
 			} else {
+				print("\nError token\n")
 				adminData = models.AdminDB{}
 				urldb = ""
 				errString = "Error token"
@@ -243,17 +240,6 @@ func CheckSession(ctx *fasthttp.RequestCtx) (admReturn models.AdminDB, urldb str
 	log.Println("\n", adminData, urldb, errString)
 	return adminData, urldb, errString
 }
-
-// func saveCompanyCredToRedis(idcompany string) {
-// 	findCredCompanyDB := `{"selector":{"_id":"` + idcompany + `"}}`
-// 	res, err, code := services.FindDocument(config.GetCredCDBAdmin(), findCredCompanyDB, config.DB_CRED_NAME)
-// 	if err == "" {
-// 		if len(res.Docs) > 0 {
-
-//			}
-//			print(res.Docs, code)
-//		}
-//	}
 func extractBearerToken(authHeader []byte) (string, error) {
 	// Check if the Authorization header starts with "Bearer "
 	if !strings.HasPrefix(string(authHeader), "Bearer ") {

@@ -76,5 +76,5 @@ func ToCDBCompany(url string, method string, body string) (resBody string, errSt
 	print("\n" + strconv.Itoa(forwardedResponse.StatusCode()) + " - " + string(forwardedResponse.Body()))
 	fasthttp.ReleaseRequest(forwardedRequest)
 	// fasthttp.ReleaseResponse(forwardedResponse)
-	return string(forwardedResponse.Body()), "", fasthttp.StatusOK
+	return string(forwardedResponse.Body()), "", forwardedResponse.StatusCode()
 }

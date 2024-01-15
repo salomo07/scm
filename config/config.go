@@ -15,7 +15,7 @@ import (
 )
 
 var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
-var usingIBM = false
+var UsingIBM = true
 
 var DB_CORE_NAME = "scm_core"
 var CDB_USER_ADMIN = ""
@@ -70,7 +70,7 @@ func GetCredCDBAdmin() string {
 
 	CDB_HOST = os.Getenv("COUCHDB_HOST")
 
-	if usingIBM {
+	if UsingIBM {
 		CDB_CRED_ADMIN = "https://" + userIBM + ":" + passIBM + "@" + hostIBM
 	} else {
 		CDB_CRED_ADMIN = "http://" + user + ":" + pass + "@" + host + ":5984/"
@@ -79,7 +79,7 @@ func GetCredCDBAdmin() string {
 	return CDB_CRED_ADMIN
 }
 func GetCredCDBCompany(user string, pass string) string {
-	if usingIBM {
+	if UsingIBM {
 		return "https://" + user + ":" + pass + "@" + CDB_HOST
 	}
 	return "http://" + user + ":" + pass + "@" + CDB_HOST + ":5984/"

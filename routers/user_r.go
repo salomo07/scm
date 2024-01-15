@@ -13,7 +13,7 @@ func UserRouters(router *fasthttprouter.Router) {
 		adminCred, urlDB, errMsg := controllers.CheckSession(ctx)
 		log.Println(adminCred, urlDB, errMsg)
 		if errMsg == "" {
-			controllers.AddUser(adminCred, urlDB, ctx)
+			controllers.AddUser(adminCred, ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
@@ -32,9 +32,9 @@ func UserRouters(router *fasthttprouter.Router) {
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 	router.POST("/api/v1/admin/user/createbulk", func(ctx *fasthttp.RequestCtx) {
-		adminCred, urlDB, errMsg := controllers.CheckSession(ctx)
+		adminCred, _, errMsg := controllers.CheckSession(ctx)
 		if errMsg == "" {
-			controllers.AddUser(adminCred, urlDB, ctx)
+			controllers.AddUser(adminCred, ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})

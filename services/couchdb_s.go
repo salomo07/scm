@@ -20,7 +20,19 @@ func FindDocument(adminCred string, query string, dbname string) (findRes models
 	log.Println(urlDB, "POST", query)
 	res, err, code := SendToNextServer(urlDB, "POST", query)
 	JsonToStruct(res, &findRes)
+	if code > 303 {
+		return models.FindResponse{}, res, code
+	}
 	return findRes, err, code
+}
+func GetDocumentById(adminCred string, dbname string, id string) (resjson string, errStr string, statuscode int) {
+	urlDB := adminCred + dbname + "/" + id
+	res, err, code := SendToNextServer(urlDB, "GET", "")
+	resjson = res
+	if code > 303 && config.UsingIBM == false {
+		return "", resjson, code
+	}
+	return resjson, err, code
 }
 func PutDocument(adminCred string, body string, dbname string, iddocument string) (resBody string, errStr string, statuscode int) {
 	urlDB := adminCred + dbname + "/" + iddocument
@@ -55,10 +67,23 @@ func InsertDocumentAsComp(company models.Company, body string) (resBody string, 
 }
 func FindDocumentAsComp(company models.Company, query string) (findRes models.FindResponse, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany + "/_find"
+
 	print(urlDB + "\n" + query)
 	resBody, err, code := ToCDBCompany(urlDB, "POST", query)
 	JsonToStruct(resBody, &findRes)
+	if code > 303 && config.UsingIBM == false {
+		return models.FindResponse{}, resBody, code
+	}
 	return findRes, err, code
+}
+func GetDocumentByIdAsComp(company models.Company, dbname string, id string) (resjson string, errStr string, statuscode int) {
+	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + dbname + "/" + id
+	res, err, code := SendToNextServer(urlDB, "GET", "")
+	resjson = res
+	if code > 303 && config.UsingIBM == false {
+		return "", resjson, code
+	}
+	return resjson, err, code
 }
 func UpdateDocumentAsComp(company models.Company, _iddoc string, data string) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + company.IdCompany + "/" + _iddoc

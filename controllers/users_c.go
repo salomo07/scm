@@ -1,9 +1,12 @@
 package controllers
 
 import (
+	"log"
 	"scm/config"
 	"scm/models"
 	"scm/services"
+	"strconv"
+	"time"
 
 	"github.com/valyala/fasthttp"
 )
@@ -76,31 +79,62 @@ func AddAccess(adminCred string, ctx *fasthttp.RequestCtx) {
 		models.ShowResponseDefault(ctx, sts, err)
 	}
 }
-func AddUser(adminCred models.AdminDB, urlDB string, ctx *fasthttp.RequestCtx) {
+func AddUser(adminCred models.AdminDB, ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Body()) == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
 		return
 	}
 	var userModel models.User
 	models.JsonToStruct(string(ctx.PostBody()), &userModel)
+	userModel.Id = "IniIdUserDummy"
+	userModel.IdCompany = adminCred.UserCDB
 	err := models.ValidateRequiredFields(userModel, ctx)
 	if err == "" {
 		encryptedPass := config.EncodingBcrypt(userModel.Password)
 		userModel.Password = encryptedPass
 		userModel.Table = "user"
-
-		findUserCoreDB := `{"selector":{"username":"` + userModel.Username + `","table":"user"}}`
+		findUserCoreDB := `{"selector":{"$or": [{"username":"` + userModel.Username + `","table":"user"},{"contact.email":"` + userModel.Contact.Email + `","table":"user"},{"contact.mobile":"` + userModel.Contact.Mobile + `","table":"user"}]}}`
+		// ressss := `{"docs":[],"bookmark": "","warning": ""}`
+		// resFind, errFind, codeFind := services.FindDocumentAsComp(models.Company{UserCDB: adminCred.UserCDB, PassCDB: adminCred.PassCDB, IdCompany: adminCred.UserCDB}, findUserCoreDB)
 		resFind, errFind, codeFind := services.FindDocumentAsComp(models.Company{UserCDB: adminCred.UserCDB, PassCDB: adminCred.PassCDB, IdCompany: adminCred.UserCDB}, findUserCoreDB)
-		if errFind == "" {
+
+		// models.JsonToStruct(ressss, &resFind)
+		if errFind != "" {
 			services.ShowResponseDefault(ctx, codeFind, errFind)
 		} else {
+			jsonHapus := `{"docs":[{
+				"_id": "c_1702276535981680",
+				"_rev": "3-53b9187200fb5731c2d840707043a1c1",
+				"appid": "scm",
+				"name": "Suka Makmur Sejahtera",
+				"alias": "sms",
+				"levelmembership": "default",
+				"table": "company",
+				"usercdb": "c_1702276535981680",
+				"passcdb": "1702276536716766",
+				"contact": [
+					{
+						"email": "",
+						"phone": "",
+						"mobile": "085186803737"
+					}
+				],
+				"users": [
+					"u_1702209986069954"
+				]
+			}],"bookmark": "g1AAAABUeJzLYWBgYMpgSmHgKy5JLCrJTq2MT8lPzkzJBYoLJccbmhsYGZmbmRqbWloYmlkYgFRywFTiUJMFAIg-FOk",
+			"warning": "No matching index found, create an index to optimize query time."}`
+			models.JsonToStruct(jsonHapus, &resFind)
 			if len(resFind.Docs) > 0 {
-				models.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Username already taken")
+				models.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Username, Email or Mobile Phone already taken")
 			} else {
-				InsertUser(urlDB)
-				resIns, errIns, codeIns := services.InsertDocumentAsComp(models.Company{UserCDB: adminCred.UserCDB, PassCDB: adminCred.PassCDB}, models.StructToJson(userModel))
+				userModel.Id = "u_" + strconv.FormatInt(time.Now().UnixNano()/1000, 10)
+				// resIns, errIns, codeIns := services.InsertDocumentAsComp(models.Company{UserCDB: adminCred.UserCDB, PassCDB: adminCred.PassCDB}, models.StructToJson(userModel))
+				resIns, errIns, codeIns := services.InsertDocument(config.GetCredCDBAdmin(), models.StructToJson(userModel), userModel.IdCompany)
+
 				if errIns == "" {
 					services.ShowResponseJson(ctx, codeIns, resIns)
+					go AddUserOnCompanyData(userModel.IdCompany, userModel.Id)
 				} else {
 					models.ShowResponseDefault(ctx, fasthttp.StatusInternalServerError, "Gagal melakukan Insert")
 				}
@@ -108,6 +142,14 @@ func AddUser(adminCred models.AdminDB, urlDB string, ctx *fasthttp.RequestCtx) {
 		}
 	}
 }
-func InsertUser(urlDB string) {
-	print(urlDB)
+func AddUserOnCompanyData(idcompany string, iduser string) {
+	//Add to DB and Redis
+	resjson, err, _ := services.GetDocumentById(config.GetCredCDBAdmin(), "scm_core", idcompany)
+	if err != "" {
+		print("Error when getting data by ID")
+	} else {
+		var company models.Company
+		services.JsonToStruct(resjson, &company)
+		log.Println("Ini harusnya diupdate", company)
+	}
 }
