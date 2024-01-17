@@ -97,6 +97,7 @@ func AddUserByAdmin(ctx *fasthttp.RequestCtx) {
 		encryptedPass := config.EncodingBcrypt(userModel.Password)
 		userModel.Password = encryptedPass
 		userModel.Table = "user"
+		log.Println(userModel)
 		resFind, errFind, codeFind := CheckUserIsExist(userModel)
 		if errFind != "" {
 			services.ShowResponseDefault(ctx, codeFind, errFind)
@@ -104,13 +105,18 @@ func AddUserByAdmin(ctx *fasthttp.RequestCtx) {
 			if len(resFind.Docs) > 0 {
 				models.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Username, Email or Mobile Phone already taken")
 			} else {
-				userModel.Id = "u_" + strconv.FormatInt(time.Now().UnixNano()/1000, 10)
-
-				resIns, errIns, codeIns := services.InsertDocument(models.StructToJson(userModel), userModel.IdCompany)
+				timemicro := time.Now().UnixNano() / 1000
+				userModel.Id = "u_" + strconv.FormatInt(timemicro, 10)
+				userModel.Password = config.EncodingBcrypt(strconv.FormatInt(timemicro, 10))
+				resIns, errIns, codeIns := services.InsertDocument(models.StructToJson(userModel), config.DB_CORE_NAME)
 
 				if errIns == "" {
-					services.ShowResponseJson(ctx, codeIns, resIns)
+					var insertResponseModel models.InsertResponse
+					models.JsonToStruct(resIns, &insertResponseModel)
+					userRes := models.User{Id: insertResponseModel.Id, Username: userModel.Username, Password: strconv.FormatInt(timemicro, 10)}
+					services.ShowResponseJson(ctx, codeIns, models.StructToJson(userRes))
 					print("\nAddUserOnCompanyData\n")
+					go services.InsertDocument(models.StructToJson(userModel), userModel.IdCompany)
 					go AddUserOnCompanyData(userModel.IdCompany, userModel.Id)
 				} else {
 					models.ShowResponseDefault(ctx, fasthttp.StatusInternalServerError, "Gagal melakukan Insert")
@@ -123,13 +129,25 @@ func AddUserByAdmin(ctx *fasthttp.RequestCtx) {
 }
 func AddUserOnCompanyData(idcompany string, iduser string) {
 	//Add to DB and Redis
-	resjson, err, _ := services.GetDocumentById("scm_core", idcompany)
+	resjson, err, _ := services.GetDocumentById(config.DB_CORE_NAME, idcompany)
 	if err != "" {
 		print("Error when getting data by ID")
 	} else {
-		var company models.Company
+		var company models.CompanyUpdate
 		services.JsonToStruct(resjson, &company)
-		log.Println("Ini harusnya diupdate", company)
-		// services.UpdateDocument(idcompany,)
+		arrUser := company.Users
+		arrUser = addIfNotExist(arrUser, iduser)
+		company.Users = arrUser
+		go services.UpdateDocument(idcompany, models.StructToJson(company))
 	}
+}
+
+func addIfNotExist(arr []string, newString string) []string {
+	// Check if the new string already exists in the array
+	for _, existingString := range arr {
+		if existingString == newString {
+			return arr
+		}
+	}
+	return append(arr, newString)
 }

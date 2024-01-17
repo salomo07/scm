@@ -195,16 +195,18 @@ func CheckSession(ctx *fasthttp.RequestCtx) (admReturn models.AdminDB, urldb str
 				ctx.Response.SetStatusCode(fasthttp.StatusOK)
 
 				var sessionModel models.Session
+				// var userModel models.User
 				claims := token.Claims.(jwt.MapClaims)
 				data := claims["data"].(string)
 				services.JsonToStruct(string(data), &sessionModel)
+
 				if sessionModel.AdminKey != "" && sessionModel.AdminKey == os.Getenv("API_KEY_ADMIN") {
 					//Jika token yang diberikan token SuperAdmin
 					sessionModel.KeyRedis = "KeyRedisDummy"
 					err := models.ValidateRequiredFields(sessionModel)
 					urlDB := config.GetCredCDBAdmin()
 					print("--You're SuperAdmin--\n" + urlDB)
-					log.Println(sessionModel)
+
 					company, err := getCompanyDataOnRedisOrDB(ctx, sessionModel)
 					if err == "" {
 						adminData = models.AdminDB{UserCDB: company.UserCDB, PassCDB: company.PassCDB}

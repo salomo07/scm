@@ -13,6 +13,11 @@ type FindResponse struct {
 	Warning        string         `json:"warning"`
 	ExecutionStats ExecutionStats `json:"execution_stats"`
 }
+type InsertResponse struct {
+	Ok  bool   `json:"ok"`
+	Id  string `json:"id"`
+	Rev string `json:"rev"`
+}
 type CreateDBResponse struct {
 	Ok bool `json:"ok"`
 }

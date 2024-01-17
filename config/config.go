@@ -15,7 +15,7 @@ import (
 )
 
 var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
-var UsingIBM = true
+var UsingIBM = false
 
 var DB_CORE_NAME = "scm_core"
 var CDB_USER_ADMIN = ""

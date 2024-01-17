@@ -41,6 +41,7 @@ func PutDocument(body string, dbname string, iddocument string) (resBody string,
 }
 func InsertDocument(body string, dbname string) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBAdmin() + dbname
+	log.Println(urlDB, "POST", body)
 	return SendToNextServer(urlDB, "POST", body)
 }
 func InsertBulkDocument(body string, dbname string) (resBody string, errStr string, statuscode int) {
@@ -58,6 +59,7 @@ func AddAdminRoleForDB(idcompany string, body string) (resBody string, errStr st
 }
 func UpdateDocument(_id string, data string) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBAdmin() + config.DB_CORE_NAME + "/" + _id
+	log.Println(urlDB, "PUT", data)
 	return SendToNextServer(urlDB, "PUT", data)
 }
 
