@@ -10,20 +10,20 @@ import (
 
 func CompanyRouters(router *fasthttprouter.Router) {
 	router.POST("/api/v1/admin/company/create/", func(ctx *fasthttp.RequestCtx) {
-		adminDB, dbCred, errMsg := controllers.CheckSession(ctx)
+		adminDB, _, errMsg := controllers.CheckSession(ctx)
 
 		//Endpoint ini hanya bisa diakses oleh SuperAdmin (bukan company)
-		if errMsg == "" && adminDB.UserCDB == "" {
-			controllers.RegisterCompany(dbCred, ctx)
+		if errMsg == "Company is unregistered" && adminDB.UserCDB == "" {
+			controllers.RegisterCompany(ctx)
 		} else {
 			services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "You have not access to this endpoint.")
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 	router.POST("/api/v1/admin/company/role/addrole", func(ctx *fasthttp.RequestCtx) {
-		_, dbCred, errMsg := controllers.CheckSession(ctx)
+		_, _, errMsg := controllers.CheckSession(ctx)
 		if errMsg == "" {
-			controllers.AddRole(dbCred, ctx)
+			controllers.AddRole(ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})

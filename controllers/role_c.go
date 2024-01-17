@@ -8,17 +8,17 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-func AddRole(adminCred string, ctx *fasthttp.RequestCtx) {
+func AddRole(ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Body()) == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
 		return
 	}
 	var roleModel models.Role
 	models.JsonToStruct(string(ctx.PostBody()), &roleModel)
-	err := models.ValidateRequiredFields(roleModel, ctx)
+	err := models.ValidateRequiredFields(roleModel)
 	if err == "" {
 		roleModel.Table = "role"
-		resBody, errStr, statuscode := services.InsertDocument(adminCred, models.StructToJson(roleModel), config.DB_CORE_NAME)
+		resBody, errStr, statuscode := services.InsertDocument(models.StructToJson(roleModel), config.DB_CORE_NAME)
 		if resBody != "" {
 			services.ShowResponseJson(ctx, statuscode, resBody)
 		} else {
@@ -26,7 +26,7 @@ func AddRole(adminCred string, ctx *fasthttp.RequestCtx) {
 		}
 	}
 }
-func AddRoleBulk(adminCred string, ctx *fasthttp.RequestCtx) {
+func AddRoleBulk(ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Body()) == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
 		return
@@ -35,7 +35,7 @@ func AddRoleBulk(adminCred string, ctx *fasthttp.RequestCtx) {
 	var roleModelTemp []models.Role
 	models.JsonToStruct(string(ctx.Request.Body()), &roleModel)
 	for _, value := range roleModel {
-		err := models.ValidateRequiredFields(value, ctx)
+		err := models.ValidateRequiredFields(value)
 		if err == "" {
 			value.Table = "role"
 			roleModelTemp = append(roleModelTemp, value)
@@ -43,7 +43,7 @@ func AddRoleBulk(adminCred string, ctx *fasthttp.RequestCtx) {
 			return
 		}
 	}
-	resBody, errStr, statuscode := services.InsertBulkDocument(adminCred, models.StructToJson(roleModelTemp), config.DB_CORE_NAME)
+	resBody, errStr, statuscode := services.InsertBulkDocument(models.StructToJson(roleModelTemp), config.DB_CORE_NAME)
 	if resBody != "" {
 		services.ShowResponseJson(ctx, statuscode, resBody)
 	} else {

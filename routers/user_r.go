@@ -1,8 +1,8 @@
 package routers
 
 import (
-	"log"
 	"scm/controllers"
+	"scm/models"
 
 	"github.com/buaazp/fasthttprouter"
 	"github.com/valyala/fasthttp"
@@ -10,31 +10,32 @@ import (
 
 func UserRouters(router *fasthttprouter.Router) {
 	router.POST("/api/v1/admin/user/create", func(ctx *fasthttp.RequestCtx) {
-		adminCred, urlDB, errMsg := controllers.CheckSession(ctx)
-		log.Println(adminCred, urlDB, errMsg)
+		_, _, errMsg := controllers.CheckSession(ctx)
 		if errMsg == "" {
-			controllers.AddUser(adminCred, ctx)
+			controllers.AddUserByAdmin(ctx)
+		} else {
+			models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "You are Unauthorized")
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 	router.POST("/api/v1/admin/role/create", func(ctx *fasthttp.RequestCtx) {
-		_, dbStringCred, errMsg := controllers.CheckSession(ctx)
+		_, _, errMsg := controllers.CheckSession(ctx)
 		if errMsg == "" {
-			controllers.AddRole(dbStringCred, ctx)
+			controllers.AddRole(ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 	router.POST("/api/v1/admin/role/createbulk", func(ctx *fasthttp.RequestCtx) {
-		_, dbStringCred, errMsg := controllers.CheckSession(ctx)
+		_, _, errMsg := controllers.CheckSession(ctx)
 		if errMsg == "" {
-			controllers.AddRoleBulk(dbStringCred, ctx)
+			controllers.AddRoleBulk(ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 	router.POST("/api/v1/admin/user/createbulk", func(ctx *fasthttp.RequestCtx) {
-		adminCred, _, errMsg := controllers.CheckSession(ctx)
+		_, _, errMsg := controllers.CheckSession(ctx)
 		if errMsg == "" {
-			controllers.AddUser(adminCred, ctx)
+			controllers.AddUserByAdmin(ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})

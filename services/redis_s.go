@@ -38,7 +38,7 @@ func SaveValueRedis(data ...string) {
 
 func GetValueRedis(key string) (val string, err string) {
 	var ctx = context.Background()
-	print(config.GetCredRedis() + "\n")
+	print("\n" + config.GetCredRedis() + "\n")
 	opt, error := redis.ParseURL(config.GetCredRedis())
 	if error != nil {
 		return "", error.Error()

@@ -15,8 +15,8 @@ func CreateIndexPerCompany(dbname string) (resBody string, errStr string, status
 	urlDB := config.GetCredCDBAdmin() + dbname
 	return SendToNextServer(urlDB, "POST", `{"index":{"fields":["table","idcompany"]},"name":"companydata","ddoc":"companydata","type":"json"}`)
 }
-func FindDocument(adminCred string, query string, dbname string) (findRes models.FindResponse, errStr string, statuscode int) {
-	urlDB := adminCred + dbname + "/_find"
+func FindDocument(query string, dbname string) (findRes models.FindResponse, errStr string, statuscode int) {
+	urlDB := config.GetCredCDBAdmin() + dbname + "/_find"
 	log.Println(urlDB, "POST", query)
 	res, err, code := SendToNextServer(urlDB, "POST", query)
 	JsonToStruct(res, &findRes)
@@ -25,38 +25,39 @@ func FindDocument(adminCred string, query string, dbname string) (findRes models
 	}
 	return findRes, err, code
 }
-func GetDocumentById(adminCred string, dbname string, id string) (resjson string, errStr string, statuscode int) {
-	urlDB := adminCred + dbname + "/" + id
+func GetDocumentById(dbname string, id string) (resjson string, errStr string, statuscode int) {
+	urlDB := config.GetCredCDBAdmin() + dbname + "/" + id
 	res, err, code := SendToNextServer(urlDB, "GET", "")
+	log.Println(urlDB, "GET", "", res, err, code)
 	resjson = res
-	if code > 303 && config.UsingIBM == false {
+	if code > 303 && config.UsingIBM == true {
 		return "", resjson, code
 	}
 	return resjson, err, code
 }
-func PutDocument(adminCred string, body string, dbname string, iddocument string) (resBody string, errStr string, statuscode int) {
-	urlDB := adminCred + dbname + "/" + iddocument
+func PutDocument(body string, dbname string, iddocument string) (resBody string, errStr string, statuscode int) {
+	urlDB := config.GetCredCDBAdmin() + dbname + "/" + iddocument
 	return SendToNextServer(urlDB, "PUT", body)
 }
-func InsertDocument(adminCred string, body string, dbname string) (resBody string, errStr string, statuscode int) {
-	urlDB := adminCred + dbname
+func InsertDocument(body string, dbname string) (resBody string, errStr string, statuscode int) {
+	urlDB := config.GetCredCDBAdmin() + dbname
 	return SendToNextServer(urlDB, "POST", body)
 }
-func InsertBulkDocument(adminCred string, body string, dbname string) (resBody string, errStr string, statuscode int) {
-	urlDB := adminCred + dbname + "/_bulk_docs"
+func InsertBulkDocument(body string, dbname string) (resBody string, errStr string, statuscode int) {
+	urlDB := config.GetCredCDBAdmin() + dbname + "/_bulk_docs"
 	jsonData := `{"docs":` + body + `}`
 	return SendToNextServer(urlDB, "POST", jsonData)
 }
-func AddUserDB(adminCred string, idcompany string, body string) (resBody string, errStr string, statuscode int) {
-	urlDB := adminCred + "_users/org.couchdb.user:" + idcompany
+func AddUserDB(idcompany string, body string) (resBody string, errStr string, statuscode int) {
+	urlDB := config.GetCredCDBAdmin() + "_users/org.couchdb.user:" + idcompany
 	return SendToNextServer(urlDB, "PUT", body)
 }
-func AddAdminRoleForDB(adminCred string, idcompany string, body string) (resBody string, errStr string, statuscode int) {
-	urlDB := adminCred + idcompany + "/_security"
+func AddAdminRoleForDB(idcompany string, body string) (resBody string, errStr string, statuscode int) {
+	urlDB := config.GetCredCDBAdmin() + idcompany + "/_security"
 	return SendToNextServer(urlDB, "PUT", body)
 }
-func UpdateDocument(adminCred string, _id string, data string) (resBody string, errStr string, statuscode int) {
-	urlDB := adminCred + config.DB_CORE_NAME + "/" + _id
+func UpdateDocument(_id string, data string) (resBody string, errStr string, statuscode int) {
+	urlDB := config.GetCredCDBAdmin() + config.DB_CORE_NAME + "/" + _id
 	return SendToNextServer(urlDB, "PUT", data)
 }
 
@@ -71,7 +72,7 @@ func FindDocumentAsComp(company models.Company, query string) (findRes models.Fi
 	print(urlDB + "\n" + query)
 	resBody, err, code := ToCDBCompany(urlDB, "POST", query)
 	JsonToStruct(resBody, &findRes)
-	if code > 303 && config.UsingIBM == false {
+	if code > 303 && config.UsingIBM == true {
 		return models.FindResponse{}, resBody, code
 	}
 	return findRes, err, code
@@ -80,7 +81,7 @@ func GetDocumentByIdAsComp(company models.Company, dbname string, id string) (re
 	urlDB := config.GetCredCDBCompany(company.UserCDB, company.PassCDB) + dbname + "/" + id
 	res, err, code := SendToNextServer(urlDB, "GET", "")
 	resjson = res
-	if code > 303 && config.UsingIBM == false {
+	if code > 303 && config.UsingIBM == true {
 		return "", resjson, code
 	}
 	return resjson, err, code

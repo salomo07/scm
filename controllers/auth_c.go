@@ -31,7 +31,7 @@ func Login(ctx *fasthttp.RequestCtx) string {
 		} else if companyData == "" {
 			print("Company tidak ditemukan di Redis\n")
 			queryFindCred := `{"selector":{"_id":"` + loginInput.IdCompany + `","appid":"` + loginInput.AppId + `"}}`
-			res, err, code := services.FindDocument(config.GetCredCDBAdmin(), queryFindCred, config.DB_CORE_NAME)
+			res, err, code := services.FindDocument(queryFindCred, config.DB_CORE_NAME)
 			if err != "" {
 				models.ShowResponseDefault(ctx, fasthttp.StatusInternalServerError, err+"Error code : "+strconv.Itoa(code))
 			} else {
@@ -60,7 +60,7 @@ func Login(ctx *fasthttp.RequestCtx) string {
 }
 func FindUserOnCoreDB(ctx *fasthttp.RequestCtx, loginInput models.LoginInput) {
 	query := `{"selector":{"$or": [{"username":"` + loginInput.Username + `","idcompany":"` + loginInput.IdCompany + `","table":"user"},{"email":"` + loginInput.Username + `","idcompany":"` + loginInput.IdCompany + `","table":"user"}]}}`
-	findRes, err, code := services.FindDocument(config.GetCredCDBAdmin(), query, config.DB_CORE_NAME)
+	findRes, err, code := services.FindDocument(query, config.DB_CORE_NAME)
 	if err != "" {
 		models.ShowResponseDefault(ctx, fasthttp.StatusInternalServerError, "An error occurred (Error : "+strconv.Itoa(code)+" - "+err+")")
 	} else {
@@ -98,7 +98,7 @@ func FindUserOnCoreDB(ctx *fasthttp.RequestCtx, loginInput models.LoginInput) {
 func GetUserDataToCoreDB(ctx *fasthttp.RequestCtx, idcompany string, username string) models.FindResponse {
 	findUserCoreDB := `{"selector":{"$or":[{"_id":"` + idcompany + `"},{"users":"` + username + `"}]}}`
 
-	res, err, code := services.FindDocument(config.GetCredCDBAdmin(), findUserCoreDB, config.DB_CORE_NAME)
+	res, err, code := services.FindDocument(findUserCoreDB, config.DB_CORE_NAME)
 	// Jika username terdaftar di DB center / SCM_CORE, login ke DB Company
 	// Jika tidak beri notif username tidak terdaftar
 	if err != "" {
@@ -154,34 +154,27 @@ func CheckAdminKey(key string) string {
 		return val
 	}
 }
-func getCompanyDataOnRedisOrDB(ctx *fasthttp.RequestCtx, sessionToken models.Session) (company models.Company, urlDB string, err string) {
+func getCompanyDataOnRedisOrDB(ctx *fasthttp.RequestCtx, sessionToken models.Session) (company models.Company, err string) {
 	resRedis, errRedis := services.GetValueRedis(sessionToken.KeyRedis)
 	var companyModel models.Company
 	if errRedis != "" {
 		models.ShowResponseDefault(ctx, fasthttp.StatusServiceUnavailable, "Error when getting user session, please contact administration")
-		return companyModel, "", "Error when getting user session, please contact administration"
+		return companyModel, "Error when getting user session, please contact administration"
 	} else if resRedis == "" {
 		println("\nData diambil dari DB\n")
 		//Jika token yng dimasukan untuk akses Company, tapi token tersebut tidak ditemukan di Redis.
-		//Find credDB company by Idcompany
-		query := `{"selector":{"_id":"` + sessionToken.IdCompany + `","table":"company"}}`
-		find, err, _ := services.FindDocument(config.GetCredCDBAdmin(), query, config.DB_CORE_NAME)
-		if err == "" {
-			if len(find.Docs) > 0 {
-				println(find.Docs[0])
-				json := models.StructToJson(find.Docs[0])
-				models.JsonToStruct(json, &companyModel)
-				return companyModel, config.GetCredCDBCompany(companyModel.UserCDB, companyModel.PassCDB), ""
-			} else {
-				models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "Company is unregistered")
-				return companyModel, "", "Company is unregistered"
-			}
+		//Get credDB company by Idcompany
+		resGet, errGet, code := services.GetDocumentById(config.DB_CORE_NAME, sessionToken.IdCompany)
+		if code == 200 {
+			//Jika proses GET berhasil
+			models.JsonToStruct(resGet, &companyModel)
+			return companyModel, ""
 		} else {
-			return companyModel, "", err
+			return companyModel, errGet
 		}
 	} else {
 		println("\nData diambil dari Redis\n")
-		return companyModel, "", err
+		return companyModel, ""
 	}
 }
 func CheckSession(ctx *fasthttp.RequestCtx) (admReturn models.AdminDB, urldb string, errString string) {
@@ -189,7 +182,6 @@ func CheckSession(ctx *fasthttp.RequestCtx) (admReturn models.AdminDB, urldb str
 	authHeader := ctx.Request.Header.Peek("Authorization")
 	tokenString, err := extractBearerToken(authHeader)
 	if err != nil {
-		services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, err.Error())
 		return models.AdminDB{}, "", err.Error()
 	} else {
 		token, errToken := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -197,9 +189,7 @@ func CheckSession(ctx *fasthttp.RequestCtx) (admReturn models.AdminDB, urldb str
 		})
 
 		if errToken != nil {
-			println("\nError token")
-			services.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, errToken.Error())
-			return admReturn, "", err.Error()
+			return admReturn, "", errToken.Error()
 		} else {
 			if token.Valid {
 				ctx.Response.SetStatusCode(fasthttp.StatusOK)
@@ -210,23 +200,26 @@ func CheckSession(ctx *fasthttp.RequestCtx) (admReturn models.AdminDB, urldb str
 				services.JsonToStruct(string(data), &sessionModel)
 				if sessionModel.AdminKey != "" && sessionModel.AdminKey == os.Getenv("API_KEY_ADMIN") {
 					//Jika token yang diberikan token SuperAdmin
-					err := models.ValidateRequiredFields(sessionModel, ctx)
+					sessionModel.KeyRedis = "KeyRedisDummy"
+					err := models.ValidateRequiredFields(sessionModel)
 					urlDB := config.GetCredCDBAdmin()
 					print("--You're SuperAdmin--\n" + urlDB)
-
-					company, _, err := getCompanyDataOnRedisOrDB(ctx, sessionModel)
+					log.Println(sessionModel)
+					company, err := getCompanyDataOnRedisOrDB(ctx, sessionModel)
 					if err == "" {
 						adminData = models.AdminDB{UserCDB: company.UserCDB, PassCDB: company.PassCDB}
 					} else {
-						log.Println(company)
+						errString = err
 					}
 				} else {
 					print("sebagai company \n")
 					//Token sebagai Company
-					company, _, err := getCompanyDataOnRedisOrDB(ctx, sessionModel)
+					company, err := getCompanyDataOnRedisOrDB(ctx, sessionModel)
 					if err == "" {
 						adminData = models.AdminDB{UserCDB: company.UserCDB, PassCDB: company.PassCDB}
 						urldb = config.GetCredCDBCompany(company.UserCDB, company.PassCDB)
+					} else {
+						errString = err
 					}
 				}
 			} else {

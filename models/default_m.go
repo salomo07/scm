@@ -101,7 +101,7 @@ func RemoveField(original any, fieldName string) DynamicStruct {
 
 	return resultValue
 }
-func ValidateRequiredFields(data interface{}, ctx *fasthttp.RequestCtx) string {
+func ValidateRequiredFields(data interface{}) string {
 	value := reflect.ValueOf(data)
 	if value.Kind() != reflect.Struct {
 		return "Input is not a struct"
@@ -125,11 +125,10 @@ func ValidateRequiredFields(data interface{}, ctx *fasthttp.RequestCtx) string {
 	if len(missingFields) > 0 {
 		missingFieldsStr := strings.Join(missingFields, ", ")
 		if len(missingFields) > 1 {
-			ShowResponseDefault(ctx, fasthttp.StatusBadRequest, missingFieldsStr+" fields are required and cannot be empty")
+			return missingFieldsStr + " fields are required and cannot be empty"
 		} else {
-			ShowResponseDefault(ctx, fasthttp.StatusBadRequest, missingFieldsStr+" field is required and cannot be empty")
+			return missingFieldsStr + " field is required and cannot be empty"
 		}
-		return missingFieldsStr
 	}
 
 	return ""
