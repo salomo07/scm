@@ -14,6 +14,7 @@ type User struct {
 }
 
 type Role struct {
+	Id        string `json:"id"`
 	Table     string `json:"table"`
 	IdCompany string `json:"idcompany" validate:"required"`
 	Name      string `json:"name" validate:"required"`

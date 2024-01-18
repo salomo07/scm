@@ -23,7 +23,8 @@ func CompanyRouters(router *fasthttprouter.Router) {
 	router.POST("/api/v1/admin/company/role/addrole", func(ctx *fasthttp.RequestCtx) {
 		_, _, errMsg := controllers.CheckSession(ctx)
 		if errMsg == "" {
-			controllers.AddRole(ctx)
+			print("AddRoleByAdmin\n")
+			controllers.AddRoleByAdmin(ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})

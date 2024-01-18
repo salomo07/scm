@@ -30,7 +30,7 @@ func GetDocumentById(dbname string, id string) (resjson string, errStr string, s
 	res, err, code := SendToNextServer(urlDB, "GET", "")
 	log.Println(urlDB, "GET", "", res, err, code)
 	resjson = res
-	if code > 303 && config.UsingIBM == true {
+	if code > 303 {
 		return "", resjson, code
 	}
 	return resjson, err, code
@@ -41,7 +41,7 @@ func PutDocument(body string, dbname string, iddocument string) (resBody string,
 }
 func InsertDocument(body string, dbname string) (resBody string, errStr string, statuscode int) {
 	urlDB := config.GetCredCDBAdmin() + dbname
-	log.Println(urlDB, "POST", body)
+	// log.Println(urlDB, "POST", body)
 	return SendToNextServer(urlDB, "POST", body)
 }
 func InsertBulkDocument(body string, dbname string) (resBody string, errStr string, statuscode int) {

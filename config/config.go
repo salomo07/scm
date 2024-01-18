@@ -34,6 +34,12 @@ func init() {
 		panic("Fail to load .env file")
 	}
 	GetCredCDBAdmin()
+	if UsingIBM {
+		print("Using IBM DB\n\n")
+	} else {
+		print("Using LocalDB\n\n")
+	}
+
 }
 func CompareHashAndPasswordBcrypt(oripass string, hashedPassword string) string {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(oripass))

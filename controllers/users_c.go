@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"log"
 	"scm/config"
 	"scm/models"
 	"scm/services"
@@ -94,10 +93,10 @@ func AddUserByAdmin(ctx *fasthttp.RequestCtx) {
 	userModel.Id = "IniIdUserDummy"
 	err := models.ValidateRequiredFields(userModel)
 	if err == "" {
+		pass := userModel.Password
 		encryptedPass := config.EncodingBcrypt(userModel.Password)
 		userModel.Password = encryptedPass
 		userModel.Table = "user"
-		log.Println(userModel)
 		resFind, errFind, codeFind := CheckUserIsExist(userModel)
 		if errFind != "" {
 			services.ShowResponseDefault(ctx, codeFind, errFind)
@@ -107,24 +106,36 @@ func AddUserByAdmin(ctx *fasthttp.RequestCtx) {
 			} else {
 				timemicro := time.Now().UnixNano() / 1000
 				userModel.Id = "u_" + strconv.FormatInt(timemicro, 10)
-				userModel.Password = config.EncodingBcrypt(strconv.FormatInt(timemicro, 10))
-				resIns, errIns, codeIns := services.InsertDocument(models.StructToJson(userModel), config.DB_CORE_NAME)
 
-				if errIns == "" {
-					var insertResponseModel models.InsertResponse
-					models.JsonToStruct(resIns, &insertResponseModel)
-					userRes := models.User{Id: insertResponseModel.Id, Username: userModel.Username, Password: strconv.FormatInt(timemicro, 10)}
-					services.ShowResponseJson(ctx, codeIns, models.StructToJson(userRes))
-					print("\nAddUserOnCompanyData\n")
-					go services.InsertDocument(models.StructToJson(userModel), userModel.IdCompany)
-					go AddUserOnCompanyData(userModel.IdCompany, userModel.Id)
+				//Cek dulu apakah Company terdaftar
+				resJson, errJson, _ := services.GetDocumentById(config.DB_CORE_NAME, userModel.IdCompany)
+				var company models.Company
+				models.JsonToStruct(resJson, &company)
+				if errJson == "" {
+					insertUserData(ctx, userModel, pass)
 				} else {
-					models.ShowResponseDefault(ctx, fasthttp.StatusInternalServerError, "Gagal melakukan Insert")
+					models.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Company is unregistered")
 				}
 			}
 		}
 	} else {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, err)
+	}
+}
+func insertUserData(ctx *fasthttp.RequestCtx, userModel models.User, oldpass string) {
+	resIns, errIns, codeIns := services.InsertDocument(models.StructToJson(userModel), config.DB_CORE_NAME)
+
+	if errIns == "" {
+		var insertResponseModel models.InsertResponse
+		models.JsonToStruct(resIns, &insertResponseModel)
+
+		print("\nAddUserOnCompanyData\n")
+		go services.InsertDocument(models.StructToJson(userModel), userModel.IdCompany)
+		go AddUserOnCompanyData(userModel.IdCompany, userModel.Id)
+		userModel.Password = oldpass
+		services.ShowResponseJson(ctx, codeIns, models.StructToJson(userModel))
+	} else {
+		models.ShowResponseDefault(ctx, fasthttp.StatusInternalServerError, "Gagal melakukan Insert")
 	}
 }
 func AddUserOnCompanyData(idcompany string, iduser string) {

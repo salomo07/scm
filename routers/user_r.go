@@ -14,14 +14,14 @@ func UserRouters(router *fasthttprouter.Router) {
 		if errMsg == "" {
 			controllers.AddUserByAdmin(ctx)
 		} else {
-			models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "You are Unauthorized")
+			models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "You have not access to this endpoint (Company is unregistered).")
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
 	router.POST("/api/v1/admin/role/create", func(ctx *fasthttp.RequestCtx) {
 		_, _, errMsg := controllers.CheckSession(ctx)
 		if errMsg == "" {
-			controllers.AddRole(ctx)
+			controllers.AddRoleByAdmin(ctx)
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})
