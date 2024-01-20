@@ -16,7 +16,7 @@ func AddCompany() {
 func TestDuplicate(adminCred string, ctx *fasthttp.RequestCtx) {
 
 }
-func AddMenu(ctx *fasthttp.RequestCtx) {
+func AddMenuByAdmin(ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.Body()) == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Request body cant be empty")
 		return
@@ -24,19 +24,27 @@ func AddMenu(ctx *fasthttp.RequestCtx) {
 	var menuModel models.Menu
 	models.JsonToStruct(string(ctx.PostBody()), &menuModel)
 	err := models.ValidateRequiredFields(menuModel)
+
 	if err == "" {
-		menuModel.Table = "menu"
-		if len(menuModel.Submenu) > 0 {
-			for i, _ := range menuModel.Submenu {
-				menuModel.Submenu[i].IdSubmenu = i + 1
+		print("cccc")
+		// Cek apakah nama menu sudah dipakai
+		queryMenu := `{"selector":{"table":"menu","appid":"` + menuModel.AppId + `","name":"` + menuModel.Name + `"}}`
+		resFind, errFind, _ := services.FindDocument(queryMenu, config.DB_CORE_NAME)
+		if errFind != "" {
+			if len(resFind.Docs) > 0 {
+				models.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Menu already exist")
+			} else {
+				json, err, cod := services.GetDocumentById(config.DB_CORE_NAME, menuModel.AppId)
+				if err != "" {
+					models.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "App is not exist")
+				}
+				log.Println(json, err, cod)
 			}
-		}
-		res, err, stts := services.InsertDocument(models.StructToJson(menuModel), config.DB_CORE_NAME)
-		if err != "" {
-			services.ShowResponseJson(ctx, stts, err)
 		} else {
-			services.ShowResponseJson(ctx, stts, res)
-		}
+			services.ShowResponseJson(ctx, fasthttp.StatusInternalServerError, errFind)
+		// }
+	} else {
+		models.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, err)
 	}
 }
 func AddAccess(ctx *fasthttp.RequestCtx) {

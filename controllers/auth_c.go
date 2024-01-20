@@ -16,9 +16,8 @@ import (
 )
 
 func Login(ctx *fasthttp.RequestCtx) string {
-	rawJSON := ctx.Request.Body()
 	var loginInput models.LoginInput
-	models.JsonToStruct(string(rawJSON), &loginInput)
+	models.JsonToStruct(string(ctx.Request.Body()), &loginInput)
 	if loginInput.IdCompany == "" || loginInput.Username == "" || loginInput.Password == "" || loginInput.AppId == "" {
 		services.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Format input login tidak sesuai")
 	} else {
@@ -26,7 +25,9 @@ func Login(ctx *fasthttp.RequestCtx) string {
 		var company models.Company
 		services.JsonToStruct(companyData, &company)
 		// Jika cred tidak ditemukan di Redis, maka ambil credential dari DB SCM_CRED
-		if err != "" {
+		if loginInput.AppId != company.AppId {
+			models.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, "Company is unregistered")
+		} else if err != "" {
 			services.ShowResponseJson(ctx, fasthttp.StatusInternalServerError, err)
 		} else if companyData == "" {
 			print("Company tidak ditemukan di Redis\n")
@@ -50,11 +51,10 @@ func Login(ctx *fasthttp.RequestCtx) string {
 		} else {
 			print("Ini Hasil dari Redis\n")
 			//Data Company berhasil ditemukan di Redis
-			print(companyData)
-			FindUserOnCoreDB(ctx, loginInput)
-			// GenerateJWT()
+			if company.IdCompany == loginInput.IdCompany {
+				FindUserOnCoreDB(ctx, loginInput)
+			}
 		}
-		// log.Println(company)
 	}
 	return ""
 }
@@ -177,19 +177,19 @@ func getCompanyDataOnRedisOrDB(ctx *fasthttp.RequestCtx, sessionToken models.Ses
 		return companyModel, ""
 	}
 }
-func CheckSession(ctx *fasthttp.RequestCtx) (admReturn models.AdminDB, urldb string, errString string) {
+func CheckSession(ctx *fasthttp.RequestCtx) (admReturn models.AdminDB, urldb string, errString string, superadmin bool) {
 	var adminData models.AdminDB
 	authHeader := ctx.Request.Header.Peek("Authorization")
 	tokenString, err := extractBearerToken(authHeader)
 	if err != nil {
-		return models.AdminDB{}, "", err.Error()
+		return models.AdminDB{}, "", err.Error(), false
 	} else {
 		token, errToken := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return []byte(config.TOKEN_SALT), nil
 		})
 
 		if errToken != nil {
-			return admReturn, "", errToken.Error()
+			return admReturn, "", errToken.Error(), false
 		} else {
 			if token.Valid {
 				ctx.Response.SetStatusCode(fasthttp.StatusOK)
@@ -213,6 +213,7 @@ func CheckSession(ctx *fasthttp.RequestCtx) (admReturn models.AdminDB, urldb str
 					} else {
 						errString = err
 					}
+					superadmin = true
 				} else {
 					print("sebagai company \n")
 					//Token sebagai Company
@@ -223,17 +224,18 @@ func CheckSession(ctx *fasthttp.RequestCtx) (admReturn models.AdminDB, urldb str
 					} else {
 						errString = err
 					}
+					superadmin = false
 				}
 			} else {
 				print("\nError token\n")
 				adminData = models.AdminDB{}
 				urldb = ""
 				errString = "Error token"
+				superadmin = false
 			}
 		}
 	}
-	log.Println("\n", adminData, urldb, errString)
-	return adminData, urldb, errString
+	return adminData, urldb, errString, superadmin
 }
 func extractBearerToken(authHeader []byte) (string, error) {
 	// Check if the Authorization header starts with "Bearer "

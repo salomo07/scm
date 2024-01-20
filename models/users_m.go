@@ -52,22 +52,6 @@ type AccessSubmenu struct {
 	Update    bool `json:"update"`
 	Delete    bool `json:"delete"`
 }
-type Menu struct {
-	Table     string    `json:"table"`
-	IdCompany string    `json:"idcompany" validate:"required"`
-	Name      string    `json:"name" validate:"required"`
-	Url       string    `json:"url" validate:"required"`
-	Icon      string    `json:"icon"`
-	Desc      string    `json:"desc"`
-	Submenu   []Submenu `json:"submenu" validate:"required"`
-}
-type Submenu struct {
-	IdSubmenu int    `json:"idsubmenu" validate:"required"`
-	Name      string `json:"name" validate:"required"`
-	Url       string `json:"url"`
-	Icon      string `json:"icon"`
-	Desc      string `json:"desc"`
-}
 
 type PublishRedis struct {
 	IdCompany string `json:"idcompany" validate:"required"`

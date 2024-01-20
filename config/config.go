@@ -16,6 +16,7 @@ import (
 
 var TOKEN_SALT = "RHJlYW1UaGVhdGVy"
 var UsingIBM = false
+var UsingRedisOnline = false
 
 var DB_CORE_NAME = "scm_core"
 var CDB_USER_ADMIN = ""
@@ -91,7 +92,11 @@ func GetCredCDBCompany(user string, pass string) string {
 	return "http://" + user + ":" + pass + "@" + CDB_HOST + ":5984/"
 }
 func GetCredRedis() string {
-	return os.Getenv("REDIS_CRED_ADMIN")
+	if UsingRedisOnline {
+		return os.Getenv("REDIS_CRED_ADMIN")
+	} else {
+		return os.Getenv("REDIS_CRED_ADMIN_LOCAL")
+	}
 }
 
 func EncryptAES(plaintext string) (string, error) {
