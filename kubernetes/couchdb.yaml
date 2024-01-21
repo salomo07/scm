@@ -6,7 +6,7 @@ metadata:
     app: couchdb
     environment: dev
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: couchdb
@@ -25,3 +25,7 @@ spec:
           value: admindev
         - name: COUCHDB_PASSWORD
           value: cRwoOG0UjxbWLwyXKRhMbep4b1LzJVIpabiVgm5hbPOeq4YSJBrAK
+        resources:
+          limits:
+            memory: "64Mi"
+            cpu: "120m"

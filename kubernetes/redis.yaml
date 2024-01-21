@@ -6,7 +6,7 @@ metadata:
     app: redis
     environment: dev
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: redis
@@ -23,3 +23,7 @@ spec:
         env:
         - name: REDIS_PASSWORD
           value: YVc1cGNHRnpjM2R2Y21SeVpXUnBjdz09
+        resources:
+          limits:
+            memory: "64Mi"
+            cpu: "120m"

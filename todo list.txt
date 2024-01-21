@@ -1,3 +1,0 @@
-1. - Register Company di DB scm_core
-    {"table":"company","name":"Suka Makmur Sejahtera","level":"l_001","email":"sitompulsalomo@gmail.com","alias":"sms"}
-   - Create DB untuk company tersebut
