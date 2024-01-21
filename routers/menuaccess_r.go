@@ -10,12 +10,16 @@ import (
 
 func Access_MenuRouters(router *fasthttprouter.Router) {
 	router.POST("/api/v1/admin/menu/add", func(ctx *fasthttp.RequestCtx) {
-		_, _, _, isSuperAdmin := controllers.CheckSession(ctx)
-		if isSuperAdmin {
-			return
+		_, _, err, isSuperAdmin := controllers.CheckSession(ctx)
+
+		if isSuperAdmin && err == "" {
 			controllers.AddMenuByAdmin(ctx)
 		} else {
-			models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "You have not access to this endpoint.")
+			if err != "" {
+				models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, err)
+			} else {
+				models.ShowResponseDefault(ctx, fasthttp.StatusUnauthorized, "You have not access to this endpoint.")
+			}
 		}
 		ctx.Response.Header.Set("Content-Type", "application/json")
 	})

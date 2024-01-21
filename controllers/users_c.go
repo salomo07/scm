@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"scm/config"
 	"scm/models"
 	"scm/services"
@@ -26,7 +27,7 @@ func AddMenuByAdmin(ctx *fasthttp.RequestCtx) {
 	err := models.ValidateRequiredFields(menuModel)
 
 	if err == "" {
-		print("cccc")
+
 		// Cek apakah nama menu sudah dipakai
 		queryMenu := `{"selector":{"table":"menu","appid":"` + menuModel.AppId + `","name":"` + menuModel.Name + `"}}`
 		resFind, errFind, _ := services.FindDocument(queryMenu, config.DB_CORE_NAME)
@@ -42,7 +43,7 @@ func AddMenuByAdmin(ctx *fasthttp.RequestCtx) {
 			}
 		} else {
 			services.ShowResponseJson(ctx, fasthttp.StatusInternalServerError, errFind)
-		// }
+		}
 	} else {
 		models.ShowResponseDefault(ctx, fasthttp.StatusBadRequest, err)
 	}

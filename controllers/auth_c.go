@@ -203,16 +203,19 @@ func CheckSession(ctx *fasthttp.RequestCtx) (admReturn models.AdminDB, urldb str
 				if sessionModel.AdminKey != "" && sessionModel.AdminKey == os.Getenv("API_KEY_ADMIN") {
 					//Jika token yang diberikan token SuperAdmin
 					sessionModel.KeyRedis = "KeyRedisDummy"
-					err := models.ValidateRequiredFields(sessionModel)
+					var sessionadmin models.SessionAdmin
+					err := models.ValidateRequiredFields(sessionadmin)
 					urlDB := config.GetCredCDBAdmin()
-					print("--You're SuperAdmin--\n" + urlDB)
+					print("--You're SuperAdmin--\n" + urlDB + "\n" + err)
 
-					company, err := getCompanyDataOnRedisOrDB(ctx, sessionModel)
-					if err == "" {
-						adminData = models.AdminDB{UserCDB: company.UserCDB, PassCDB: company.PassCDB}
-					} else {
-						errString = err
-					}
+					// print("OOOOOOOOOOOOOOO" + err + "OOOOOOOOOOOOOOO")
+					errString = err
+					// company, err := getCompanyDataOnRedisOrDB(ctx, sessionModel)
+					// if err == "" {
+					// 	adminData = models.AdminDB{UserCDB: company.UserCDB, PassCDB: company.PassCDB}
+					// } else {
+					// 	errString = err
+					// }
 					superadmin = true
 				} else {
 					print("sebagai company \n")

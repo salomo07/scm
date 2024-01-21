@@ -3,7 +3,7 @@ package models
 type Menu struct {
 	Table     string    `json:"table"`
 	AppId     string    `json:"appid" validate:"required"`
-	IdCompany string    `json:"idcompany" validate:"required"`
+	IdCompany string    `json:"idcompany"`
 	Name      string    `json:"name" validate:"required"`
 	Url       string    `json:"url" validate:"required"`
 	Icon      string    `json:"icon"`

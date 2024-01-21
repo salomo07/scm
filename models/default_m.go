@@ -19,8 +19,17 @@ type Session struct {
 	//contoh format IdAppCompanyUser scm*c_1324353452345*u_34345345
 	KeyRedis  string `json:"keyredis" validate:"required"`
 	AdminKey  string `json:"adminkey"`
-	AppId     string `json:"appid"`
+	AppId     string `json:"appid" validate:"required"`
 	IdCompany string `json:"idcompany" validate:"required"`
+	IdUser    string `json:"iduser"`
+	UserAgent string `json:"useragent"`
+	IpClient  string `json:"ipclient"`
+}
+type SessionAdmin struct {
+	//contoh format IdAppCompanyUser scm*c_1324353452345*u_34345345
+	AdminKey  string `json:"adminkey"`
+	AppId     string `json:"appid"`
+	IdCompany string `json:"idcompany"`
 	IdUser    string `json:"iduser"`
 	UserAgent string `json:"useragent"`
 	IpClient  string `json:"ipclient"`
@@ -130,6 +139,5 @@ func ValidateRequiredFields(data interface{}) string {
 			return missingFieldsStr + " field is required and cannot be empty"
 		}
 	}
-
 	return ""
 }
